@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Money Padel">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<title>Money Padel — Leaderboard</title>
+<style>
+  :root{
+    --gold:#d4af37;
+    --gold-bright:#f5d576;
+    --gold-dim:#8a6d1f;
+    --bg0:#0b0a08;
+    --bg1:#141210;
+    --bg2:#1c1814;
+    --line:#332b1e;
+    --text:#f1e9d8;
+    --text-dim:#a89c82;
+    --green:#5a9c5a;
+    --red:#b5453f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Georgia', 'Iowan Old Style', serif;
+    background:
+      radial-gradient(ellipse at top, #23200f 0%, var(--bg0) 55%),
+      var(--bg0);
+    color:var(--text);
+    padding:0 0 40px;
+    min-height:100vh;
+  }
+  .header{
+    text-align:center;
+    padding:28px 16px 18px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, #1a1710 0%, transparent 100%);
+  }
+  .header .tag{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    letter-spacing:.28em;
+    font-size:11px;
+    color:var(--gold-dim);
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .header h1{
+    margin:0;
+    font-size:30px;
+    letter-spacing:.03em;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold) 60%, var(--gold-dim));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    text-shadow:0 1px 0 rgba(0,0,0,.4);
+  }
+  .header .sub{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    color:var(--text-dim);
+    font-size:12.5px;
+    margin-top:6px;
+  }
+
+  .controls{
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .tierbar{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding-bottom:2px;
+  }
+  .tierbtn{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    flex:0 0 auto;
+    padding:8px 14px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--bg1);
+    color:var(--text-dim);
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:.02em;
+    white-space:nowrap;
+  }
+  .tierbtn.active{
+    border-color:var(--gold);
+    color:var(--bg0);
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+  }
+  .searchwrap{
+    position:relative;
+  }
+  .searchwrap input{
+    width:100%;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    background:var(--bg1);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 12px;
+    color:var(--text);
+    font-size:14px;
+  }
+  .searchwrap input::placeholder{color:var(--text-dim);}
+  .sortbar{
+    display:flex;
+    gap:6px;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+  }
+  .sortbtn{
+    flex:1;
+    padding:7px 4px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--text-dim);
+    font-size:11.5px;
+  }
+  .sortbtn.active{color:var(--gold-bright); border-color:var(--gold-dim);}
+
+  .list{padding:0 16px;}
+  .row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 4px;
+    border-bottom:1px solid var(--line);
+  }
+  .rank{
+    width:22px;
+    text-align:center;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    color:var(--text-dim);
+    font-size:12px;
+    flex:0 0 auto;
+  }
+  .badge{
+    width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-weight:700;font-size:11px;
+    flex:0 0 auto;
+    color:#0b0a08;
+  }
+  .badge.S{background:linear-gradient(180deg,#fff3c4,#d4af37);}
+  .badge.A{background:linear-gradient(180deg,#e8c98a,#b8842e);}
+  .badge.B{background:linear-gradient(180deg,#9fdc9f,#4c8a4c);color:#0b0a08;}
+  .badge.C{background:linear-gradient(180deg,#e2938d,#a5433c);color:#1a0f0d;}
+  .badge.Unranked{background:linear-gradient(180deg,#7d7d7d,#4a4a4a);color:#eee;}
+
+  .namecol{flex:1; min-width:0;}
+  .namecol .nm{font-size:15.5px; font-weight:600; letter-spacing:.01em;}
+  .namecol .meta{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:11px; color:var(--text-dim); margin-top:2px;
+  }
+  .wl{
+    text-align:right;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    flex:0 0 auto;
+  }
+  .wl .pct{font-size:16px; font-weight:700;}
+  .wl .rec{font-size:11px; color:var(--text-dim); margin-top:2px;}
+  .wl .rec .w{color:var(--green);}
+  .wl .rec .l{color:var(--red);}
+
+  .tab-row{
+    display:flex; gap:8px;
+    overflow-x:auto;
+    padding-bottom:2px;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+  }
+  .tab-btn{
+    flex:0 0 auto;
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--bg1);
+    color:var(--text-dim);
+    font-size:13px; font-weight:700;
+    white-space:nowrap;
+  }
+  .tab-btn.active{
+    color:var(--bg0);
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    border-color:var(--gold);
+  }
+  .rating-big{font-size:16px; font-weight:700; color:var(--gold-bright);}
+  .rating-sub{font-size:10.5px; color:var(--text-dim); margin-top:2px;}
+  .perf-pos{color:var(--green);}
+  .perf-neg{color:var(--red);}
+  .strength-pill{
+    display:inline-block;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:10.5px;
+    padding:2px 8px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    color:var(--text-dim);
+  }
+  .upset-tag{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:11.5px;
+    font-weight:700;
+    padding:5px 8px;
+    border-radius:6px;
+    margin:5px 0;
+    letter-spacing:.01em;
+  }
+  .upset-good{ background:rgba(212,175,55,.15); color:var(--gold-bright); border:1px solid var(--gold-dim); }
+  .upset-bad{ background:rgba(181,69,63,.15); color:#e8a5a1; border:1px solid var(--red); }
+
+  .minGamesRow{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    flex-wrap:wrap;
+  }
+  .minGamesLabel{ font-size:12px; color:var(--text-dim); }
+  #minGamesInput{
+    width:48px;
+    background:var(--bg1);
+    border:1px solid var(--line);
+    border-radius:6px;
+    color:var(--text);
+    font-size:13px;
+    padding:5px 6px;
+    text-align:center;
+  }
+  .minGamesPresets{ display:flex; gap:5px; }
+  .preset-btn{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    padding:5px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--text-dim);
+    font-size:11.5px;
+  }
+  .preset-btn.active{ color:var(--gold-bright); border-color:var(--gold-dim); }
+  .upset-mini{ font-size:11px; color:var(--text-dim); margin-top:2px; }
+  .upset-mini .uw{ color:var(--gold-bright); }
+  .upset-mini .ul{ color:#e8a5a1; }
+
+  .risk-badge{
+    display:inline-block;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:10px; font-weight:700;
+    padding:2px 8px; border-radius:999px;
+    letter-spacing:.03em; text-transform:uppercase;
+  }
+  .risk-promotion{ background:rgba(90,156,90,.18); color:var(--green); border:1px solid var(--green); }
+  .risk-demotion{ background:rgba(181,69,63,.18); color:#e8a5a1; border:1px solid var(--red); }
+  .risk-unproven{ background:rgba(168,156,130,.15); color:var(--text-dim); border:1px solid var(--line); }
+  .risk-stable{ background:rgba(212,175,55,.1); color:var(--gold-dim); border:1px solid var(--gold-dim); }
+
+  .profile-box{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:12.5px; line-height:1.65; color:var(--text);
+    background:var(--bg2); border:1px solid var(--line); border-radius:10px;
+    padding:12px; margin:10px 0;
+  }
+
+  .callout-card{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    background:var(--bg1); border:1px solid var(--line); border-radius:10px;
+    padding:12px; margin-bottom:10px;
+  }
+  .callout-card .cc-title{ font-size:13.5px; font-weight:700; color:var(--gold-bright); margin-bottom:4px; }
+  .callout-card .cc-detail{ font-size:11.5px; color:var(--text-dim); line-height:1.5; }
+  .section-heading{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:13px; font-weight:700; color:var(--text);
+    margin:16px 0 8px; padding-top:6px;
+  }
+  .section-sub{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:11.5px; color:var(--text-dim); margin-bottom:10px; line-height:1.5;
+  }
+  .alpha-row{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 2px;
+    border-bottom:1px solid var(--line);
+  }
+  .alpha-letter{
+    width:20px; font-family:Georgia,serif; font-size:13px; color:var(--gold-dim); flex:0 0 auto;
+  }
+  .alpha-name{ font-size:14.5px; font-weight:600; flex:1; }
+  .alpha-tier{ font-size:11px; color:var(--text-dim); font-family:'Helvetica Neue', Arial, sans-serif; }
+  .matchup-vs{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:12.5px; color:var(--text); line-height:1.6;
+    background:var(--bg2); border:1px solid var(--line); border-radius:8px;
+    padding:8px 10px; margin-top:4px;
+  }
+  .difficulty-row{ display:flex; gap:6px; margin-top:8px; }
+  .difficulty-pill{
+    flex:1; text-align:center;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:10.5px; font-weight:700;
+    padding:6px 4px; border-radius:8px;
+    border:1px solid var(--line);
+  }
+  .diff-easy{ color:var(--green); border-color:var(--green); }
+  .diff-balanced{ color:var(--gold-bright); border-color:var(--gold-dim); }
+  .diff-hard{ color:#e8a5a1; border-color:var(--red); }
+
+  .fg-controls{
+    background:var(--bg1); border:1px solid var(--line); border-radius:10px;
+    padding:12px; margin:12px 0;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+  }
+  .fg-row{ margin-bottom:10px; }
+  .fg-row:last-child{ margin-bottom:0; }
+  .fg-label{
+    display:block; font-size:11px; color:var(--text-dim);
+    text-transform:uppercase; letter-spacing:.04em; margin-bottom:5px;
+  }
+  .fg-select{
+    width:100%; background:var(--bg2); border:1px solid var(--line); border-radius:8px;
+    color:var(--text); font-size:14px; padding:8px 10px;
+  }
+  .fg-toggle{ display:flex; gap:6px; }
+  .fg-toggle-btn{
+    flex:1; padding:8px 6px; border-radius:8px; border:1px solid var(--line);
+    background:transparent; color:var(--text-dim); font-size:12px; font-weight:600;
+  }
+  .fg-toggle-btn.active{ background:var(--bg2); color:var(--text); border-color:var(--gold-dim); }
+  .fg-toggle-btn.diff-easy.active{ color:var(--green); border-color:var(--green); background:rgba(90,156,90,.12); }
+  .fg-toggle-btn.diff-balanced.active{ color:var(--gold-bright); border-color:var(--gold-dim); background:rgba(212,175,55,.12); }
+  .fg-toggle-btn.diff-hard.active{ color:#e8a5a1; border-color:var(--red); background:rgba(181,69,63,.12); }
+
+  .fg-result-card{
+    background:var(--bg1); border:1px solid var(--line); border-radius:10px;
+    padding:12px; margin-bottom:9px;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+  }
+  .fg-result-rank{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .fg-result-teams{ font-size:13.5px; line-height:1.5; }
+  .fg-result-teams b{ color:var(--gold-bright); }
+  .fg-result-detail{ font-size:11px; color:var(--text-dim); margin-top:5px; line-height:1.5; }
+  .empty{
+    text-align:center; color:var(--text-dim);
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    padding:30px 10px; font-size:13px;
+  }
+
+  .footer-note{
+    padding:18px 20px 4px;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:11px; color:var(--text-dim);
+    line-height:1.6;
+    text-align:center;
+  }
+
+  /* detail overlay */
+  .overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.75);
+    display:none; align-items:flex-end; justify-content:center;
+    z-index:20;
+  }
+  .overlay.show{display:flex;}
+  .sheet{
+    background:var(--bg1); width:100%; max-width:480px;
+    border-radius:18px 18px 0 0; border:1px solid var(--line); border-bottom:none;
+    max-height:80vh; overflow-y:auto; padding:18px 18px 26px;
+  }
+  .sheet h2{margin:0 0 2px; font-size:20px; color:var(--gold-bright);}
+  .sheet .stat-row{
+    display:flex; gap:14px; margin:10px 0 14px;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+  }
+  .sheet .stat-row div{
+    background:var(--bg2); border:1px solid var(--line); border-radius:10px;
+    padding:8px 12px; font-size:12px; color:var(--text-dim); flex:1; text-align:center;
+  }
+  .sheet .stat-row b{display:block; font-size:16px; color:var(--text); font-family:Georgia,serif;}
+  .match{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:12.5px;
+    padding:9px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .match .top{display:flex; justify-content:space-between; color:var(--text-dim); font-size:11px; margin-bottom:3px;}
+  .match .teams{color:var(--text);}
+  .match .teams b{color:var(--gold-bright);}
+  .match .score{color:var(--text-dim); margin-top:2px;}
+  .close-btn{
+    display:block; margin:14px auto 0; padding:9px 20px;
+    border-radius:999px; border:1px solid var(--gold-dim);
+    background:transparent; color:var(--gold-bright);
+    font-family:'Helvetica Neue', Arial, sans-serif; font-size:13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="tag">Money Padel · Results Only</div>
+  <h1>🧮 Leaderboard</h1>
+  <div class="sub" id="headerSub">Parsed from the group chats, June–August 2026 · tap a player for their match log</div>
+</div>
+
+<div class="controls">
+  <div class="tab-row" id="tabrow">
+    <button class="tab-btn active" data-tab="wl">Win / Loss</button>
+    <button class="tab-btn" data-tab="power">Power Rating</button>
+    <button class="tab-btn" data-tab="callouts">Call-Outs</button>
+    <button class="tab-btn" data-tab="findgame">Find a Game</button>
+    <button class="tab-btn" data-tab="players">Players</button>
+    <button class="tab-btn" data-tab="manage">Manage</button>
+    <button class="tab-btn" data-tab="games">Games</button>
+  </div>
+  <div class="tierbar" id="tierbar"></div>
+  <div class="searchwrap" id="searchWrap">
+    <input id="search" type="text" placeholder="Search a player…" />
+  </div>
+  <div class="sortbar" id="sortbar">
+    <button class="sortbtn active" data-sort="winpct">Win %</button>
+    <button class="sortbtn" data-sort="total">Games</button>
+    <button class="sortbtn" data-sort="wins">Wins</button>
+    <button class="sortbtn" data-sort="name">A–Z</button>
+  </div>
+  <div class="sortbar" id="sortbarPower" style="display:none;">
+    <button class="sortbtn active" data-sortp="rating">Rating</button>
+    <button class="sortbtn" data-sortp="avg_match_strength">Avg opp.</button>
+    <button class="sortbtn" data-sortp="avg_overperf_pct">Clutch %</button>
+    <button class="sortbtn" data-sortp="upset_total">Upsets</button>
+    <button class="sortbtn" data-sortp="name">A–Z</button>
+  </div>
+  <div class="minGamesRow" id="minGamesRow">
+    <span class="minGamesLabel">Min games played:</span>
+    <input id="minGamesInput" type="number" min="0" max="20" value="10" />
+    <div class="minGamesPresets">
+      <button class="preset-btn" data-n="0">All</button>
+      <button class="preset-btn" data-n="3">3+</button>
+      <button class="preset-btn" data-n="5">5+</button>
+      <button class="preset-btn active" data-n="10">10+</button>
+    </div>
+  </div>
+  <div class="minGamesRow" id="monthFilterRow">
+    <span class="minGamesLabel">Month:</span>
+    <select id="monthSelect" class="fg-select" style="width:170px;"></select>
+  </div>
+  <div class="minGamesRow" id="dataQualityRow">
+    <span class="minGamesLabel">Data:</span>
+    <select id="dataQualitySelect" class="fg-select" style="width:220px;">
+      <option value="all">All data</option>
+      <option value="verified">June onwards only (cross-checked)</option>
+      <option value="unverified">Pre-June only (single-sourced)</option>
+    </select>
+  </div>
+</div>
+
+<div class="list" id="list"></div>
+<div class="empty" id="empty" style="display:none;">No players match that filter.</div>
+<div id="calloutsView" style="display:none; padding:0 16px;"></div>
+<div id="playersView" style="display:none; padding:0 16px;"></div>
+<div id="manageView" style="display:none; padding:0 16px;"></div>
+<div id="gamesView" style="display:none; padding:0 16px;"></div>
+<div id="findGameView" style="display:none; padding:0 16px;">
+  <div class="fg-controls">
+    <div class="fg-row">
+      <label class="fg-label">Player</label>
+      <select id="fgPlayerSelect" class="fg-select"></select>
+    </div>
+    <div class="fg-row">
+      <label class="fg-label">Scope</label>
+      <div class="fg-toggle" id="fgScopeToggle">
+        <button class="fg-toggle-btn active" data-scope="tier">Within my tier</button>
+        <button class="fg-toggle-btn" data-scope="any">Any tier</button>
+      </div>
+    </div>
+    <div class="fg-row">
+      <label class="fg-label">Difficulty</label>
+      <div class="fg-toggle" id="fgDiffToggle">
+        <button class="fg-toggle-btn diff-easy active" data-diff="easy">Easy</button>
+        <button class="fg-toggle-btn diff-balanced" data-diff="balanced">Balanced</button>
+        <button class="fg-toggle-btn diff-hard" data-diff="hard">Hard</button>
+      </div>
+    </div>
+  </div>
+  <div id="fgResults"></div>
+</div>
+
+<div class="footer-note" id="explainer">
+  Built from readable trophy-emoji results across the main group chat and Results Only, with names and tiers confirmed against the group. Excludes single-set/"money game" results, matches against non-members, and a couple of results with no opponent named or a disputed winner.
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <h2 id="sheetName"></h2>
+    <div id="sheetSub" style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:var(--text-dim);"></div>
+    <div class="stat-row" id="sheetStats"></div>
+    <div id="sheetProfile"></div>
+    <div id="sheetMatches"></div>
+    <button class="close-btn" onclick="closeSheet()">Close</button>
+  </div>
+</div>
+
+<script>
+// ===================== BASE (immutable historical) DATA =====================
+const BASE_MATCHES = [{"date": "2026-07-02", "winners": ["Len", "Eli"], "losers": ["Shaun", "Osh"], "sets": [[0, 6], [6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_0", "verified": true}, {"date": "2026-07-02", "winners": ["Dennis", "Osh"], "losers": ["KC", "Eli"], "sets": [[7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_1", "verified": true}, {"date": "2026-07-02", "winners": ["Tee", "MK"], "losers": ["Rhys", "Fee"], "sets": [[6, 0], [6, 2]], "type": "doubles", "note": "", "id": "base_2", "verified": true}, {"date": "2026-07-02", "winners": ["KC", "Shaun"], "losers": ["Osh", "Carla"], "sets": [[6, 4], [6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_3", "verified": true}, {"date": "2026-07-03", "winners": ["Osh"], "losers": ["Len"], "sets": [[15, 13], [15, 11]], "type": "singles", "note": "", "id": "base_4", "verified": true}, {"date": "2026-07-03", "winners": ["Eli", "Fatch"], "losers": ["Stormzy", "Omar"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_5", "verified": true}, {"date": "2026-07-05", "winners": ["Len", "Eli"], "losers": ["Erf", "Max"], "sets": [[3, 6], [6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_6", "verified": true}, {"date": "2026-07-05", "winners": ["Erf", "Eli"], "losers": ["Len", "Max"], "sets": [[6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_7", "verified": true}, {"date": "2026-07-05", "winners": ["Erf", "Len"], "losers": ["Max", "Eli"], "sets": [[6, 1], [5, 0]], "type": "doubles", "note": "walkover/forfeit", "id": "base_8", "verified": true}, {"date": "2026-07-06", "winners": ["Stormzy", "Osh"], "losers": ["Max", "Len"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_9", "verified": true}, {"date": "2026-07-07", "winners": ["Erf", "Osh"], "losers": ["Len", "Eli"], "sets": [[6, 2], [7, 5]], "type": "doubles", "note": "", "id": "base_10", "verified": true}, {"date": "2026-07-08", "winners": ["Rishi", "Max"], "losers": ["Harry", "Shaun"], "sets": [[7, 5], [7, 5]], "type": "doubles", "note": "", "id": "base_11", "verified": true}, {"date": "2026-07-08", "winners": ["Rishi", "Harry"], "losers": ["Max", "Shaun"], "sets": [[6, 7], [6, 4], [7, 5]], "type": "doubles", "note": "", "id": "base_12", "verified": true}, {"date": "2026-07-09", "winners": ["Harry", "Omar"], "losers": ["Max", "Rishi"], "sets": [[6, 3], [7, 6]], "type": "doubles", "note": "", "id": "base_13", "verified": true}, {"date": "2026-07-10", "winners": ["Eli", "Erf"], "losers": ["Kaz", "Max"], "sets": [[4, 6], [6, 1], [6, 1]], "type": "doubles", "note": "", "id": "base_14", "verified": true}, {"date": "2026-07-12", "winners": ["Erf", "Rishi"], "losers": ["PDM", "Eli"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "", "id": "base_15", "verified": true}, {"date": "2026-07-12", "winners": ["Manny", "Kaz"], "losers": ["Osh", "Dennis"], "sets": [[6, 1], [6, 0]], "type": "doubles", "note": "", "id": "base_16", "verified": true}, {"date": "2026-07-12", "winners": ["Manny", "Dennis"], "losers": ["Osh", "Kaz"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_17", "verified": true}, {"date": "2026-07-12", "winners": ["Eli", "Len"], "losers": ["Rishi", "Osh"], "sets": [[7, 5], [5, 7], [7, 5]], "type": "doubles", "note": "", "id": "base_18", "verified": true}, {"date": "2026-07-13", "winners": ["Jords", "Kaz"], "losers": ["Erf", "Rishi"], "sets": [[6, 4], [6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_19", "verified": true}, {"date": "2026-07-13", "winners": ["Harry", "Antz"], "losers": ["Shaun", "Rocky"], "sets": [[4, 6], [6, 4], [9, 8]], "type": "doubles", "note": "3rd set tie-break", "id": "base_20", "verified": true}, {"date": "2026-07-13", "winners": ["Jams", "Rishi"], "losers": ["Fatch", "Jords"], "sets": [[6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_21", "verified": true}, {"date": "2026-07-14", "winners": ["KC", "Erf"], "losers": ["Osh", "Dennis"], "sets": [[2, 6], [6, 1], [6, 2]], "type": "doubles", "note": "", "id": "base_22", "verified": true}, {"date": "2026-07-15", "winners": ["Rishi", "Antz"], "losers": ["Jords", "MK"], "sets": [[1, 6], [6, 3], [6, 0]], "type": "doubles", "note": "", "id": "base_23", "verified": true}, {"date": "2026-07-15", "winners": ["Kaz", "Rishi"], "losers": ["Max", "Erf"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_24", "verified": true}, {"date": "2026-07-16", "winners": ["Max", "PDM"], "losers": ["Rishi", "Jords"], "sets": [[7, 6], [7, 6]], "type": "doubles", "note": "", "id": "base_25", "verified": true}, {"date": "2026-07-16", "winners": ["Len", "Antz"], "losers": ["Harry", "PDM"], "sets": [[6, 2], [6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_26", "verified": true}, {"date": "2026-07-17", "winners": ["Harry", "Len"], "losers": ["Max", "Eli"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "", "id": "base_27", "verified": true}, {"date": "2026-07-17", "winners": ["Len", "Erf"], "losers": ["Kaz", "Rishi"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_28", "verified": true}, {"date": "2026-07-17", "winners": ["Kaz", "Jords"], "losers": ["Rishi", "Erf"], "sets": [[2, 6], [6, 2], [6, 1]], "type": "doubles", "note": "", "id": "base_29", "verified": true}, {"date": "2026-07-18", "winners": ["Rishi", "Eli"], "losers": ["Max", "PDM"], "sets": [[5, 7], [6, 1], [6, 3]], "type": "doubles", "note": "", "id": "base_30", "verified": true}, {"date": "2026-07-20", "winners": ["Harry", "PDM"], "losers": ["Rishi", "Chloe"], "sets": [[6, 2], [4, 6], [6, 2]], "type": "doubles", "note": "opponent listed as 'CC'", "id": "base_31", "verified": true}, {"date": "2026-07-20", "winners": ["Harry", "Rishi"], "losers": ["Jords", "Omar"], "sets": [[6, 4], [8, 7]], "type": "doubles", "note": "", "id": "base_32", "verified": true}, {"date": "2026-07-21", "winners": ["Dennis", "Rishi"], "losers": ["Harry", "PDM"], "sets": [[6, 2], [4, 6], [6, 4]], "type": "doubles", "note": "", "id": "base_33", "verified": true}, {"date": "2026-07-21", "winners": ["KC", "Rishi"], "losers": ["Antz", "Len"], "sets": [[6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_34", "verified": true}, {"date": "2026-07-22", "winners": ["Harry", "Rocky"], "losers": ["Shaun", "Max"], "sets": [[6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_35", "verified": true}, {"date": "2026-07-22", "winners": ["Harry", "Fatch"], "losers": ["Shaun", "Tee"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_36", "verified": true}, {"date": "2026-07-25", "winners": ["Tee", "Fatch"], "losers": ["Rhys", "Fee"], "sets": [[4, 6], [6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_37", "verified": true}, {"date": "2026-07-25", "winners": ["KC", "Shaun"], "losers": ["Max", "PDM"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "", "id": "base_38", "verified": true}, {"date": "2026-07-25", "winners": ["KC", "Max"], "losers": ["Shaun", "PDM"], "sets": [[6, 2], [7, 6]], "type": "doubles", "note": "", "id": "base_39", "verified": true}, {"date": "2026-07-27", "winners": ["Tom", "Shaun"], "losers": ["Max", "Tee"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "", "id": "base_40", "verified": true}, {"date": "2026-07-30", "winners": ["PDM", "Rishi"], "losers": ["Harry", "Rocky"], "sets": [[6, 0], [6, 0]], "type": "doubles", "note": "", "id": "base_41", "verified": true}, {"date": "2026-07-30", "winners": ["KC", "Fatch"], "losers": ["Max", "Rishi"], "sets": [[6, 4], [6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_42", "verified": true}, {"date": "2026-07-30", "winners": ["Fatch", "Antz"], "losers": ["Rishi", "Jords"], "sets": [[6, 2], [1, 6], [6, 3]], "type": "doubles", "note": "", "id": "base_43", "verified": true}, {"date": "2026-08-01", "winners": ["PDM", "Rishi"], "losers": ["Jords", "Omar"], "sets": [[6, 3], [6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_44", "verified": true}, {"date": "2026-08-02", "winners": ["Jams", "Rishi"], "losers": ["Fatch", "Tom"], "sets": [[6, 4], [3, 6], [7, 6]], "type": "doubles", "note": "", "id": "base_45", "verified": true}, {"date": "2026-08-02", "winners": ["Tee", "MK"], "losers": ["Tom", "Shaun"], "sets": [[5, 7], [6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_46", "verified": true}, {"date": "2026-08-03", "winners": ["KC", "Max"], "losers": ["Erf", "Rishi"], "sets": [[5, 7], [6, 1], [7, 6]], "type": "doubles", "note": "", "id": "base_47", "verified": true}, {"date": "2026-08-04", "winners": ["Aubyn", "Antz"], "losers": ["Fatch", "Jams"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_48", "verified": true}, {"date": "2026-08-04", "winners": ["MK", "Fatch"], "losers": ["Shaun", "Tom"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_49", "verified": true}, {"date": "2026-08-05", "winners": ["Rishi", "Jams"], "losers": ["Aubyn", "Antz"], "sets": [[6, 2], [6, 2], [2, 6]], "type": "doubles", "note": "", "id": "base_50", "verified": true}, {"date": "2026-08-05", "winners": ["Rishi", "Omar"], "losers": ["Max", "Eli"], "sets": [[7, 6], [4, 6], [6, 3]], "type": "doubles", "note": "", "id": "base_51", "verified": true}, {"date": "2026-08-06", "winners": ["Skapz", "Rhys"], "losers": ["Tee", "Fee"], "sets": [[6, 2], [6, 2], [3, 6]], "type": "doubles", "note": "", "id": "base_52", "verified": true}, {"date": "2026-08-08", "winners": ["Tom", "Erf"], "losers": ["Antz", "Fatch"], "sets": [[6, 3], [6, 2], [6, 4]], "type": "doubles", "note": "", "id": "base_53", "verified": true}, {"date": "2026-08-08", "winners": ["Erf", "PDM"], "losers": ["Osh", "Fatch"], "sets": [[8, 6], [6, 2]], "type": "doubles", "note": "", "id": "base_54", "verified": true}, {"date": "2026-08-09", "winners": ["Len", "Fatch"], "losers": ["PDM", "Antz"], "sets": [[8, 6], [5, 7], [9, 7]], "type": "doubles", "note": "", "id": "base_55", "verified": true}, {"date": "2026-08-09", "winners": ["Rocky", "Max"], "losers": ["MK", "Fatch"], "sets": [[6, 4], [6, 4], [7, 6]], "type": "doubles", "note": "", "id": "base_56", "verified": true}, {"date": "2026-08-11", "winners": ["Osh", "Eli"], "losers": ["PDM", "Max"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_57", "verified": true}, {"date": "2026-08-11", "winners": ["PDM", "Shaun"], "losers": ["Tarique", "Max"], "sets": [[6, 3], [6, 2]], "type": "doubles", "note": "", "id": "base_58", "verified": true}, {"date": "2026-08-12", "winners": ["Rocky", "PDM"], "losers": ["Rishi", "Max"], "sets": [[6, 2], [6, 4], [6, 7]], "type": "doubles", "note": "", "id": "base_59", "verified": true}, {"date": "2026-08-14", "winners": ["Mulley", "Osh"], "losers": ["KC", "Shaun"], "sets": [[4, 6], [7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_60", "verified": true}, {"date": "2026-08-14", "winners": ["Max", "Kaz"], "losers": ["PDM", "Rishi"], "sets": [[5, 7], [6, 0], [6, 3]], "type": "doubles", "note": "", "id": "base_61", "verified": true}, {"date": "2026-08-15", "winners": ["KC", "Fatch"], "losers": ["Max", "PDM"], "sets": [[4, 6], [7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_62", "verified": true}, {"date": "2026-08-15", "winners": ["Max", "Fatch"], "losers": ["Rocky", "PDM"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_63", "verified": true}, {"date": "2026-08-16", "winners": ["Len", "Eli"], "losers": ["Rishi", "PDM"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "", "id": "base_64", "verified": true}, {"date": "2026-08-16", "winners": ["Osh", "KC"], "losers": ["Max", "Kaz"], "sets": [[6, 1], [6, 2], [6, 1]], "type": "doubles", "note": "", "id": "base_65", "verified": true}, {"date": "2026-08-17", "winners": ["Osh", "Eli"], "losers": ["Len", "KC"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "score corrected from 6-4 6-4", "id": "base_66", "verified": true}, {"date": "2026-08-19", "winners": ["Rishi", "Omar"], "losers": ["PDM", "Shaun"], "sets": [[7, 5], [6, 3], [6, 4]], "type": "doubles", "note": "double or quits", "id": "base_67", "verified": true}, {"date": "2026-08-19", "winners": ["Max", "Aubyn"], "losers": ["Rishi", "Jams"], "sets": [[6, 4], [6, 0], [8, 6]], "type": "doubles", "note": "", "id": "base_68", "verified": true}, {"date": "2026-08-20", "winners": ["Rishi", "Len"], "losers": ["Eli", "Stormzy"], "sets": [[6, 3], [6, 1], [6, 4]], "type": "doubles", "note": "double or quits", "id": "base_69", "verified": true}, {"date": "2026-08-20", "winners": ["Rishi", "Stormzy"], "losers": ["Fatch", "Max"], "sets": [[6, 3], [3, 6], [6, 3]], "type": "doubles", "note": "", "id": "base_70", "verified": true}, {"date": "2026-08-21", "winners": ["Max"], "losers": ["Fatch"], "sets": [[15, 11], [15, 9]], "type": "singles", "note": "", "id": "base_71", "verified": true}, {"date": "2026-08-21", "winners": ["Rishi", "PDM"], "losers": ["Stormzy", "Max"], "sets": [[7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_72", "verified": true}, {"date": "2026-08-21", "winners": ["Stormzy", "Max"], "losers": ["Rishi", "PDM"], "sets": [[6, 3], [2, 6], [6, 2]], "type": "doubles", "note": "rematch same day", "id": "base_73", "verified": true}, {"date": "2026-08-25", "winners": ["Tom", "Rishi"], "losers": ["Max", "Rocky"], "sets": [[2, 6], [6, 3], [6, 2]], "type": "doubles", "note": "", "id": "base_74", "verified": true}, {"date": "2026-08-25", "winners": ["Erf", "Kaz"], "losers": ["Osh", "KC"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "", "id": "base_75", "verified": true}, {"date": "2026-08-25", "winners": ["Erf", "Kaz"], "losers": ["Osh", "Eli"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "", "id": "base_76", "verified": true}, {"date": "2026-08-27", "winners": ["Eli", "Ant Slice"], "losers": ["Rishi", "Max"], "sets": [[8, 6], [6, 2]], "type": "doubles", "note": "", "id": "base_77", "verified": true}, {"date": "2026-08-27", "winners": ["Max", "PDM"], "losers": ["Ant Slice", "Chloe"], "sets": [[4, 6], [6, 2], [6, 2]], "type": "doubles", "note": "", "id": "base_78", "verified": true}, {"date": "2026-06-02", "winners": ["Rishi", "Jords"], "losers": ["Tarique", "Harry"], "sets": [[4, 6], [6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_79", "verified": true}, {"date": "2026-06-02", "winners": ["Rocky", "Harry"], "losers": ["Rishi", "Jords"], "sets": [[6, 4], [6, 4], [3, 6]], "type": "doubles", "note": "", "id": "base_80", "verified": true}, {"date": "2026-06-03", "winners": ["Harry", "Antz"], "losers": ["Rishi", "MK"], "sets": [[1, 6], [6, 1], [8, 6]], "type": "doubles", "note": "", "id": "base_81", "verified": true}, {"date": "2026-06-04", "winners": ["Harry", "Tom"], "losers": ["Fatch", "Jords"], "sets": [[7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_82", "verified": true}, {"date": "2026-06-04", "winners": ["Fatch", "Harry"], "losers": ["Tom", "Jords"], "sets": [[2, 6], [6, 1], [7, 5]], "type": "doubles", "note": "", "id": "base_83", "verified": true}, {"date": "2026-06-05", "winners": ["Rocky", "Tarique"], "losers": ["Rishi", "Harry"], "sets": [[6, 3], [6, 4], [2, 6]], "type": "doubles", "note": "", "id": "base_84", "verified": true}, {"date": "2026-06-07", "winners": ["Max", "Tom"], "losers": ["Shaun", "MK"], "sets": [[6, 2], [6, 3], [4, 6]], "type": "doubles", "note": "", "id": "base_85", "verified": true}, {"date": "2026-06-07", "winners": ["Stormzy", "Len"], "losers": ["Rishi", "Antz"], "sets": [[6, 3], [6, 0]], "type": "doubles", "note": "", "id": "base_86", "verified": true}, {"date": "2026-06-07", "winners": ["Rishi", "Antz"], "losers": ["Stormzy", "Len"], "sets": [[7, 6], [4, 6], [6, 3]], "type": "doubles", "note": "rematch same session", "id": "base_87", "verified": true}, {"date": "2026-06-09", "winners": ["Rishi", "Fatch"], "losers": ["Chloe", "Jords"], "sets": [[2, 6], [6, 2], [6, 2]], "type": "doubles", "note": "", "id": "base_88", "verified": true}, {"date": "2026-06-09", "winners": ["Rishi", "Chloe"], "losers": ["Fatch", "Jords"], "sets": [[6, 0], [6, 1]], "type": "doubles", "note": "rematch same session", "id": "base_89", "verified": true}, {"date": "2026-06-09", "winners": ["Erf", "Osh"], "losers": ["Eli", "Len"], "sets": [[4, 6], [7, 5], [6, 3]], "type": "doubles", "note": "", "id": "base_90", "verified": true}, {"date": "2026-06-10", "winners": ["Eli", "Harry"], "losers": ["Jords", "KC"], "sets": [[4, 6], [6, 0], [6, 2]], "type": "doubles", "note": "", "id": "base_91", "verified": true}, {"date": "2026-06-14", "winners": ["Jords", "MK"], "losers": ["Rocky", "Fatch"], "sets": [[9, 7], [6, 1]], "type": "doubles", "note": "", "id": "base_92", "verified": true}, {"date": "2026-06-14", "winners": ["Max", "Shaun"], "losers": ["MK", "Harry"], "sets": [[6, 4], [7, 5], [5, 7]], "type": "doubles", "note": "", "id": "base_93", "verified": true}, {"date": "2026-06-16", "winners": ["Max", "Rishi"], "losers": ["KC", "Tom"], "sets": [[6, 3], [6, 3], [8, 6]], "type": "doubles", "note": "", "id": "base_94", "verified": true}, {"date": "2026-06-16", "winners": ["Jords", "Kaz"], "losers": ["Rishi", "Eli"], "sets": [[6, 4], [6, 3], [6, 2], [2, 6]], "type": "doubles", "note": "4 sets as posted", "id": "base_95", "verified": true}, {"date": "2026-06-18", "winners": ["Shaun", "Rocky"], "losers": ["Harry", "Jords"], "sets": [[6, 1], [6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_96", "verified": true}, {"date": "2026-06-21", "winners": ["Max", "Rishi"], "losers": ["Tarique", "Kaz"], "sets": [[7, 5], [3, 6], [7, 5]], "type": "doubles", "note": "", "id": "base_97", "verified": true}, {"date": "2026-06-21", "winners": ["Rishi", "Fatch"], "losers": ["Antz", "Tarique"], "sets": [[7, 5], [6, 8], [6, 3]], "type": "doubles", "note": "", "id": "base_98", "verified": true}, {"date": "2026-06-22", "winners": ["Max", "Kaz"], "losers": ["KC", "Rishi"], "sets": [[6, 4], [6, 4], [4, 6]], "type": "doubles", "note": "", "id": "base_99", "verified": true}, {"date": "2026-06-22", "winners": ["Rishi", "Del"], "losers": ["Harry", "Dennis"], "sets": [[6, 2], [6, 4]], "type": "doubles", "note": "'wolf emoji'=Rishi; Del one-off, Tier A", "id": "base_100", "verified": true}, {"date": "2026-06-23", "winners": ["Erf", "Shaun"], "losers": ["Rishi", "Max"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_101", "verified": true}, {"date": "2026-06-24", "winners": ["Erf", "Eli"], "losers": ["KC", "Shaun"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "game 1", "id": "base_102", "verified": true}, {"date": "2026-06-24", "winners": ["KC", "Shaun"], "losers": ["Erf", "Eli"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "game 2 rematch", "id": "base_103", "verified": true}, {"date": "2026-06-26", "winners": ["Fatch", "Antz"], "losers": ["Jords", "M.R"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "M.R identity unconfirmed, Tier C", "id": "base_104", "verified": true}, {"date": "2026-06-28", "winners": ["Len"], "losers": ["Harry"], "sets": [[6, 7], [6, 2], [6, 4]], "type": "singles", "note": "", "id": "base_105", "verified": true}, {"date": "2026-06-29", "winners": ["Kaz", "Osh"], "losers": ["KC", "Erf"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_106", "verified": true}, {"date": "2026-06-30", "winners": ["KC", "Rishi"], "losers": ["Osh", "Harry"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_107", "verified": true}, {"date": "2026-06-30", "winners": ["KC", "Rishi"], "losers": ["Harry", "Osh"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "2nd match same session", "id": "base_108", "verified": true}, {"date": "2026-06-30", "winners": ["Harry", "Osh"], "losers": ["KC", "Rishi"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "double or quits decider", "id": "base_109", "verified": true}, {"date": "2026-06-30", "winners": ["Max", "MK"], "losers": ["Tarique", "Rocky"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "", "id": "base_110", "verified": true}, {"date": "2026-06-30", "winners": ["Harry", "Len"], "losers": ["Max", "Erf"], "sets": [[6, 3], [3, 6], [6, 4]], "type": "doubles", "note": "", "id": "base_111", "verified": true}, {"date": "2026-07-11", "winners": ["Omar", "Jords"], "losers": ["Tom", "Max"], "sets": [[7, 6], [4, 6], [6, 2]], "type": "doubles", "note": "final corrected version", "id": "base_112", "verified": true}, {"date": "2026-07-18", "winners": ["Tom", "Chloe"], "losers": ["Fatch", "Antz"], "sets": [[6, 2], [7, 5], [7, 5], [6, 3]], "type": "doubles", "note": "4 sets as posted", "id": "base_113", "verified": true}, {"date": "2026-07-19", "winners": ["Kaz", "Tom"], "losers": ["Rocky", "MK"], "sets": [[6, 1], [6, 1]], "type": "doubles", "note": "", "id": "base_114", "verified": true}, {"date": "2026-08-19", "winners": ["Eli", "Stormzy"], "losers": ["Osh", "Jords"], "sets": [[6, 8], [6, 3], [6, 3]], "type": "doubles", "note": "", "id": "base_115", "verified": true}, {"date": "2026-08-19", "winners": ["Eli", "Stormzy"], "losers": ["Osh", "Jords"], "sets": [[7, 5], [6, 1]], "type": "doubles", "note": "part 2, same session", "id": "base_116", "verified": true}, {"date": "2026-08-23", "winners": ["Stormzy", "Chloe"], "losers": ["Jords", "Tom"], "sets": [[6, 1], [5, 7], [6, 2], [5, 7], [6, 1]], "type": "doubles", "note": "5 sets, final corrected version", "id": "base_117", "verified": true}, {"date": "2026-08-26", "winners": ["PDM", "Max"], "losers": ["Chloe", "Antz"], "sets": [[4, 6], [6, 2], [6, 1]], "type": "doubles", "note": "double or quits 2-1, to be continued", "id": "base_118", "verified": true}, {"date": "2026-08-29", "winners": ["PDM", "Tom"], "losers": ["Fatch", "Shaun"], "sets": [[6, 3], [6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_119", "verified": true}, {"date": "2026-04-01", "winners": ["Kaz", "Eli"], "losers": ["Twoshay", "Erf"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0001", "id": "early_0", "verified": false}, {"date": "2026-04-01", "winners": ["Aubyn", "Len"], "losers": ["Stormzy", "Max"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0002", "id": "early_1", "verified": false}, {"date": "2026-04-01", "winners": ["Aubyn", "Len"], "losers": ["Stormzy", "Max"], "sets": [[6, 1], [3, 6], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0003", "id": "early_2", "verified": false}, {"date": "2026-04-02", "winners": ["Tom", "Ant Slice"], "losers": ["Tee", "MK"], "sets": [[6, 3], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0004", "id": "early_3", "verified": false}, {"date": "2026-04-03", "winners": ["Kaz", "Erf"], "losers": ["Eli", "Osh"], "sets": [[6, 2], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0005", "id": "early_4", "verified": false}, {"date": "2026-04-03", "winners": ["Dennis", "Erf"], "losers": ["Stormzy", "Osh"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0006", "id": "early_5", "verified": false}, {"date": "2026-04-04", "winners": ["Eli", "Kam"], "losers": ["Stormzy", "Chloe"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0007", "id": "early_6", "verified": false}, {"date": "2026-04-04", "winners": ["Stormzy", "Chloe"], "losers": ["Eli", "Kam"], "sets": [[7, 5], [4, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0008", "id": "early_7", "verified": false}, {"date": "2026-04-04", "winners": ["Max", "Ant Slice"], "losers": ["Stormzy", "Jords"], "sets": [[7, 6], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0009", "id": "early_8", "verified": false}, {"date": "2026-04-05", "winners": ["Ant Slice", "MK"], "losers": ["Max", "Jords"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0010", "id": "early_9", "verified": false}, {"date": "2026-04-05", "winners": ["Kaz", "Kam"], "losers": ["Len", "Tom"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0011", "id": "early_10", "verified": false}, {"date": "2026-04-05", "winners": ["Kaz", "Erf"], "losers": ["Len", "Osh"], "sets": [[6, 4], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0012", "id": "early_11", "verified": false}, {"date": "2026-04-05", "winners": ["Erf", "Max"], "losers": ["Kaz", "Jords"], "sets": [[2, 6], [3, 6]], "type": "doubles", "note": "from spreadsheet MAT0013", "id": "early_12", "verified": false}, {"date": "2026-04-05", "winners": ["Kaz", "Ant Slice"], "losers": ["Len", "Aubyn"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0014", "id": "early_13", "verified": false}, {"date": "2026-04-05", "winners": ["Len", "Ant Slice"], "losers": ["Kaz", "Aubyn"], "sets": [[1, 6], [3, 6]], "type": "doubles", "note": "from spreadsheet MAT0015", "id": "early_14", "verified": false}, {"date": "2026-04-05", "winners": ["Eli", "Stormzy"], "losers": ["Tom", "Rishi"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0016", "id": "early_15", "verified": false}, {"date": "2026-04-06", "winners": ["Stormzy", "bruh"], "losers": ["Kevin", "Eli"], "sets": [[6, 4], [6, 7], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0018", "id": "early_16", "verified": false}, {"date": "2026-04-07", "winners": ["Erf", "Ant Slice"], "losers": ["Osh", "Eli"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0019", "id": "early_17", "verified": false}, {"date": "2026-04-07", "winners": ["Stormzy", "Jords"], "losers": ["Tom", "Max"], "sets": [[6, 7], [6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0020", "id": "early_18", "verified": false}, {"date": "2026-04-08", "winners": ["Ant Slice", "Kam"], "losers": ["Stormzy", "bruh"], "sets": [[7, 6], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0021", "id": "early_19", "verified": false}, {"date": "2026-04-08", "winners": ["Kaz", "Erf"], "losers": ["Dennis", "Eli"], "sets": [[1, 6], [2, 6]], "type": "doubles", "note": "from spreadsheet MAT0022", "id": "early_20", "verified": false}, {"date": "2026-04-09", "winners": ["Eli", "Twoshay"], "losers": ["Osh", "Jords"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0023", "id": "early_21", "verified": false}, {"date": "2026-04-09", "winners": ["Osh", "Twoshay"], "losers": ["Erf", "KC"], "sets": [[6, 2], [2, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0024", "id": "early_22", "verified": false}, {"date": "2026-04-10", "winners": ["Stormzy", "Chloe"], "losers": ["Tom", "Jords"], "sets": [[5, 7], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0025", "id": "early_23", "verified": false}, {"date": "2026-04-11", "winners": ["Eli", "Erf"], "losers": ["Stormzy", "Osh"], "sets": [[6, 2], [2, 6], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0026", "id": "early_24", "verified": false}, {"date": "2026-04-12", "winners": ["Jords", "Erf"], "losers": ["Tom", "Kevin"], "sets": [[6, 3], [3, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0027", "id": "early_25", "verified": false}, {"date": "2026-04-15", "winners": ["Stormzy", "Chloe"], "losers": ["Max", "Eli"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0028", "id": "early_26", "verified": false}, {"date": "2026-04-16", "winners": ["Eli", "Stormzy"], "losers": ["Rishi", "Erf"], "sets": [[2, 6], [7, 6], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0030", "id": "early_27", "verified": false}, {"date": "2026-04-17", "winners": ["Jords", "Ant Slice"], "losers": ["Stormzy", "Chloe"], "sets": [[7, 6], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0031", "id": "early_28", "verified": false}, {"date": "2026-04-19", "winners": ["Jords", "KC"], "losers": ["Max", "Rishi"], "sets": [[1, 6], [6, 4], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0032", "id": "early_29", "verified": false}, {"date": "2026-04-02", "winners": ["KC", "MK"], "losers": ["Kam", "Stormzy"], "sets": [[6, 3], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0033", "id": "early_30", "verified": false}, {"date": "2026-04-09", "winners": ["Tee", "MK"], "losers": ["Aubyn", "Max"], "sets": [[6, 4], [7, 6]], "type": "doubles", "note": "from spreadsheet MAT0034", "id": "early_31", "verified": false}, {"date": "2026-04-19", "winners": ["Ant Slice", "Jords"], "losers": ["Tom", "Aubyn"], "sets": [[5, 7], [6, 1], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0035", "id": "early_32", "verified": false}, {"date": "2026-04-20", "winners": ["Len", "Mulley"], "losers": ["Twoshay", "Eli"], "sets": [[6, 2], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0036", "id": "early_33", "verified": false}, {"date": "2026-04-21", "winners": ["KC", "Erf"], "losers": ["Rishi", "Kaz"], "sets": [[7, 6], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0038", "id": "early_34", "verified": false}, {"date": "2026-04-22", "winners": ["Jords", "Ant Slice"], "losers": ["Eli", "Chloe"], "sets": [[3, 6], [7, 5], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0039", "id": "early_35", "verified": false}, {"date": "2026-04-21", "winners": ["Jords", "Erf"], "losers": ["Chloe", "Tom"], "sets": [[4, 6], [6, 1], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0040", "id": "early_36", "verified": false}, {"date": "2026-04-22", "winners": ["Rhys", "Aubyn"], "losers": ["Skapz", "Tee"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0042", "id": "early_37", "verified": false}, {"date": "2026-04-23", "winners": ["Max", "Dennis"], "losers": ["Kaz", "Rishi"], "sets": [[6, 7], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0043", "id": "early_38", "verified": false}, {"date": "2026-04-24", "winners": ["Stormzy", "Eli"], "losers": ["Jords", "Max"], "sets": [[4, 6], [6, 2], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0044", "id": "early_39", "verified": false}, {"date": "2026-04-27", "winners": ["Jords", "Erf"], "losers": ["Kaz", "Skapz"], "sets": [[7, 5], [1, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0045", "id": "early_40", "verified": false}, {"date": "2026-04-26", "winners": ["KC", "Erf"], "losers": ["Kaz", "Len"], "sets": [[6, 4], [4, 6], [1, 6]], "type": "doubles", "note": "from spreadsheet MAT0046", "id": "early_41", "verified": false}, {"date": "2026-04-25", "winners": ["Erf", "KC"], "losers": ["Kaz", "Rishi"], "sets": [[6, 7], [1, 6]], "type": "doubles", "note": "from spreadsheet MAT0047", "id": "early_42", "verified": false}, {"date": "2026-04-28", "winners": ["Stormzy", "Chloe"], "losers": ["Manny", "Rishi"], "sets": [[3, 6], [6, 2], [7, 6]], "type": "doubles", "note": "from spreadsheet MAT0048", "id": "early_43", "verified": false}, {"date": "2026-04-25", "winners": ["Kaz", "Erf"], "losers": ["Abby", "Alfie"], "sets": [[6, 7], [6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0050", "id": "early_45", "verified": false}, {"date": "2026-04-30", "winners": ["Jords", "Osh"], "losers": ["Erf", "Max"], "sets": [[7, 5], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0051", "id": "early_46", "verified": false}, {"date": "2026-04-30", "winners": ["Manny", "Osh"], "losers": ["Twoshay", "Erf"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0052", "id": "early_47", "verified": false}, {"date": "2026-04-30", "winners": ["Alfie", "Manny"], "losers": ["Kaz", "Twoshay"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0053", "id": "early_48", "verified": false}, {"date": "2026-04-30", "winners": ["Kaz", "Twoshay"], "losers": ["Alfie", "Manny"], "sets": [[4, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0054", "id": "early_49", "verified": false}, {"date": "2026-05-01", "winners": ["Kaz", "Alfie"], "losers": ["Manny", "Twoshay"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0055", "id": "early_50", "verified": false}, {"date": "2026-07-20", "winners": ["Kaz", "Tom"], "losers": ["Rocky", "MK"], "sets": [[6, 0], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0091", "id": "zgnew_0", "verified": true}, {"date": "2026-07-21", "winners": ["Tom", "Shaun"], "losers": ["Max", "Tee"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0092", "id": "zgnew_1", "verified": true}, {"date": "2026-08-01", "winners": ["Jams", "Rishi"], "losers": ["Fatch", "Tom"], "sets": [[4, 6], [6, 3], [7, 6]], "type": "doubles", "note": "from spreadsheet MAT0098", "id": "zgnew_2", "verified": true}, {"date": "2026-08-02", "winners": ["Tee", "MK"], "losers": ["Tom", "Shaun"], "sets": [[5, 7], [6, 4], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0099", "id": "zgnew_3", "verified": true}, {"date": "2026-08-04", "winners": ["MK", "Fatch"], "losers": ["Shaun", "Tom"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0102", "id": "zgnew_4", "verified": true}, {"date": "2026-08-10", "winners": ["Tom", "Erf"], "losers": ["Antz", "Fatch"], "sets": [[6, 3], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0115", "id": "zgnew_5", "verified": true}, {"date": "2026-08-25", "winners": ["Tom", "Rishi"], "losers": ["Max", "Rocky"], "sets": [[2, 6], [6, 3], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0130", "id": "zgnew_6", "verified": true}];
+const BASE_TIERS = {"Manny": "S", "Erf": "A", "Kaz": "A", "Twoshay": "A", "Osh": "A", "Eli": "A", "Dennis": "A", "Ant Slice": "A", "Len": "A", "Rishi": "B", "Omar": "B", "Chloe": "B", "Max": "B", "James": "B", "MK": "B", "Antz": "B", "Rocky": "B", "Harry": "B", "PDM": "B", "Shaun": "B", "Jords": "B", "Tarique": "B", "Tom": "B", "Fatch": "B", "Jams": "C", "Aubyn": "C", "Rhys": "C", "Tee": "C", "Skapz": "C", "Stormzy": "B", "KC": "A", "Mulley": "B", "Fee": "C", "Carla": "B", "Del": "A", "M.R": "C", "Kam": "B", "bruh": "B", "Kevin": "B", "Abby": "B", "Alfie": "B"};
+const BASE_ACTIVE = {"Manny": true, "Erf": true, "Kaz": true, "Twoshay": false, "Osh": true, "Eli": true, "Dennis": true, "Ant Slice": true, "Len": true, "Rishi": true, "Omar": true, "Chloe": true, "Max": true, "James": true, "MK": true, "Antz": true, "Rocky": true, "Harry": true, "PDM": true, "Shaun": true, "Jords": true, "Tarique": true, "Tom": true, "Fatch": true, "Jams": true, "Aubyn": true, "Rhys": true, "Tee": true, "Skapz": true, "Stormzy": true, "KC": true, "Mulley": true, "Fee": true, "Carla": true, "Del": false, "M.R": true, "Kam": false, "bruh": false, "Kevin": false, "Abby": false, "Alfie": false};
+
+// ===================== LIVE STATE =====================
+let ALL_MATCHES = [];      // BASE_MATCHES + user-added
+let TIER_MAP = {};         // name -> tier (base + overrides + new players)
+let ACTIVE_MAP = {};       // name -> bool
+
+let PLAYERS = [];
+let MATCHES = [];
+let PARTNERSHIPS = [];
+let BEST_PARTNER = {};
+let BOUNDARY_TESTS = [];
+let CALIBRATION_GAMES = [];
+let WITHIN_TIER_GAMES = [];
+let DIFFICULTY_SUGGESTIONS = {};
+let INACTIVE_PLAYERS = new Set();
+let H2H = {};
+
+const TIER_SEED = {S:2000, A:1700, B:1400, C:1100};
+const TIER_ORDER_LIST = ["S","A","B","C"];
+const TIER_IDX = {S:0,A:1,B:2,C:3};
+
+// ===================== STORAGE (Firebase Firestore + localStorage) =====================
+// Fill in your own Firebase project config here (Firebase console > Project settings > General > Your apps).
+const firebaseConfig = {
+  apiKey: "AIzaSyAYDCghLPhMLpHaxTbbC8Rm2sV09UlPKOw",
+  authDomain: "mp---dashboard.firebaseapp.com",
+  projectId: "mp---dashboard",
+  storageBucket: "mp---dashboard.firebasestorage.app",
+  messagingSenderId: "10882600309",
+  appId: "1:10882600309:web:4e3a8e186f465cc35bd73c"
+};
+
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+} catch(e) {
+  console.error('Firebase init failed — check firebaseConfig at the top of the script.', e);
+}
+
+const FS_COLLECTION = 'moneypadel'; // one Firestore collection, one document per storage key
+
+let lastStorageError = null;
+
+function storageAvailable(){
+  return !!db;
+}
+
+async function fsGet(key){
+  const doc = await db.collection(FS_COLLECTION).doc(key).get();
+  return doc.exists ? doc.data().value : null;
+}
+async function fsSet(key, value){
+  await db.collection(FS_COLLECTION).doc(key).set({ value, updatedAt: Date.now() });
+}
+
+const STORAGE_KEY_MATCHES = 'moneypadel_extra_matches';   // pending + approved submissions
+const STORAGE_KEY_TAGS = 'moneypadel_player_tags';
+const STORAGE_KEY_EDITS = 'moneypadel_match_edits';        // id -> override fields
+const STORAGE_KEY_DELETED = 'moneypadel_deleted_ids';      // array of ids, soft-delete
+const STORAGE_KEY_MY_NAME = 'moneypadel_my_name';          // personal — localStorage, this device only
+
+async function loadStoredData(){
+  let extraMatches = [];
+  let tagOverrides = {};
+  let matchEdits = {};
+  let deletedIds = [];
+  try { const v = await fsGet(STORAGE_KEY_MATCHES); if(v) extraMatches = JSON.parse(v); } catch(e){ console.error('load matches failed', e); }
+  try { const v = await fsGet(STORAGE_KEY_TAGS); if(v) tagOverrides = JSON.parse(v); } catch(e){ console.error('load tags failed', e); }
+  try { const v = await fsGet(STORAGE_KEY_EDITS); if(v) matchEdits = JSON.parse(v); } catch(e){ console.error('load edits failed', e); }
+  try { const v = await fsGet(STORAGE_KEY_DELETED); if(v) deletedIds = JSON.parse(v); } catch(e){ console.error('load deleted ids failed', e); }
+  return {extraMatches, tagOverrides, matchEdits, deletedIds};
+}
+
+async function loadMyName(){
+  try { const v = localStorage.getItem(STORAGE_KEY_MY_NAME); if(v) return JSON.parse(v); } catch(e){ /* not set yet */ }
+  return '';
+}
+async function saveMyName(name){
+  try { localStorage.setItem(STORAGE_KEY_MY_NAME, JSON.stringify(name)); } catch(e){ /* best effort */ }
+}
+
+// ===================== ADMIN LOCK (deterrent, not real security) =====================
+const STORAGE_KEY_ADMIN_PW = 'moneypadel_admin_pw_hash';   // shared, in Firestore
+const STORAGE_KEY_MY_UNLOCKED = 'moneypadel_my_unlocked';  // personal — localStorage, this device only
+
+let adminPasswordHash = null;
+let isUnlocked = false;
+
+function simpleHash(str){
+  let hash = 0;
+  for(let i=0;i<str.length;i++){
+    hash = ((hash<<5)-hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return (hash>>>0).toString(16);
+}
+
+async function loadAdminPassword(){
+  try { const v = await fsGet(STORAGE_KEY_ADMIN_PW); if(v) return JSON.parse(v); } catch(e){ console.error('load admin password failed', e); }
+  return null;
+}
+async function saveAdminPassword(hash){
+  try {
+    await fsSet(STORAGE_KEY_ADMIN_PW, JSON.stringify(hash));
+    return true;
+  } catch(e){
+    lastStorageError = (e && e.message) ? e.message : String(e);
+    console.error('saveAdminPassword failed:', e);
+    return false;
+  }
+}
+async function loadMyUnlocked(){
+  try { const v = localStorage.getItem(STORAGE_KEY_MY_UNLOCKED); if(v) return JSON.parse(v) === true; } catch(e){ /* not set yet */ }
+  return false;
+}
+async function saveMyUnlocked(val){
+  try { localStorage.setItem(STORAGE_KEY_MY_UNLOCKED, JSON.stringify(!!val)); } catch(e){ /* best effort */ }
+}
+
+function buildLockScreenHtml(){
+  const settingNew = !adminPasswordHash;
+  const storageWarning = !storageAvailable()
+    ? `<div class="section-sub" style="color:#e8a5a1; margin-bottom:8px;">⚠️ This page can't reach shared storage right now. That usually means you're viewing a downloaded copy of this file, or an embed, rather than the actual published/shared link on claude.ai — open that link directly and this should work.</div>`
+    : '';
+  if(settingNew){
+    return `<div class="fg-controls">
+      <div class="section-heading" style="margin-top:0;">🔒 Set an admin password</div>
+      ${storageWarning}
+      <div class="section-sub">No password has been set yet. Whatever you set here will be needed by anyone adding, approving, editing, or deleting games — share it with whoever should have access. This is a deterrent, not real security: the result is the ledger anyway, this just avoids accidental or casual changes.</div>
+      <div class="fg-row"><label class="fg-label">New password</label><input id="lockPw1" type="password" class="fg-select" /></div>
+      <div class="fg-row"><label class="fg-label">Confirm password</label><input id="lockPw2" type="password" class="fg-select" /></div>
+      <div class="fg-row"><button class="tab-btn active" id="lockSetBtn" style="width:100%;">Set password &amp; unlock</button></div>
+      <div id="lockMessage" class="section-sub"></div>
+    </div>`;
+  }
+  return `<div class="fg-controls">
+    <div class="section-heading" style="margin-top:0;">🔒 Admin area</div>
+    ${storageWarning}
+    <div class="section-sub">Enter the admin password to add, approve, edit, or delete games.</div>
+    <div class="fg-row"><label class="fg-label">Password</label><input id="lockPwInput" type="password" class="fg-select" /></div>
+    <div class="fg-row"><button class="tab-btn active" id="lockUnlockBtn" style="width:100%;">Unlock</button></div>
+    <div id="lockMessage" class="section-sub"></div>
+  </div>`;
+}
+
+function wireLockScreen(onUnlocked){
+  const settingNew = !adminPasswordHash;
+  if(settingNew){
+    document.getElementById('lockSetBtn').onclick = async ()=>{
+      const p1 = document.getElementById('lockPw1').value;
+      const p2 = document.getElementById('lockPw2').value;
+      const msg = document.getElementById('lockMessage');
+      if(!p1 || p1.length<4){ msg.textContent='Use at least 4 characters.'; return; }
+      if(p1!==p2){ msg.textContent="Passwords don't match."; return; }
+      const hash = simpleHash(p1);
+      const ok = await saveAdminPassword(hash);
+      if(!ok){
+        msg.textContent = storageAvailable()
+          ? `Save failed (${lastStorageError || 'unknown error'}) — try again in a moment.`
+          : `Save failed — this page can't reach shared storage. Make sure you're on the actual published/shared claude.ai link, not a downloaded file.`;
+        return;
+      }
+      adminPasswordHash = hash;
+      isUnlocked = true;
+      await saveMyUnlocked(true);
+      onUnlocked();
+    };
+  } else {
+    document.getElementById('lockUnlockBtn').onclick = async ()=>{
+      const p = document.getElementById('lockPwInput').value;
+      const msg = document.getElementById('lockMessage');
+      if(simpleHash(p) === adminPasswordHash){
+        isUnlocked = true;
+        await saveMyUnlocked(true);
+        onUnlocked();
+      } else {
+        msg.textContent = 'Incorrect password.';
+      }
+    };
+  }
+}
+
+async function saveExtraMatches(extraMatches){
+  try {
+    await fsSet(STORAGE_KEY_MATCHES, JSON.stringify(extraMatches));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save matches failed', e); return false; }
+}
+async function saveTagOverrides(tagOverrides){
+  try {
+    await fsSet(STORAGE_KEY_TAGS, JSON.stringify(tagOverrides));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save tags failed', e); return false; }
+}
+async function saveMatchEdits(matchEdits){
+  try {
+    await fsSet(STORAGE_KEY_EDITS, JSON.stringify(matchEdits));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save edits failed', e); return false; }
+}
+async function saveDeletedIds(deletedIds){
+  try {
+    await fsSet(STORAGE_KEY_DELETED, JSON.stringify(deletedIds));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save deleted ids failed', e); return false; }
+}
+
+let extraMatchesState = [];   // each: {id, date, winners, losers, sets, type, note, status, submittedBy, submittedAt}
+let tagOverridesState = {};
+let matchEditsState = {};     // id -> {date?,winners?,losers?,sets?,type?,note?, editedBy, editedAt}
+let deletedIdsState = [];
+let currentUserName = '';
+
+function rebuildMapsFromState(){
+  TIER_MAP = {...BASE_TIERS};
+  ACTIVE_MAP = {...BASE_ACTIVE};
+  Object.keys(tagOverridesState).forEach(name=>{
+    const o = tagOverridesState[name];
+    if(o.tier) TIER_MAP[name] = o.tier;
+    if(typeof o.active === 'boolean') ACTIVE_MAP[name] = o.active;
+  });
+}
+
+// The list used for rating computation: base + approved submissions, edits applied, deletions removed.
+function getEffectiveMatches(){
+  let all = BASE_MATCHES.concat(extraMatchesState.filter(m=>m.status==='approved'));
+  all = all.map(m=>{
+    const edit = matchEditsState[m.id];
+    if(!edit) return m;
+    const {date,winners,losers,sets,type,note} = edit;
+    return {...m,
+      date: date!==undefined?date:m.date, winners: winners!==undefined?winners:m.winners,
+      losers: losers!==undefined?losers:m.losers, sets: sets!==undefined?sets:m.sets,
+      type: type!==undefined?type:m.type, note: note!==undefined?note:m.note};
+  });
+  all = all.filter(m=>!deletedIdsState.includes(m.id));
+  if(dataQualityFilter === 'verified') all = all.filter(m => m.verified !== false);
+  else if(dataQualityFilter === 'unverified') all = all.filter(m => m.verified === false);
+  return all;
+}
+
+// The list used for the Games tab display: effective matches + pending (not yet approved), never deleted.
+function getDisplayMatches(){
+  const effective = getEffectiveMatches().map(m=>({...m, _status:'approved'}));
+  const pending = extraMatchesState.filter(m=>m.status==='pending' && !deletedIdsState.includes(m.id)).map(m=>({...m, _status:'pending'}));
+  return effective.concat(pending);
+}
+
+// ===================== RATING ENGINE =====================
+function computeElo(matches, tierMap){
+  const ratings = {};
+  function R(name){
+    if(!(name in ratings)) ratings[name] = TIER_SEED[tierMap[name] || 'B'];
+    return ratings[name];
+  }
+  const K = 28, EPOCHS = 300;
+  for(let epoch=0; epoch<EPOCHS; epoch++){
+    for(const m of matches){
+      const gw = m.sets.reduce((s,set)=>s+set[0],0);
+      const gl = m.sets.reduce((s,set)=>s+set[1],0);
+      const total = (gw+gl) || 1;
+      const actual = gw/total;
+      const wr = m.winners.reduce((s,p)=>s+R(p),0)/m.winners.length;
+      const lr = m.losers.reduce((s,p)=>s+R(p),0)/m.losers.length;
+      const expected = 1/(1+Math.pow(10,(lr-wr)/400));
+      const delta = K*(actual-expected)/EPOCHS*3;
+      m.winners.forEach(p=>{ ratings[p] = R(p) + delta; });
+      m.losers.forEach(p=>{ ratings[p] = R(p) - delta; });
+    }
+  }
+  return ratings;
+}
+
+function enrichMatches(matches, ratings){
+  return matches.map(m=>{
+    const gw = m.sets.reduce((s,set)=>s+set[0],0);
+    const gl = m.sets.reduce((s,set)=>s+set[1],0);
+    const total = (gw+gl) || 1;
+    const actual = gw/total;
+    const wr = m.winners.reduce((s,p)=>s+ratings[p],0)/m.winners.length;
+    const lr = m.losers.reduce((s,p)=>s+ratings[p],0)/m.losers.length;
+    const expected = 1/(1+Math.pow(10,(lr-wr)/400));
+    return {
+      date: m.date, winners: m.winners, losers: m.losers,
+      score: m.sets.map(s=>s.join('-')).join(', '),
+      type: m.type, note: m.note||'', verified: m.verified !== false,
+      games_winner: gw, games_loser: gl,
+      game_share_winner: Math.round(actual*1000)/1000,
+      expected_winshare: Math.round(expected*1000)/1000,
+      team_w_rating: Math.round(wr*10)/10, team_l_rating: Math.round(lr*10)/10,
+      match_strength: Math.round((wr+lr)/2*10)/10,
+      overperformance_winner: Math.round((actual-expected)*1000)/1000,
+    };
+  });
+}
+
+function buildPlayers(enrichedMatches, ratings, tierMap, activeMap){
+  const agg = {};
+  function A(name){
+    if(!agg[name]) agg[name] = {wins:0, losses:0, strengths:[], overperf:[], games_w:0, games_l:0, upset_wins:0, upset_losses:0};
+    return agg[name];
+  }
+  const GAP_THRESHOLD = 15;
+  enrichedMatches.forEach(m=>{
+    const gap = Math.abs(m.team_w_rating - m.team_l_rating);
+    const isClose = gap < GAP_THRESHOLD;
+    const winnerFavored = m.team_w_rating > m.team_l_rating;
+    const isUpset = !isClose && !winnerFavored;
+    m.winners.forEach(p=>{
+      const a = A(p);
+      a.wins++; a.strengths.push(m.match_strength); a.overperf.push(m.overperformance_winner);
+      a.games_w += m.games_winner; a.games_l += m.games_loser;
+      if(isUpset) a.upset_wins++;
+    });
+    m.losers.forEach(p=>{
+      const a = A(p);
+      a.losses++; a.strengths.push(m.match_strength); a.overperf.push(-m.overperformance_winner);
+      a.games_w += m.games_loser; a.games_l += m.games_winner;
+      if(isUpset) a.upset_losses++;
+    });
+  });
+
+  const allNames = Object.keys(ratings);
+  const byTier = {};
+  allNames.forEach(name=>{
+    const t = tierMap[name] || 'B';
+    (byTier[t] = byTier[t]||[]).push(name);
+  });
+
+  const tierAvgRating = {}, tierAvgOpp = {}, tierMinRating = {}, tierMaxRating = {};
+  TIER_ORDER_LIST.forEach(t=>{
+    const names = byTier[t] || [];
+    if(names.length===0) return;
+    tierAvgRating[t] = names.reduce((s,n)=>s+ratings[n],0)/names.length;
+    const opps = names.map(n=>{
+      const a = agg[n];
+      return a && a.strengths.length ? a.strengths.reduce((s,x)=>s+x,0)/a.strengths.length : ratings[n];
+    });
+    tierAvgOpp[t] = opps.reduce((s,x)=>s+x,0)/opps.length;
+    tierMinRating[t] = Math.min(...names.map(n=>ratings[n]));
+    tierMaxRating[t] = Math.max(...names.map(n=>ratings[n]));
+  });
+
+  const PROMO_THRESHOLD = 100, DEMO_THRESHOLD = 100, MIN_GAMES_FOR_RISK = 4;
+
+  const players = [];
+  TIER_ORDER_LIST.forEach(t=>{
+    const names = (byTier[t]||[]).slice().sort((a,b)=>ratings[b]-ratings[a]);
+    names.forEach((name, idx)=>{
+      const a = agg[name] || {wins:0,losses:0,strengths:[],overperf:[],games_w:0,games_l:0,upset_wins:0,upset_losses:0};
+      const total = a.wins + a.losses;
+      const avgStrength = a.strengths.length ? a.strengths.reduce((s,x)=>s+x,0)/a.strengths.length : ratings[name];
+      const avgOverperf = a.overperf.length ? 100*a.overperf.reduce((s,x)=>s+x,0)/a.overperf.length : 0;
+      const idx0 = TIER_IDX[t];
+      const tierAbove = idx0>0 ? TIER_ORDER_LIST[idx0-1] : null;
+      const tierBelow = idx0<3 ? TIER_ORDER_LIST[idx0+1] : null;
+      const promotionGap = (tierAbove && tierMinRating[tierAbove]!==undefined) ? Math.round((tierMinRating[tierAbove]-ratings[name])*10)/10 : null;
+      const demotionGap = (tierBelow && tierMaxRating[tierBelow]!==undefined) ? Math.round((ratings[name]-tierMaxRating[tierBelow])*10)/10 : null;
+      const confidence = total < MIN_GAMES_FOR_RISK ? 'low' : (total < 10 ? 'medium' : 'high');
+      let risk = 'stable';
+      if(confidence==='low') risk='unproven';
+      else if(promotionGap!==null && promotionGap<=PROMO_THRESHOLD) risk='promotion_watch';
+      else if(demotionGap!==null && demotionGap<=DEMO_THRESHOLD) risk='demotion_watch';
+
+      players.push({
+        name, tier: t, rating: Math.round(ratings[name]*10)/10,
+        wins: a.wins, losses: a.losses, total, winpct: total? Math.round(1000*a.wins/total)/10 : 0,
+        avg_match_strength: Math.round(avgStrength*10)/10, avg_overperf_pct: Math.round(avgOverperf*10)/10,
+        game_diff: a.games_w - a.games_l,
+        upset_wins: a.upset_wins, upset_losses: a.upset_losses,
+        upset_total: a.upset_wins+a.upset_losses,
+        upset_rate: total ? Math.round(1000*(a.upset_wins+a.upset_losses)/total)/10 : 0,
+        tier_rank: idx+1, tier_size: names.length,
+        tier_avg_rating: Math.round(tierAvgRating[t]*10)/10,
+        rating_vs_tier_avg: Math.round((ratings[name]-tierAvgRating[t])*10)/10,
+        tier_avg_opp: Math.round(tierAvgOpp[t]*10)/10,
+        opp_vs_tier_avg: Math.round((avgStrength-tierAvgOpp[t])*10)/10,
+        promotion_gap: promotionGap, demotion_gap: demotionGap,
+        confidence, risk, active: activeMap[name] !== false,
+      });
+    });
+  });
+  return players;
+}
+
+function buildH2H(enrichedMatches){
+  const h2h = {};
+  enrichedMatches.forEach(m=>{
+    m.winners.forEach(a=>m.losers.forEach(b=>{
+      const key=[a,b].sort().join('|');
+      h2h[key]=(h2h[key]||0)+1;
+    }));
+  });
+  return h2h;
+}
+
+function buildPartnerships(enrichedMatches, tierMap){
+  const partnerships = {};
+  enrichedMatches.forEach(m=>{
+    [[m.winners, true],[m.losers,false]].forEach(([team,isWin])=>{
+      if(team.length!==2) return;
+      const key = [...team].sort().join('|');
+      if(!partnerships[key]) partnerships[key] = {pair: [...team].sort(), games:0, wins:0, losses:0, overperfSum:0};
+      const p = partnerships[key];
+      p.games++;
+      if(isWin){ p.wins++; p.overperfSum += m.overperformance_winner; }
+      else { p.losses++; p.overperfSum += -m.overperformance_winner; }
+    });
+  });
+  const rows = [];
+  Object.values(partnerships).forEach(p=>{
+    if(p.games<2) return;
+    rows.push({
+      pair: p.pair, games: p.games, wins: p.wins, losses: p.losses,
+      winpct: Math.round(1000*p.wins/p.games)/10,
+      avg_overperf: Math.round(1000*p.overperfSum/p.games)/10,
+      tier_a: tierMap[p.pair[0]], tier_b: tierMap[p.pair[1]],
+    });
+  });
+  rows.sort((a,b)=> b.avg_overperf - a.avg_overperf);
+  return rows;
+}
+
+function buildBestPartner(partnerships){
+  const best = {};
+  partnerships.forEach(r=>{
+    r.pair.forEach((name,i)=>{
+      const partner = r.pair[1-i];
+      const cur = best[name];
+      if(!cur || r.avg_overperf > cur.avg_overperf){
+        best[name] = {partner, games:r.games, wins:r.wins, losses:r.losses, winpct:r.winpct, avg_overperf:r.avg_overperf};
+      }
+    });
+  });
+  return best;
+}
+
+function findWingman(players, targetRating, exclude, sameTier, minGames){
+  let best=null;
+  players.forEach(p=>{
+    if(exclude.has(p.name) || p.total < minGames) return;
+    if(sameTier && p.tier!==sameTier) return;
+    const gap = Math.abs(p.rating-targetRating);
+    if(!best || gap<best.gap) best={gap, p};
+  });
+  return best ? best.p : null;
+}
+
+function buildMatchup(players, focusA, focusB, globalExclude, tier){
+  const byName = {}; players.forEach(p=>byName[p.name]=p);
+  if(!byName[focusA] || !byName[focusB]) return null;
+  const ra=byName[focusA].rating, rb=byName[focusB].rating;
+  const exclude = new Set([focusA,focusB,...globalExclude]);
+  let wingA = tier ? findWingman(players, rb, exclude, tier, 4) : null;
+  if(!wingA) wingA = findWingman(players, rb, exclude, null, 4);
+  if(!wingA) return null;
+  const exclude2 = new Set([...exclude, wingA.name]);
+  let wingB = tier ? findWingman(players, ra, exclude2, tier, 4) : null;
+  if(!wingB) wingB = findWingman(players, ra, exclude2, null, 4);
+  if(!wingB) return null;
+  const team1=[focusA,wingA.name], team2=[focusB,wingB.name];
+  const t1r=(ra+wingA.rating)/2, t2r=(rb+wingB.rating)/2;
+  return {team1,team2, team1_rating:Math.round(t1r*10)/10, team2_rating:Math.round(t2r*10)/10,
+          team_gap: Math.round(Math.abs(t1r-t2r)*10)/10};
+}
+
+function buildBoundaryTests(activePlayers, h2h){
+  const byName = {}; activePlayers.forEach(p=>byName[p.name]=p);
+  const names = activePlayers.map(p=>p.name);
+  const candidates = [];
+  for(let i=0;i<names.length;i++) for(let j=i+1;j<names.length;j++){
+    const a=names[i], b=names[j];
+    const pa=byName[a], pb=byName[b];
+    if(Math.abs(TIER_IDX[pa.tier]-TIER_IDX[pb.tier]) !== 1) continue;
+    const gap = Math.abs(pa.rating-pb.rating);
+    if(gap>130) continue;
+    const minGames = Math.min(pa.total, pb.total);
+    if(minGames<3) continue;
+    const played = h2h[[a,b].sort().join('|')] || 0;
+    candidates.push({a,b, tier_a:pa.tier, tier_b:pb.tier, rating_a:pa.rating, rating_b:pb.rating,
+                      gap: Math.round(gap*10)/10, played_before: played, games_a: pa.total, games_b: pb.total});
+  }
+  candidates.sort((x,y)=> (x.played_before-y.played_before) || (x.gap-y.gap));
+  const top = candidates.slice(0,8);
+  const focusNames = new Set(); top.forEach(c=>{ focusNames.add(c.a); focusNames.add(c.b); });
+  top.forEach(c=>{
+    const otherFocus = new Set([...focusNames].filter(n=>n!==c.a && n!==c.b));
+    c.matchup = buildMatchup(activePlayers, c.a, c.b, otherFocus);
+  });
+  return top.filter(c=>c.matchup);
+}
+
+function buildCalibrationGames(activePlayers, h2h){
+  const lowSample = activePlayers.filter(p=>p.total<4);
+  const rows = [];
+  lowSample.forEach(p=>{
+    let best=null;
+    activePlayers.forEach(q=>{
+      if(q.name===p.name || q.total<6) return;
+      const played = h2h[[p.name,q.name].sort().join('|')] || 0;
+      const gap = Math.abs(p.rating-q.rating);
+      const score = played*200+gap;
+      if(!best || score<best.score) best={score, opponent:q.name, tier:q.tier, rating:q.rating, games:q.total, gap:Math.round(gap*10)/10, played_before:played};
+    });
+    if(!best) return;
+    rows.push({name:p.name, tier:p.tier, rating:p.rating, games:p.total, best_anchor:best});
+  });
+  rows.sort((a,b)=> a.best_anchor.gap - b.best_anchor.gap);
+  rows.forEach(r=>{ r.matchup = buildMatchup(activePlayers, r.name, r.best_anchor.opponent, new Set()); });
+  return rows.filter(r=>r.matchup);
+}
+
+function buildWithinTierGames(activePlayers, h2h){
+  const byTier = {};
+  activePlayers.forEach(p=>{ (byTier[p.tier]=byTier[p.tier]||[]).push(p); });
+  const picked = [];
+  TIER_ORDER_LIST.forEach(t=>{
+    const tp = byTier[t]||[];
+    if(tp.length<2) return;
+    const cands = [];
+    for(let i=0;i<tp.length;i++) for(let j=i+1;j<tp.length;j++){
+      const p=tp[i], q=tp[j];
+      const minGames = Math.min(p.total,q.total);
+      if(minGames<3) continue;
+      const gap = Math.abs(p.rating-q.rating);
+      const played = h2h[[p.name,q.name].sort().join('|')] || 0;
+      cands.push({tier:t, a:p.name, b:q.name, rating_a:p.rating, rating_b:q.rating,
+                  gap:Math.round(gap*10)/10, games_a:p.total, games_b:q.total, played_before:played});
+    }
+    cands.sort((x,y)=> (x.played_before-y.played_before) || (x.gap-y.gap));
+    picked.push(...cands.slice(0,2));
+  });
+  const byTierFocus = {};
+  picked.forEach(c=>{ (byTierFocus[c.tier]=byTierFocus[c.tier]||new Set()).add(c.a); byTierFocus[c.tier].add(c.b); });
+  picked.forEach(c=>{
+    const otherFocus = new Set([...byTierFocus[c.tier]].filter(n=>n!==c.a && n!==c.b));
+    c.matchup = buildMatchup(activePlayers, c.a, c.b, otherFocus, c.tier);
+    if(c.matchup){
+      const allP = c.matchup.team1.concat(c.matchup.team2);
+      const byName = {}; activePlayers.forEach(p=>byName[p.name]=p);
+      const tiersInvolved = [...new Set(allP.map(n=>byName[n].tier))].sort();
+      c.matchup.pure_tier = (tiersInvolved.length===1 && tiersInvolved[0]===c.tier);
+      c.matchup.tiers_involved = tiersInvolved;
+    }
+  });
+  return picked.filter(c=>c.matchup);
+}
+
+function bestPairNear(players, targetRating, exclude){
+  let best=null;
+  const pool = players.filter(p=>!exclude.has(p.name));
+  for(let i=0;i<pool.length;i++) for(let j=i+1;j<pool.length;j++){
+    const p=pool[i], q=pool[j];
+    const avg=(p.rating+q.rating)/2;
+    const gap=Math.abs(avg-targetRating);
+    if(!best || gap<best.gap) best={gap, pair:[p.name,q.name], avg_rating:Math.round(avg*10)/10};
+  }
+  return best ? {pair:best.pair, avg_rating:best.avg_rating, gap_to_target:Math.round(best.gap*10)/10} : null;
+}
+
+function buildDifficultySuggestions(allPlayers, activePlayers){
+  const diff = {};
+  allPlayers.forEach(p=>{
+    const R = p.rating;
+    const exclude = new Set([p.name]);
+    diff[p.name] = {
+      easy: bestPairNear(activePlayers, R-150, exclude),
+      balanced: bestPairNear(activePlayers, R, exclude),
+      hard: bestPairNear(activePlayers, R+150, exclude),
+    };
+  });
+  return diff;
+}
+
+function recomputeAll(){
+  rebuildMapsFromState();
+  ALL_MATCHES = getEffectiveMatches();
+  const ratings = computeElo(ALL_MATCHES, TIER_MAP);
+  MATCHES = enrichMatches(ALL_MATCHES, ratings);
+  PLAYERS = buildPlayers(MATCHES, ratings, TIER_MAP, ACTIVE_MAP);
+  H2H = buildH2H(MATCHES);
+  PARTNERSHIPS = buildPartnerships(MATCHES, TIER_MAP);
+  BEST_PARTNER = buildBestPartner(PARTNERSHIPS);
+  INACTIVE_PLAYERS = new Set(PLAYERS.filter(p=>!p.active).map(p=>p.name));
+  const activePlayers = PLAYERS.filter(p=>p.active);
+  BOUNDARY_TESTS = buildBoundaryTests(activePlayers, H2H);
+  CALIBRATION_GAMES = buildCalibrationGames(activePlayers, H2H);
+  WITHIN_TIER_GAMES = buildWithinTierGames(activePlayers, H2H);
+  DIFFICULTY_SUGGESTIONS = buildDifficultySuggestions(PLAYERS, activePlayers);
+  const monthSelectEl = document.getElementById('monthSelect');
+  if(monthSelectEl) populateMonthSelect(monthSelectEl);
+}
+
+
+
+const TIERS = ["All","S","A","B","C"];
+let activeTab = "wl";
+let activeTier = "All";
+let activeSort = "winpct";
+let activeSortP = "rating";
+let query = "";
+let minGames = 10;
+let selectedMonth = 'all';
+let selectedGamesPlayer = 'all';
+let dataQualityFilter = 'all'; // 'all' | 'verified' (June onwards) | 'unverified' (pre-June, single-sourced)
+
+function getAvailableMonths(){
+  const months = new Set();
+  getDisplayMatches().forEach(m=> months.add(m.date.slice(0,7)));
+  return [...months].sort();
+}
+function monthLabel(ym){
+  const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const [y,m] = ym.split('-');
+  return names[parseInt(m)-1] + ' ' + y;
+}
+function computeMonthlyStats(month){
+  const filtered = month==='all' ? MATCHES : MATCHES.filter(m=>m.date.slice(0,7)===month);
+  const agg = {};
+  function A(name){
+    if(!agg[name]) agg[name] = {wins:0, losses:0, strengths:[], overperf:[], games_w:0, games_l:0, upset_wins:0, upset_losses:0};
+    return agg[name];
+  }
+  const GAP_THRESHOLD = 15;
+  filtered.forEach(m=>{
+    const gap = Math.abs(m.team_w_rating - m.team_l_rating);
+    const isClose = gap < GAP_THRESHOLD;
+    const winnerFavored = m.team_w_rating > m.team_l_rating;
+    const isUpset = !isClose && !winnerFavored;
+    m.winners.forEach(p=>{
+      const a = A(p);
+      a.wins++; a.strengths.push(m.match_strength); a.overperf.push(m.overperformance_winner);
+      a.games_w += m.games_winner; a.games_l += m.games_loser;
+      if(isUpset) a.upset_wins++;
+    });
+    m.losers.forEach(p=>{
+      const a = A(p);
+      a.losses++; a.strengths.push(m.match_strength); a.overperf.push(-m.overperformance_winner);
+      a.games_w += m.games_loser; a.games_l += m.games_winner;
+      if(isUpset) a.upset_losses++;
+    });
+  });
+  const stats = {};
+  Object.keys(agg).forEach(name=>{
+    const a = agg[name];
+    const total = a.wins+a.losses;
+    const avgStrength = a.strengths.length ? a.strengths.reduce((s,x)=>s+x,0)/a.strengths.length : 0;
+    const avgOverperf = a.overperf.length ? 100*a.overperf.reduce((s,x)=>s+x,0)/a.overperf.length : 0;
+    stats[name] = {
+      wins:a.wins, losses:a.losses, total, winpct: total?Math.round(1000*a.wins/total)/10:0,
+      avg_match_strength: Math.round(avgStrength*10)/10, avg_overperf_pct: Math.round(avgOverperf*10)/10,
+      game_diff: a.games_w-a.games_l,
+      upset_wins:a.upset_wins, upset_losses:a.upset_losses, upset_total:a.upset_wins+a.upset_losses,
+      upset_rate: total?Math.round(1000*(a.upset_wins+a.upset_losses)/total)/10:0,
+    };
+  });
+  return stats;
+}
+const ZERO_MONTH_STATS = {wins:0,losses:0,total:0,winpct:0,avg_match_strength:0,avg_overperf_pct:0,game_diff:0,upset_wins:0,upset_losses:0,upset_total:0,upset_rate:0};
+
+function populateMonthSelect(selectEl){
+  if(!selectEl) return;
+  const months = getAvailableMonths();
+  selectEl.innerHTML = `<option value="all">All time</option>` + months.map(m=>`<option value="${m}" ${m===selectedMonth?'selected':''}>${monthLabel(m)}</option>`).join('');
+  selectEl.value = selectedMonth;
+}
+
+function rerenderCurrentTab(){
+  if(activeTab==='wl' || activeTab==='power') render();
+  else if(activeTab==='games') renderGamesTab();
+}
+
+
+const tierbar = document.getElementById('tierbar');
+TIERS.forEach(t=>{
+  const b = document.createElement('button');
+  b.className = 'tierbtn' + (t==='All' ? ' active' : '');
+  b.textContent = t === 'All' ? 'All players' : 'Tier ' + t;
+  b.dataset.tier = t;
+  b.onclick = ()=>{ activeTier = t; document.querySelectorAll('.tierbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(); };
+  tierbar.appendChild(b);
+});
+
+document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
+  b.onclick = ()=>{
+    activeTab = b.dataset.tab;
+    document.querySelectorAll('#tabrow .tab-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+
+    const isCallouts = activeTab === 'callouts';
+    const isPlayers = activeTab === 'players';
+    const isFindGame = activeTab === 'findgame';
+    const isManage = activeTab === 'manage';
+    const isGames = activeTab === 'games';
+    const isListView = !isCallouts && !isPlayers && !isFindGame && !isManage && !isGames;
+
+    document.getElementById('tierbar').style.display = isListView ? 'flex' : 'none';
+    document.getElementById('searchWrap').style.display = (isListView || isPlayers) ? 'block' : 'none';
+    document.getElementById('minGamesRow').style.display = isListView ? 'flex' : 'none';
+    document.getElementById('monthFilterRow').style.display = isListView ? 'flex' : 'none';
+    document.getElementById('dataQualityRow').style.display = isListView ? 'flex' : 'none';
+    document.getElementById('sortbar').style.display = (activeTab==='wl') ? 'flex' : 'none';
+    document.getElementById('sortbarPower').style.display = (activeTab==='power') ? 'flex' : 'none';
+    document.getElementById('list').style.display = isListView ? 'block' : 'none';
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('calloutsView').style.display = isCallouts ? 'block' : 'none';
+    document.getElementById('playersView').style.display = isPlayers ? 'block' : 'none';
+    document.getElementById('findGameView').style.display = isFindGame ? 'block' : 'none';
+    document.getElementById('manageView').style.display = isManage ? 'block' : 'none';
+    document.getElementById('gamesView').style.display = isGames ? 'block' : 'none';
+
+    document.getElementById('headerSub').textContent = activeTab==='wl'
+      ? 'Parsed from the group chats, June–August 2026 · tap a player for their match log'
+      : (activeTab==='power'
+        ? 'A tier-anchored power rating · scoreline counts, not just who won · tap a player for details'
+        : (activeTab==='callouts'
+          ? 'Games worth setting up next, based on what the data can\'t yet confirm'
+          : (activeTab==='findgame'
+            ? 'Pick a player, a scope, and a difficulty — generate real opponent options on demand'
+            : (activeTab==='manage'
+              ? 'Add results going forward and tag who\'s active — everything above recalculates instantly'
+              : (activeTab==='games'
+                ? 'Every game, newest first — pending ones need approval before they count'
+                : 'Every player, A–Z · tap a name for their full profile')))));
+    document.getElementById('explainer').innerHTML = activeTab==='wl'
+      ? 'Built from readable trophy-emoji results across the main group chat and Results Only, with names and tiers confirmed against the group. Excludes single-set/"money game" results, matches against non-members, and a couple of results with no opponent named or a disputed winner.'
+      : (activeTab==='power'
+        ? 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much.'
+        : (activeTab==='callouts'
+          ? 'Suggested matchups are full 2v2s — a wingman is added to each side, chosen to keep team strength balanced, so these are games you could actually go and organize. This spans every tier, not just the ones with the least data — S/A near-ties get surfaced the same way as small-sample C-tier players. Every player also has their own Easy / Balanced / Hard opponent suggestions on their profile page.'
+          : (activeTab==='findgame'
+            ? '"Within my tier" keeps every suggested player inside your own tier — easy always means the weakest pair actually in your tier, hard the strongest, never a reach into a different tier. "Any tier" opens it up and targets a rating roughly 150 points below/above your own. Each suggested opponent pair also comes with a partner recommendation — the player who\'d make it an even match, with a proven-chemistry option flagged where one exists. Five options shown each time, ranked by fit — this is computed live, not a fixed list, so try different scopes and difficulties freely. Players who\'ve gone inactive are excluded from every suggestion here, though their history stays visible elsewhere.'
+            : (activeTab==='manage'
+              ? 'This data is shared — anyone who opens this artifact sees the same games and tags. Ratings, tiers, and every suggestion above recompute from scratch the moment you add a game or change a tag.'
+              : (activeTab==='games'
+                ? 'Editing or deleting a game recalculates every rating instantly. Your name is required for any change here so the group can see who touched what.'
+                : '')))));
+
+    if(isCallouts) renderCallouts();
+    else if(isPlayers) renderPlayersTab();
+    else if(isFindGame) renderFindGame();
+    else if(isManage) renderManage();
+    else if(isGames) renderGamesTab();
+    else render();
+  };
+});
+
+document.querySelectorAll('#sortbar .sortbtn').forEach(b=>{
+  b.onclick = ()=>{ activeSort = b.dataset.sort; document.querySelectorAll('#sortbar .sortbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(); };
+});
+document.querySelectorAll('#sortbarPower .sortbtn').forEach(b=>{
+  b.onclick = ()=>{ activeSortP = b.dataset.sortp; document.querySelectorAll('#sortbarPower .sortbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(); };
+});
+
+document.getElementById('search').addEventListener('input', e=>{
+  query = e.target.value.trim().toLowerCase();
+  if(activeTab === 'players') renderPlayersTab(); else render();
+});
+
+const minGamesInput = document.getElementById('minGamesInput');
+minGamesInput.addEventListener('input', e=>{
+  minGames = Math.max(0, parseInt(e.target.value) || 0);
+  document.querySelectorAll('.preset-btn').forEach(b=> b.classList.toggle('active', parseInt(b.dataset.n)===minGames));
+  render();
+});
+document.querySelectorAll('.preset-btn').forEach(b=>{
+  b.onclick = ()=>{
+    minGames = parseInt(b.dataset.n);
+    minGamesInput.value = minGames;
+    document.querySelectorAll('.preset-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    render();
+  };
+});
+
+const monthSelect = document.getElementById('monthSelect');
+monthSelect.addEventListener('change', e=>{
+  selectedMonth = e.target.value;
+  rerenderCurrentTab();
+});
+
+const dataQualitySelect = document.getElementById('dataQualitySelect');
+dataQualitySelect.value = dataQualityFilter;
+dataQualitySelect.addEventListener('change', e=>{
+  dataQualityFilter = e.target.value;
+  recomputeAll();
+  rerenderCurrentTab();
+});
+
+
+function sortRows(rows){
+  const arr = [...rows];
+  if(activeTab==='wl'){
+    if(activeSort==='winpct') arr.sort((a,b)=> b.winpct - a.winpct || b.total - a.total);
+    else if(activeSort==='total') arr.sort((a,b)=> b.total - a.total);
+    else if(activeSort==='wins') arr.sort((a,b)=> b.wins - a.wins);
+    else if(activeSort==='name') arr.sort((a,b)=> a.name.localeCompare(b.name));
+  } else {
+    if(activeSortP==='rating') arr.sort((a,b)=> b.rating - a.rating);
+    else if(activeSortP==='avg_match_strength') arr.sort((a,b)=> b.avg_match_strength - a.avg_match_strength);
+    else if(activeSortP==='avg_overperf_pct') arr.sort((a,b)=> b.avg_overperf_pct - a.avg_overperf_pct);
+    else if(activeSortP==='upset_total') arr.sort((a,b)=> b.upset_rate - a.upset_rate || b.upset_total - a.upset_total);
+    else if(activeSortP==='name') arr.sort((a,b)=> a.name.localeCompare(b.name));
+  }
+  return arr;
+}
+
+function render(){
+  let rows = PLAYERS.filter(p => activeTier==='All' || p.tier===activeTier);
+  if(selectedMonth !== 'all'){
+    const monthly = computeMonthlyStats(selectedMonth);
+    rows = rows.map(p => ({...p, ...(monthly[p.name] || ZERO_MONTH_STATS)}));
+  }
+  rows = rows.filter(p => p.total >= minGames);
+  if(query) rows = rows.filter(p => p.name.toLowerCase().includes(query));
+  rows = sortRows(rows);
+
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
+  list.innerHTML = '';
+  empty.style.display = rows.length ? 'none' : 'block';
+
+  if(selectedMonth !== 'all'){
+    const note = document.createElement('div');
+    note.className = 'section-sub';
+    note.style.padding = '8px 2px';
+    note.innerHTML = activeTab==='power'
+      ? `Showing <b style="color:var(--text);">${monthLabel(selectedMonth)}</b> only — record, avg opp., clutch and upsets are for this month; rating stays the season-long number.`
+      : `Showing <b style="color:var(--text);">${monthLabel(selectedMonth)}</b> only.`;
+    list.appendChild(note);
+  }
+
+  rows.forEach((p, i)=>{
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.onclick = ()=> openSheet(p.name);
+    if(activeTab==='wl'){
+      row.innerHTML = `
+        <div class="rank">${i+1}</div>
+        <div class="badge ${p.tier}">${p.tier}</div>
+        <div class="namecol">
+          <div class="nm">${p.name}</div>
+          <div class="meta">${p.total} game${p.total===1?'':'s'} played</div>
+        </div>
+        <div class="wl">
+          <div class="pct">${p.winpct}%</div>
+          <div class="rec"><span class="w">${p.wins}W</span> · <span class="l">${p.losses}L</span></div>
+        </div>
+      `;
+    } else {
+      const perfClass = p.avg_overperf_pct > 0.5 ? 'perf-pos' : (p.avg_overperf_pct < -0.5 ? 'perf-neg' : '');
+      const perfSign = p.avg_overperf_pct > 0 ? '+' : '';
+      row.innerHTML = `
+        <div class="rank">${i+1}</div>
+        <div class="badge ${p.tier}">${p.tier}</div>
+        <div class="namecol">
+          <div class="nm">${p.name}</div>
+          <div class="meta">avg opp. ${Math.round(p.avg_match_strength)} · ${p.total} games</div>
+          <div class="upset-mini"><span class="uw">${p.upset_wins} upset win${p.upset_wins===1?'':'s'}</span> · <span class="ul">${p.upset_losses} upset loss${p.upset_losses===1?'':'es'}</span> (${p.upset_rate}% of games)</div>
+        </div>
+        <div class="wl">
+          <div class="rating-big">${Math.round(p.rating)}</div>
+          <div class="rating-sub ${perfClass}">${perfSign}${p.avg_overperf_pct}% clutch</div>
+        </div>
+      `;
+    }
+    list.appendChild(row);
+  });
+}
+
+function ratingOf(n){ const x = PLAYERS.find(pl=>pl.name===n); return x ? Math.round(x.rating) : null; }
+
+const RISK_LABELS = {
+  promotion_watch: {text: "Promotion watch", cls: "risk-promotion"},
+  demotion_watch: {text: "Demotion watch", cls: "risk-demotion"},
+  unproven: {text: "Unproven — small sample", cls: "risk-unproven"},
+  stable: {text: "Stable", cls: "risk-stable"},
+};
+
+function buildProfileText(p){
+  const parts = [];
+
+  // confidence / sample size
+  if(p.confidence === 'low'){
+    parts.push(`Only ${p.total} game${p.total===1?'':'s'} played so far — this rating leans heavily on the Tier ${p.tier} baseline rather than on much personal evidence, so it's the least certain kind of number in this dataset.`);
+  } else if(p.confidence === 'medium'){
+    parts.push(`${p.total} games played — enough to start moving away from the Tier ${p.tier} baseline, but still a fairly thin sample.`);
+  } else {
+    parts.push(`${p.total} games played — a solid track record, so this rating is largely earned rather than assumed from the tier.`);
+  }
+
+  // position within tier
+  const rankText = `Ranked #${p.tier_rank} of ${p.tier_size} in Tier ${p.tier}`;
+  if(Math.abs(p.rating_vs_tier_avg) < 15){
+    parts.push(`${rankText}, right around the tier average (${Math.round(p.tier_avg_rating)}).`);
+  } else if(p.rating_vs_tier_avg > 0){
+    parts.push(`${rankText}, ${Math.round(p.rating_vs_tier_avg)} points above the tier average (${Math.round(p.tier_avg_rating)}).`);
+  } else {
+    parts.push(`${rankText}, ${Math.round(Math.abs(p.rating_vs_tier_avg))} points below the tier average (${Math.round(p.tier_avg_rating)}).`);
+  }
+
+  // schedule strength
+  if(Math.abs(p.opp_vs_tier_avg) < 20){
+    parts.push(`Opposition faced has been about average for the tier.`);
+  } else if(p.opp_vs_tier_avg > 0){
+    parts.push(`Opposition faced has run tougher than the tier average by ${Math.round(p.opp_vs_tier_avg)} points — a harder schedule than most tier-mates.`);
+  } else {
+    parts.push(`Opposition faced has run softer than the tier average by ${Math.round(Math.abs(p.opp_vs_tier_avg))} points — an easier schedule than most tier-mates.`);
+  }
+
+  // clutch
+  if(p.avg_overperf_pct > 3){
+    parts.push(`Scorelines have run ahead of what the ratings predicted (+${p.avg_overperf_pct}% clutch) — results have generally been better than expected.`);
+  } else if(p.avg_overperf_pct < -3){
+    parts.push(`Scorelines have run behind what the ratings predicted (${p.avg_overperf_pct}% clutch) — results have generally been a bit worse than expected.`);
+  } else {
+    parts.push(`Scorelines have tracked expectation closely (${p.avg_overperf_pct>=0?'+':''}${p.avg_overperf_pct}% clutch) — nothing unusual going on there.`);
+  }
+
+  // upsets
+  if(p.upset_wins > 0 || p.upset_losses > 0){
+    parts.push(`${p.upset_wins} upset win${p.upset_wins===1?'':'s'} and ${p.upset_losses} upset loss${p.upset_losses===1?'':'es'} on record.`);
+  }
+
+  // risk verdict
+  if(p.risk === 'promotion_watch'){
+    parts.push(`<b>Sits within ${Math.round(p.promotion_gap)} points of the tier above's floor</b> — a decent run would make a real case for promotion.`);
+  } else if(p.risk === 'demotion_watch'){
+    parts.push(`<b>Sits within ${Math.round(p.demotion_gap)} points of the tier below's ceiling</b> — worth keeping an eye on, though not a clear-cut case yet.`);
+  } else if(p.risk === 'unproven'){
+    parts.push(`Too little data to say anything definitive about tier placement either way.`);
+  } else {
+    parts.push(`Comfortably clear of both tier boundaries — no case for moving either way right now.`);
+  }
+
+  // best partnership
+  const bp = BEST_PARTNER[p.name];
+  if(bp){
+    const smallSample = bp.games < 3 ? ' (small sample)' : '';
+    parts.push(`Best chemistry so far has been with <b>${bp.partner}</b> — ${bp.wins}-${bp.losses} together (${bp.winpct}%), ${bp.avg_overperf>=0?'+':''}${bp.avg_overperf}% ahead of what the matchups alone predicted${smallSample}.`);
+  }
+
+  return parts.join(' ');
+}
+
+function renderCallouts(){
+  const box = document.getElementById('calloutsView');
+  let html = '';
+
+  html += `<div class="section-heading">🤝 Best chemistry partnerships</div>`;
+  html += `<div class="section-sub">Ranked by how much a pairing overperforms what the matchup alone would predict, not just their win rate — this is what "they barely lose together" actually looks like in the numbers. Minimum 2 games together; small samples are flagged.</div>`;
+  const topPartnerships = PARTNERSHIPS.filter(p=>p.games>=2).sort((a,b)=> b.avg_overperf - a.avg_overperf).slice(0,8);
+  topPartnerships.forEach(p=>{
+    const perfClass = p.avg_overperf > 3 ? 'perf-pos' : (p.avg_overperf < -3 ? 'perf-neg' : '');
+    const smallSample = p.games < 3 ? ` <span style="color:var(--text-dim); font-size:10px;">(small sample)</span>` : '';
+    html += `<div class="callout-card">
+      <div class="cc-title">${p.pair[0]} (Tier ${p.tier_a}) &amp; ${p.pair[1]} (Tier ${p.tier_b})${smallSample}</div>
+      <div class="cc-detail">${p.games} games together · ${p.wins}-${p.losses} (${p.winpct}%) · <span class="${perfClass}">${p.avg_overperf>=0?'+':''}${p.avg_overperf}% chemistry</span></div>
+    </div>`;
+  });
+
+  html += `<div class="section-heading">🏆 Within-tier rank clarifiers</div>`;
+  html += `<div class="section-sub">Near-ties inside the same tier, from S down to C — these settle who's actually better among players already grouped together, not just who's borderline.</div>`;
+  const tierOrderDisplay = ["S","A","B","C"];
+  tierOrderDisplay.forEach(t=>{
+    const games = WITHIN_TIER_GAMES.filter(c=>c.tier===t);
+    if(games.length === 0) return;
+    html += `<div style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:11.5px; color:var(--gold-dim); font-weight:700; margin:8px 0 4px;">TIER ${t}</div>`;
+    games.forEach(c=>{
+      const m = c.matchup;
+      const wingNote = m.pure_tier
+        ? ''
+        : `<br/><span style="color:var(--text-dim); font-size:10.5px;">wingmen pulled partly from Tier ${m.tiers_involved.filter(x=>x!==t).join(', ')} — not enough proven Tier ${t} players to fill both sides</span>`;
+      html += `<div class="callout-card">
+        <div class="cc-title">${c.a} (${Math.round(c.rating_a)}, ${c.games_a}g) vs ${c.b} (${Math.round(c.rating_b)}, ${c.games_b}g)</div>
+        <div class="cc-detail">Just ${c.gap} rating points apart · played each other ${c.played_before}x so far</div>
+        <div class="matchup-vs"><b>${m.team1[0]} &amp; ${m.team1[1]}</b> (${Math.round(m.team1_rating)}) &nbsp;vs&nbsp; <b>${m.team2[0]} &amp; ${m.team2[1]}</b> (${Math.round(m.team2_rating)})<br/><span style="color:var(--text-dim); font-size:11px;">teams balanced within ${m.team_gap} pts</span>${wingNote}</div>
+      </div>`;
+    });
+  });
+
+  html += `<div class="section-heading">🎯 Boundary tests</div>`;
+  html += `<div class="section-sub">Close ratings straddling a tier line — these games carry the most weight for deciding if the line is in the right place. A wingman is added to each side to keep the two teams balanced.</div>`;
+  if(BOUNDARY_TESTS.length === 0){
+    html += `<div class="section-sub">No close cross-tier pairings with enough of a track record yet.</div>`;
+  } else {
+    BOUNDARY_TESTS.forEach(c=>{
+      const m = c.matchup;
+      html += `<div class="callout-card">
+        <div class="cc-title">${c.a} (Tier ${c.tier_a}, ${Math.round(c.rating_a)}) vs ${c.b} (Tier ${c.tier_b}, ${Math.round(c.rating_b)})</div>
+        <div class="cc-detail">Only ${c.gap} rating points apart despite sitting in different tiers · played each other ${c.played_before}x so far</div>
+        <div class="matchup-vs"><b>${m.team1[0]} &amp; ${m.team1[1]}</b> (${Math.round(m.team1_rating)}) &nbsp;vs&nbsp; <b>${m.team2[0]} &amp; ${m.team2[1]}</b> (${Math.round(m.team2_rating)})<br/><span style="color:var(--text-dim); font-size:11px;">teams balanced within ${m.team_gap} pts</span></div>
+      </div>`;
+    });
+  }
+
+  html += `<div class="section-heading">📋 Players worth calling out</div>`;
+  html += `<div class="section-sub">Low-sample players, matched against the closest-rated opponent with a real track record who they haven't already played much — the fastest way to firm up an uncertain number.</div>`;
+  CALIBRATION_GAMES.forEach(c=>{
+    const b = c.best_anchor;
+    const m = c.matchup;
+    html += `<div class="callout-card">
+      <div class="cc-title">${c.name} (Tier ${c.tier}, ${Math.round(c.rating)}, ${c.games}g) → ${b.opponent} (Tier ${b.tier}, ${Math.round(b.rating)}, ${b.games}g)</div>
+      <div class="cc-detail">${c.games} game${c.games===1?'':'s'} on record for ${c.name} · ${b.gap} point gap · played before: ${b.played_before}x</div>
+      <div class="matchup-vs"><b>${m.team1[0]} &amp; ${m.team1[1]}</b> (${Math.round(m.team1_rating)}) &nbsp;vs&nbsp; <b>${m.team2[0]} &amp; ${m.team2[1]}</b> (${Math.round(m.team2_rating)})<br/><span style="color:var(--text-dim); font-size:11px;">teams balanced within ${m.team_gap} pts</span></div>
+    </div>`;
+  });
+
+  box.innerHTML = html;
+}
+
+function renderPlayersTab(){
+  const box = document.getElementById('playersView');
+  let rows = [...PLAYERS].sort((a,b)=> a.name.localeCompare(b.name));
+  if(query) rows = rows.filter(p => p.name.toLowerCase().includes(query));
+
+  if(rows.length === 0){
+    box.innerHTML = `<div class="section-sub">No players match that search.</div>`;
+    return;
+  }
+
+  let html = '';
+  let lastLetter = '';
+  rows.forEach(p=>{
+    const letter = p.name[0].toUpperCase();
+    const showLetter = letter !== lastLetter;
+    lastLetter = letter;
+    html += `<div class="alpha-row" onclick="openSheet('${p.name.replace(/'/g,"\\'")}')">
+      <div class="alpha-letter">${showLetter ? letter : ''}</div>
+      <div class="alpha-name">${p.name}</div>
+      <div class="alpha-tier">Tier ${p.tier} · ${Math.round(p.rating)}</div>
+    </div>`;
+  });
+
+  box.innerHTML = html;
+}
+
+// ===== Find a Game =====
+function h2hCount(a,b){ return H2H[[a,b].sort().join('|')] || 0; }
+
+let fgPlayer = null;
+let fgScope = 'tier';
+let fgDiff = 'easy';
+
+function initFindGame(){
+  const sel = document.getElementById('fgPlayerSelect');
+  if(sel.options.length === 0){
+    const sorted = [...PLAYERS].sort((a,b)=>a.name.localeCompare(b.name));
+    sorted.forEach(p=>{
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = `${p.name} (Tier ${p.tier})`;
+      sel.appendChild(opt);
+    });
+    fgPlayer = sorted[0].name;
+    sel.value = fgPlayer;
+    sel.addEventListener('change', e=>{ fgPlayer = e.target.value; renderFindGameResults(); });
+  }
+  document.querySelectorAll('#fgScopeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{ fgScope = b.dataset.scope; document.querySelectorAll('#fgScopeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderFindGameResults(); };
+  });
+  document.querySelectorAll('#fgDiffToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{ fgDiff = b.dataset.diff; document.querySelectorAll('#fgDiffToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderFindGameResults(); };
+  });
+}
+
+function generateCandidatePairs(player, scope, diff, topN){
+  const pool = PLAYERS.filter(p => p.name !== player.name && !INACTIVE_PLAYERS.has(p.name) && (scope==='any' || p.tier === player.tier));
+  let target;
+  if(scope === 'tier'){
+    const tierRatings = PLAYERS.filter(p=>p.tier===player.tier && !INACTIVE_PLAYERS.has(p.name)).map(p=>p.rating);
+    const tierMin = Math.min(...tierRatings), tierMax = Math.max(...tierRatings);
+    target = diff==='easy' ? tierMin : (diff==='hard' ? tierMax : player.rating);
+  } else {
+    target = diff==='easy' ? player.rating - 150 : (diff==='hard' ? player.rating + 150 : player.rating);
+  }
+
+  const results = [];
+  for(let i=0; i<pool.length; i++){
+    for(let j=i+1; j<pool.length; j++){
+      const p = pool[i], q = pool[j];
+      const avg = (p.rating + q.rating) / 2;
+      const gap = Math.abs(avg - target);
+      const h2h_p = h2hCount(player.name, p.name);
+      const h2h_q = h2hCount(player.name, q.name);
+      results.push({ pair: [p.name, q.name], tiers: [p.tier, q.tier], avg: Math.round(avg*10)/10,
+                      gap: Math.round(gap*10)/10, played_p: h2h_p, played_q: h2h_q });
+    }
+  }
+  results.sort((a,b)=> a.gap - b.gap || (a.played_p+a.played_q) - (b.played_p+b.played_q));
+  return results.slice(0, topN);
+}
+
+function generateCandidatePartners(player, scope, topN){
+  const pool = PLAYERS.filter(p => p.name !== player.name && !INACTIVE_PLAYERS.has(p.name) && (scope==='any' || p.tier === player.tier));
+  const poolNames = new Set(pool.map(p=>p.name));
+
+  // known chemistry first
+  const history = PARTNERSHIPS
+    .filter(pt => pt.pair.includes(player.name) && poolNames.has(pt.pair[0]===player.name ? pt.pair[1] : pt.pair[0]))
+    .map(pt => {
+      const partnerName = pt.pair[0]===player.name ? pt.pair[1] : pt.pair[0];
+      return { name: partnerName, source: 'history', games: pt.games, wins: pt.wins, losses: pt.losses,
+               winpct: pt.winpct, chemistry: pt.avg_overperf };
+    })
+    .sort((a,b)=> b.chemistry - a.chemistry);
+
+  const usedNames = new Set(history.map(h=>h.name));
+  const fresh = pool
+    .filter(p => !usedNames.has(p.name))
+    .map(p => ({ name: p.name, source: 'fresh', tier: p.tier, rating: p.rating,
+                 gap: Math.round(Math.abs(p.rating - player.rating)*10)/10,
+                 played: h2hCount(player.name, p.name) }))
+    .sort((a,b)=> a.gap - b.gap);
+
+  return { history: history.slice(0, 2), fresh: fresh.slice(0, topN) };
+}
+
+function suggestPartnerForTarget(player, targetTeamAvg, scope){
+  const pool = PLAYERS.filter(p => p.name !== player.name && !INACTIVE_PLAYERS.has(p.name) && (scope==='any' || p.tier === player.tier));
+  const idealPartnerRating = 2*targetTeamAvg - player.rating;
+
+  let closest = null;
+  pool.forEach(p=>{
+    const gap = Math.abs(p.rating - idealPartnerRating);
+    if(closest===null || gap < closest.gap) closest = {name:p.name, rating:p.rating, tier:p.tier, gap: Math.round(gap*10)/10};
+  });
+
+  const poolNames = new Set(pool.map(p=>p.name));
+  const chemMatches = PARTNERSHIPS
+    .filter(pt => pt.pair.includes(player.name) && pt.games>=2 && pt.avg_overperf > 3)
+    .map(pt => pt.pair[0]===player.name ? pt.pair[1] : pt.pair[0])
+    .filter(n => poolNames.has(n));
+
+  return { closest, chemistryPartner: chemMatches.length ? chemMatches[0] : null };
+}
+
+function renderFindGameResults(){
+  const player = PLAYERS.find(p=>p.name===fgPlayer);
+  if(!player) return;
+  const candidates = generateCandidatePairs(player, fgScope, fgDiff, 5);
+  const partners = generateCandidatePartners(player, fgScope, 3);
+  const box = document.getElementById('fgResults');
+
+  const diffLabel = {easy:'Easy', balanced:'Balanced', hard:'Hard'}[fgDiff];
+  const scopeLabel = fgScope==='tier' ? `within Tier ${player.tier}` : 'across any tier';
+
+  let html = `<div class="section-heading" style="margin-top:2px;">🤝 Suggested partners</div>`;
+  html += `<div class="section-sub">Proven chemistry first, then the closest-rated fresh option, ${scopeLabel}.</div>`;
+  if(partners.history.length === 0 && partners.fresh.length === 0){
+    html += `<div class="section-sub">Not enough other players in this scope — try "Any tier".</div>`;
+  } else {
+    partners.history.forEach(h=>{
+      const smallSample = h.games < 3 ? ' (small sample)' : '';
+      html += `<div class="fg-result-card">
+        <div class="fg-result-rank">Proven chemistry</div>
+        <div class="fg-result-teams"><b>${h.name}</b></div>
+        <div class="fg-result-detail">${h.games} games together · ${h.wins}-${h.losses} (${h.winpct}%) · ${h.chemistry>=0?'+':''}${h.chemistry}% chemistry${smallSample}</div>
+      </div>`;
+    });
+    partners.fresh.forEach(f=>{
+      html += `<div class="fg-result-card">
+        <div class="fg-result-rank">Fresh option</div>
+        <div class="fg-result-teams"><b>${f.name}</b></div>
+        <div class="fg-result-detail">Tier ${f.tier} · rating ${Math.round(f.rating)} (${f.gap} pt gap) · played together ${f.played}x</div>
+      </div>`;
+    });
+  }
+
+  html += `<div class="section-heading">🎯 Suggested opponents &amp; who to bring</div>`;
+  html += `<div class="section-sub">Best ${diffLabel.toLowerCase()} opponent pairs for <b style="color:var(--text);">${player.name}</b> (${Math.round(player.rating)}), ${scopeLabel} — each paired with the partner that would make it an even match.</div>`;
+
+  if(candidates.length === 0){
+    html += `<div class="section-sub">Not enough other players in this scope to suggest anything — try "Any tier".</div>`;
+  } else {
+    candidates.forEach((c, i)=>{
+      const tierNote = c.tiers[0]===c.tiers[1] ? `Tier ${c.tiers[0]}` : `Tier ${c.tiers[0]} &amp; Tier ${c.tiers[1]}`;
+      const ps = suggestPartnerForTarget(player, c.avg, fgScope);
+      let partnerLine = '';
+      if(ps.chemistryPartner && ps.chemistryPartner !== ps.closest?.name){
+        partnerLine = `<div style="margin-top:5px; font-size:11px; color:var(--gold-bright);">Bring: ${ps.chemistryPartner} (proven chemistry) — or ${ps.closest ? ps.closest.name+' ('+Math.round(ps.closest.rating)+') for the closest even match' : 'no rating-matched option in this scope'}</div>`;
+      } else if(ps.closest){
+        partnerLine = `<div style="margin-top:5px; font-size:11px; color:var(--text-dim);">Bring: <b style="color:var(--gold-bright);">${ps.closest.name}</b> (Tier ${ps.closest.tier}, ${Math.round(ps.closest.rating)}) to even it up</div>`;
+      }
+      html += `<div class="fg-result-card">
+        <div class="fg-result-rank">Option ${i+1}</div>
+        <div class="fg-result-teams"><b>${c.pair[0]} &amp; ${c.pair[1]}</b></div>
+        <div class="fg-result-detail">${tierNote} · avg rating ${c.avg} &nbsp;·&nbsp; you've played ${c.pair[0]} ${c.played_p}x, ${c.pair[1]} ${c.played_q}x</div>
+        ${partnerLine}
+      </div>`;
+    });
+  }
+  box.innerHTML = html;
+}
+
+function renderFindGame(){
+  initFindGame();
+  renderFindGameResults();
+}
+
+function buildCallOutSection(name){
+  const relevant = [];
+  WITHIN_TIER_GAMES.forEach(c=>{ if(c.a===name || c.b===name) relevant.push(c.matchup); });
+  BOUNDARY_TESTS.forEach(c=>{ if(c.a===name || c.b===name) relevant.push(c.matchup); });
+  CALIBRATION_GAMES.forEach(c=>{ if(c.name===name) relevant.push(c.matchup); });
+  if(relevant.length === 0) return '';
+  let html = `<div class="section-heading" style="margin-top:14px;">📋 Call-out for ${name}</div>`;
+  relevant.forEach(m=>{
+    html += `<div class="matchup-vs"><b>${m.team1[0]} &amp; ${m.team1[1]}</b> (${Math.round(m.team1_rating)}) &nbsp;vs&nbsp; <b>${m.team2[0]} &amp; ${m.team2[1]}</b> (${Math.round(m.team2_rating)})<br/><span style="color:var(--text-dim); font-size:11px;">this would help settle where ${name}'s rating actually sits</span></div>`;
+  });
+  return html;
+}
+
+function buildDifficultySection(name){
+  const d = DIFFICULTY_SUGGESTIONS[name];
+  if(!d) return '';
+  const easy = d.easy, bal = d.balanced, hard = d.hard;
+  const allSame = (easy.pair.join()===bal.pair.join()) && (bal.pair.join()===hard.pair.join());
+
+  let html = `<div class="section-heading" style="margin-top:14px;">🎮 Suggest a game for ${name}</div>`;
+  if(allSame){
+    html += `<div class="section-sub">${name}'s rating is far enough out on its own that there's no meaningful easy/hard range — this is simply the toughest game available.</div>
+      <div class="matchup-vs"><b>${easy.pair[0]} &amp; ${easy.pair[1]}</b> (avg ${Math.round(easy.avg_rating)})</div>`;
+  } else {
+    html += `<div class="section-sub">Opponent pairs picked so the two-player average lands near an easy / even / hard target relative to ${name}'s own rating.</div>
+      <div class="difficulty-row">
+        <div class="difficulty-pill diff-easy">EASY</div>
+        <div class="difficulty-pill diff-balanced">BALANCED</div>
+        <div class="difficulty-pill diff-hard">HARD</div>
+      </div>
+      <div class="matchup-vs"><b>Easy:</b> ${easy.pair[0]} &amp; ${easy.pair[1]} (avg ${Math.round(easy.avg_rating)})</div>
+      <div class="matchup-vs"><b>Balanced:</b> ${bal.pair[0]} &amp; ${bal.pair[1]} (avg ${Math.round(bal.avg_rating)})</div>
+      <div class="matchup-vs"><b>Hard:</b> ${hard.pair[0]} &amp; ${hard.pair[1]} (avg ${Math.round(hard.avg_rating)})</div>`;
+  }
+  return html;
+}
+
+function openSheet(name){
+  const p = PLAYERS.find(x=>x.name===name);
+  document.getElementById('sheetName').textContent = name;
+  const riskInfo = RISK_LABELS[p.risk] || RISK_LABELS.stable;
+  document.getElementById('sheetSub').innerHTML = `Tier ${p.tier} · Money Padel &nbsp; <span class="risk-badge ${riskInfo.cls}">${riskInfo.text}</span>`;
+  document.getElementById('sheetStats').innerHTML = `
+    <div><b>${Math.round(p.rating)}</b>Power rating</div>
+    <div><b>${p.winpct}%</b>Win rate</div>
+    <div><b>${p.wins}-${p.losses}</b>Record</div>
+    <div><b>${p.upset_wins}-${p.upset_losses}</b>Upset W-L</div>
+  `;
+  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildCallOutSection(name) + buildDifficultySection(name);
+  const ms = MATCHES.filter(m => m.winners.includes(name) || m.losers.includes(name));
+  ms.sort((a,b)=> a.date < b.date ? 1 : -1);
+  const box = document.getElementById('sheetMatches');
+  box.innerHTML = ms.map(m=>{
+    const won = m.winners.includes(name);
+    const myTeam = won ? m.winners : m.losers;
+    const oppTeam = won ? m.losers : m.winners;
+    const partner = m.type==='doubles' ? myTeam.filter(n=>n!==name)[0] : null;
+
+    const myTeamRating = won ? m.team_w_rating : m.team_l_rating;
+    const oppTeamRating = won ? m.team_l_rating : m.team_w_rating;
+    const favored = myTeamRating > oppTeamRating;
+    const gap = Math.round(Math.abs(myTeamRating - oppTeamRating));
+
+    const myExpectedShare = won ? m.expected_winshare : (1 - m.expected_winshare);
+    const myActualShare = won ? m.game_share_winner : (1 - m.game_share_winner);
+    const myGames = won ? m.games_winner : m.games_loser;
+    const oppGames = won ? m.games_loser : m.games_winner;
+
+    const perf = (myActualShare - myExpectedShare) * 100;
+    const perfRounded = Math.round(perf * 10) / 10;
+    const perfLabel = perfRounded > 3 ? `<span class="perf-pos">overperformed +${perfRounded}pts on games</span>`
+                     : (perfRounded < -3 ? `<span class="perf-neg">underperformed ${perfRounded}pts on games</span>`
+                     : `<span style="color:var(--text-dim)">games roughly as expected</span>`);
+
+    const isCloseOnPaper = gap < 15;
+    let upsetTag = '';
+    if(!isCloseOnPaper){
+      if(favored && !won) upsetTag = `<div class="upset-tag upset-bad">⚠️ UPSET LOSS — lost as the favorite</div>`;
+      else if(!favored && won) upsetTag = `<div class="upset-tag upset-good">🔥 UPSET WIN — won as the underdog</div>`;
+    }
+
+    const favLabel = isCloseOnPaper
+      ? `evenly matched on paper (${gap} pt gap)`
+      : (favored ? `favored by ${gap} pts on paper` : `underdogs by ${gap} pts on paper`);
+
+    const namesWithRatings = myTeam.map(n => `${n} (${ratingOf(n)})`).join(' &amp; ');
+    const oppWithRatings = oppTeam.map(n => `${n} (${ratingOf(n)})`).join(' &amp; ');
+
+    return `<div class="match">
+      <div class="top"><span>${m.date}${m.type==='singles' ? ' · Singles' : ''}</span><span style="color:${won?'var(--green)':'var(--red)'}">${won?'WIN':'LOSS'}</span></div>
+      ${upsetTag}
+      <div class="teams"><b>${namesWithRatings}</b> vs ${oppWithRatings}</div>
+      <div class="score">${m.score}${m.note ? ' · '+m.note : ''}</div>
+      <div style="margin-top:5px; font-size:11.5px; color:var(--text-dim); line-height:1.5;">
+        ${favLabel}, expected ~${Math.round(myExpectedShare*100)}% of games<br/>
+        actually took ${myGames}/${myGames+oppGames} games (${Math.round(myActualShare*100)}%)
+      </div>
+      <div style="margin-top:4px;">${perfLabel}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeSheet(){ document.getElementById('overlay').classList.remove('show'); }
+document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeSheet(); });
+
+// ===================== MANAGE TAB =====================
+let addGameSets = [{w:'', l:''}, {w:'', l:''}];
+
+function allPlayerNames(){
+  return [...PLAYERS].map(p=>p.name).sort((a,b)=>a.localeCompare(b));
+}
+
+function renderManage(){
+  const box = document.getElementById('manageView');
+  if(!isUnlocked){
+    box.innerHTML = buildLockScreenHtml();
+    wireLockScreen(renderManage);
+    return;
+  }
+  let html = '';
+
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Your name</label>
+      <input id="yourNameInput" class="fg-select" placeholder="So the group knows who added this" value="${currentUserName}" />
+    </div>
+  </div>`;
+
+  html += `<div class="section-heading">➕ Add a game</div>`;
+  html += `<div class="section-sub">Enter the two teams and the set scores (winner's score first in each set). New games go to the <b>Games</b> tab as pending until someone approves them — nothing here affects ratings until then.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Date</label><input id="agDate" type="date" class="fg-select" /></div>
+    <div class="fg-row"><label class="fg-label">Match type</label>
+      <div class="fg-toggle" id="agTypeToggle">
+        <button class="fg-toggle-btn active" data-type="doubles">Doubles</button>
+        <button class="fg-toggle-btn" data-type="singles">Singles</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label">Team A (winners)</label>
+      <input id="agA1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
+      <input id="agA2" list="playerNamesList" class="fg-select" placeholder="Partner (leave blank for singles)" />
+    </div>
+    <div class="fg-row"><label class="fg-label">Team B (losers)</label>
+      <input id="agB1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
+      <input id="agB2" list="playerNamesList" class="fg-select" placeholder="Partner (leave blank for singles)" />
+    </div>
+    <datalist id="playerNamesList">${allPlayerNames().map(n=>`<option value="${n}">`).join('')}</datalist>
+    <div class="fg-row"><label class="fg-label">Set scores (Team A – Team B)</label>
+      <div id="agSets"></div>
+      <button class="preset-btn" id="agAddSet" style="margin-top:6px;">+ Add set</button>
+    </div>
+    <div class="fg-row" id="agNewPlayerRow" style="display:none;">
+      <label class="fg-label" style="color:var(--gold-bright);">New player(s) detected — pick a starting tier</label>
+      <div id="agNewPlayerTiers"></div>
+    </div>
+    <div class="fg-row">
+      <button class="tab-btn active" id="agSubmit" style="width:100%;">Submit for approval</button>
+    </div>
+    <div id="agMessage" class="section-sub"></div>
+  </div>`;
+
+  html += `<div class="section-heading">🏷️ Player tags</div>`;
+  html += `<div class="section-sub">Toggle who's currently active — inactive players are skipped by every suggestion engine but keep their full history. You can also add someone who hasn't played yet.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Add a new player</label>
+      <input id="npName" class="fg-select" placeholder="Name" style="margin-bottom:6px;" />
+      <select id="npTier" class="fg-select">
+        <option value="S">Tier S</option><option value="A">Tier A</option>
+        <option value="B" selected>Tier B</option><option value="C">Tier C</option>
+      </select>
+    </div>
+    <div class="fg-row"><button class="preset-btn" id="npAdd">+ Add player</button></div>
+    <div id="npMessage" class="section-sub"></div>
+  </div>`;
+
+  html += `<div id="playerTagsList"></div>`;
+
+  html += `<div class="section-heading">🔑 Admin lock</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><button class="preset-btn" id="lockNowBtn" style="width:100%;">🔒 Lock admin area</button></div>
+    <div style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:11px; color:var(--text-dim); margin:10px 0 6px;">Change password</div>
+    <div class="fg-row"><input id="cpCurrent" type="password" class="fg-select" placeholder="Current password" style="margin-bottom:6px;" /></div>
+    <div class="fg-row"><input id="cpNew" type="password" class="fg-select" placeholder="New password" /></div>
+    <div class="fg-row"><button class="preset-btn" id="cpSubmit">Update password</button></div>
+    <div id="cpMessage" class="section-sub"></div>
+  </div>`;
+
+  box.innerHTML = html;
+
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('agDate').value = today;
+
+  document.getElementById('yourNameInput').addEventListener('change', e=>{
+    currentUserName = e.target.value.trim();
+    saveMyName(currentUserName);
+  });
+
+  document.querySelectorAll('#agTypeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#agTypeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const isSingles = b.dataset.type==='singles';
+      document.getElementById('agA2').style.display = isSingles ? 'none' : 'block';
+      document.getElementById('agB2').style.display = isSingles ? 'none' : 'block';
+    };
+  });
+
+  renderAddGameSets();
+  document.getElementById('agAddSet').onclick = ()=>{
+    if(addGameSets.length>=5) return;
+    addGameSets.push({w:'',l:''});
+    renderAddGameSets();
+  };
+
+  ['agA1','agA2','agB1','agB2'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', checkForNewPlayers);
+  });
+
+  document.getElementById('agSubmit').onclick = submitNewGame;
+
+  document.getElementById('npAdd').onclick = async ()=>{
+    const name = document.getElementById('npName').value.trim();
+    const tier = document.getElementById('npTier').value;
+    const msg = document.getElementById('npMessage');
+    if(!name){ msg.textContent = 'Enter a name first.'; return; }
+    if(PLAYERS.some(p=>p.name.toLowerCase()===name.toLowerCase())){
+      msg.textContent = `${name} already exists.`; return;
+    }
+    tagOverridesState[name] = {...(tagOverridesState[name]||{}), tier, active:true};
+    const ok = await saveTagOverrides(tagOverridesState);
+    if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; return; }
+    msg.textContent = `${name} added to Tier ${tier}. They'll appear once they've played a game.`;
+    document.getElementById('npName').value = '';
+  };
+
+  document.getElementById('lockNowBtn').onclick = async ()=>{
+    isUnlocked = false;
+    await saveMyUnlocked(false);
+    renderManage();
+  };
+
+  document.getElementById('cpSubmit').onclick = async ()=>{
+    const cur = document.getElementById('cpCurrent').value;
+    const next = document.getElementById('cpNew').value;
+    const msg = document.getElementById('cpMessage');
+    if(simpleHash(cur) !== adminPasswordHash){ msg.textContent = 'Current password is incorrect.'; return; }
+    if(!next || next.length<4){ msg.textContent = 'New password needs at least 4 characters.'; return; }
+    const ok = await saveAdminPassword(simpleHash(next));
+    if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; return; }
+    adminPasswordHash = simpleHash(next);
+    msg.textContent = 'Password updated.';
+    document.getElementById('cpCurrent').value=''; document.getElementById('cpNew').value='';
+  };
+
+  renderPlayerTagsList();
+}
+
+function renderAddGameSets(){
+  const box = document.getElementById('agSets');
+  box.innerHTML = addGameSets.map((s,i)=>`
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+      <input type="number" min="0" max="30" value="${s.w}" data-idx="${i}" data-side="w" class="ag-set-input fg-select" style="width:70px;" placeholder="A" />
+      <span style="color:var(--text-dim);">–</span>
+      <input type="number" min="0" max="30" value="${s.l}" data-idx="${i}" data-side="l" class="ag-set-input fg-select" style="width:70px;" placeholder="B" />
+      ${addGameSets.length>1 ? `<button class="preset-btn" data-remove="${i}" style="margin-left:auto;">Remove</button>` : ''}
+    </div>
+  `).join('');
+  box.querySelectorAll('.ag-set-input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const idx = parseInt(e.target.dataset.idx), side = e.target.dataset.side;
+      addGameSets[idx][side] = e.target.value;
+    });
+  });
+  box.querySelectorAll('[data-remove]').forEach(btn=>{
+    btn.onclick = ()=>{ addGameSets.splice(parseInt(btn.dataset.remove),1); renderAddGameSets(); };
+  });
+}
+
+function checkForNewPlayers(){
+  const names = ['agA1','agA2','agB1','agB2'].map(id=>document.getElementById(id).value.trim()).filter(n=>n);
+  const known = new Set(PLAYERS.map(p=>p.name.toLowerCase()));
+  const newNames = names.filter(n=>!known.has(n.toLowerCase()));
+  const row = document.getElementById('agNewPlayerRow');
+  const box = document.getElementById('agNewPlayerTiers');
+  if(newNames.length===0){ row.style.display='none'; box.innerHTML=''; return; }
+  row.style.display = 'block';
+  box.innerHTML = newNames.map(n=>`
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+      <span style="font-size:13px; flex:1;">${n}</span>
+      <select class="fg-select ag-new-tier" data-name="${n}" style="width:120px;">
+        <option value="S">Tier S</option><option value="A">Tier A</option>
+        <option value="B" selected>Tier B</option><option value="C">Tier C</option>
+      </select>
+    </div>
+  `).join('');
+}
+
+async function submitNewGame(){
+  const msg = document.getElementById('agMessage');
+  currentUserName = document.getElementById('yourNameInput').value.trim();
+  if(!currentUserName){
+    msg.textContent = 'Enter your name at the top first — every submission needs one.'; return;
+  }
+  await saveMyName(currentUserName);
+
+  const date = document.getElementById('agDate').value;
+  const isSingles = document.querySelector('#agTypeToggle .fg-toggle-btn.active').dataset.type === 'singles';
+  const a1 = document.getElementById('agA1').value.trim();
+  const a2 = document.getElementById('agA2').value.trim();
+  const b1 = document.getElementById('agB1').value.trim();
+  const b2 = document.getElementById('agB2').value.trim();
+
+  if(!date || !a1 || !b1 || (!isSingles && (!a2 || !b2))){
+    msg.textContent = 'Fill in the date and all player names.'; return;
+  }
+  const winners = isSingles ? [a1] : [a1,a2];
+  const losers = isSingles ? [b1] : [b1,b2];
+  if(new Set([...winners,...losers].map(n=>n.toLowerCase())).size !== winners.length+losers.length){
+    msg.textContent = 'The same name appears twice — check your entries.'; return;
+  }
+
+  const sets = [];
+  for(const s of addGameSets){
+    const w = parseInt(s.w), l = parseInt(s.l);
+    if(isNaN(w) || isNaN(l)) continue;
+    sets.push([w,l]);
+  }
+  if(sets.length===0){ msg.textContent = 'Enter at least one set score.'; return; }
+  const setsWon = sets.filter(s=>s[0]>s[1]).length, setsLost = sets.filter(s=>s[1]>s[0]).length;
+  if(setsWon < setsLost){
+    msg.textContent = 'Team A\'s scores should be the winning side — swap the teams or check your set scores.'; return;
+  }
+
+  // register any new players with chosen tiers
+  document.querySelectorAll('.ag-new-tier').forEach(sel=>{
+    const name = sel.dataset.name;
+    tagOverridesState[name] = {...(tagOverridesState[name]||{}), tier: sel.value, active:true};
+  });
+  if(document.querySelectorAll('.ag-new-tier').length>0){
+    await saveTagOverrides(tagOverridesState);
+  }
+
+  const id = 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  const newMatch = {id, date, winners, losers, sets, type: isSingles?'singles':'doubles', note:'',
+                     status:'pending', submittedBy: currentUserName, submittedAt: new Date().toISOString()};
+  extraMatchesState.push(newMatch);
+  const ok = await saveExtraMatches(extraMatchesState);
+  if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; extraMatchesState.pop(); return; }
+
+  recomputeAll();
+  msg.textContent = `Submitted. ${winners.join(' & ')} def ${losers.join(' & ')} — waiting for approval in the Games tab.`;
+  document.getElementById('agA1').value=''; document.getElementById('agA2').value='';
+  document.getElementById('agB1').value=''; document.getElementById('agB2').value='';
+  addGameSets = [{w:'',l:''},{w:'',l:''}];
+  renderAddGameSets();
+  document.getElementById('agNewPlayerRow').style.display='none';
+  renderPlayerTagsList();
+}
+
+function renderPlayerTagsList(){
+  const box = document.getElementById('playerTagsList');
+  const rows = [...PLAYERS].sort((a,b)=>a.name.localeCompare(b.name));
+  box.innerHTML = rows.map(p=>`
+    <div class="alpha-row">
+      <div class="alpha-name">${p.name}</div>
+      <select class="fg-select ptag-tier" data-name="${p.name}" style="width:90px; margin-right:8px;">
+        ${['S','A','B','C'].map(t=>`<option value="${t}" ${t===p.tier?'selected':''}>${t}</option>`).join('')}
+      </select>
+      <button class="preset-btn ptag-active ${p.active?'active':''}" data-name="${p.name}" style="width:80px;">${p.active?'Active':'Inactive'}</button>
+    </div>
+  `).join('');
+
+  box.querySelectorAll('.ptag-tier').forEach(sel=>{
+    sel.addEventListener('change', async e=>{
+      const name = e.target.dataset.name;
+      tagOverridesState[name] = {...(tagOverridesState[name]||{}), tier: e.target.value};
+      await saveTagOverrides(tagOverridesState);
+      recomputeAll();
+      renderPlayerTagsList();
+    });
+  });
+  box.querySelectorAll('.ptag-active').forEach(btn=>{
+    btn.addEventListener('click', async e=>{
+      const name = e.target.dataset.name;
+      const cur = PLAYERS.find(p=>p.name===name);
+      const newActive = !(cur ? cur.active : true);
+      tagOverridesState[name] = {...(tagOverridesState[name]||{}), active: newActive};
+      const ok = await saveTagOverrides(tagOverridesState);
+      if(!ok) return;
+      recomputeAll();
+      renderPlayerTagsList();
+    });
+  });
+}
+
+// ===================== INIT =====================
+
+// ===================== GAMES TAB =====================
+let editingMatchId = null;
+let armedDeleteId = null;
+
+function fmtRelative(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diffH = Math.round((now-d)/3600000);
+  if(diffH < 1) return 'just now';
+  if(diffH < 24) return diffH + 'h ago';
+  const diffD = Math.round(diffH/24);
+  return diffD + 'd ago';
+}
+
+function requireName(){
+  const el = document.getElementById('gamesYourName');
+  const name = el ? el.value.trim() : currentUserName;
+  if(!name){
+    const msg = document.getElementById('gamesMessage');
+    if(msg) msg.textContent = 'Enter your name at the top first.';
+    return null;
+  }
+  currentUserName = name;
+  saveMyName(name);
+  return name;
+}
+
+function renderGamesTab(){
+  const box = document.getElementById('gamesView');
+  const pending = extraMatchesState.filter(m=>m.status==='pending' && !deletedIdsState.includes(m.id));
+  let display = getDisplayMatches().filter(m=>m._status==='approved');
+  if(selectedMonth !== 'all') display = display.filter(m=>m.date.slice(0,7)===selectedMonth);
+  if(selectedGamesPlayer !== 'all') display = display.filter(m=> m.winners.includes(selectedGamesPlayer) || m.losers.includes(selectedGamesPlayer));
+  display.sort((a,b)=> a.date < b.date ? 1 : -1);
+
+  let html = '';
+
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Month</label>
+      <select id="gamesMonthSelect" class="fg-select"></select>
+    </div>
+    <div class="fg-row"><label class="fg-label">Player</label>
+      <select id="gamesPlayerSelect" class="fg-select"></select>
+    </div>
+    <div class="fg-row"><label class="fg-label">Data</label>
+      <select id="gamesDataQualitySelect" class="fg-select">
+        <option value="all">All data</option>
+        <option value="verified">June onwards only (cross-checked)</option>
+        <option value="unverified">Pre-June only (single-sourced)</option>
+      </select>
+    </div>
+  </div>`;
+
+  if(!isUnlocked){
+    html += buildLockScreenHtml();
+  } else {
+    html += `<div class="fg-controls">
+      <div class="fg-row"><label class="fg-label">Your name</label>
+        <input id="gamesYourName" class="fg-select" placeholder="Required to approve, edit, or delete" value="${currentUserName}" />
+      </div>
+      <div class="fg-row"><button class="preset-btn" id="gamesLockNowBtn">🔒 Lock admin area</button></div>
+      <div id="gamesMessage" class="section-sub"></div>
+    </div>`;
+  }
+
+  const pendingFiltered = selectedGamesPlayer === 'all' ? pending : pending.filter(m=> m.winners.includes(selectedGamesPlayer) || m.losers.includes(selectedGamesPlayer));
+
+  if(pendingFiltered.length > 0){
+    html += `<div class="section-heading">⏳ Pending approval (${pendingFiltered.length})</div>`;
+    html += `<div class="section-sub">Submitted but not yet counted in any rating.</div>`;
+    pendingFiltered.forEach(m=>{
+      html += `<div class="callout-card">
+        <div class="cc-title">${m.winners.join(' & ')} def ${m.losers.join(' & ')}</div>
+        <div class="cc-detail">${m.date} · ${m.sets.map(s=>s.join('-')).join(', ')} · submitted by ${m.submittedBy} (${fmtRelative(m.submittedAt)})</div>
+        ${isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
+          <button class="preset-btn" data-approve="${m.id}" style="flex:1; color:var(--green); border-color:var(--green);">Approve</button>
+          <button class="preset-btn" data-reject="${m.id}" style="flex:1; color:#e8a5a1; border-color:var(--red);">Reject</button>
+          <button class="preset-btn" data-edit="${m.id}" style="flex:1;">Edit</button>
+        </div>` : `<div class="section-sub" style="margin-top:6px;">🔒 Unlock above to approve, reject, or edit</div>`}
+      </div>`;
+    });
+  }
+
+  const gamesHeading = selectedGamesPlayer === 'all' ? `📋 All games (${display.length})` : `📋 ${selectedGamesPlayer}'s games (${display.length})`;
+  html += `<div class="section-heading">${gamesHeading}</div>`;
+  html += `<div class="section-sub">Newest first.${isUnlocked ? ' Editing or deleting recalculates every rating immediately.' : ''}</div>`;
+  display.forEach(m=>{
+    const isBase = m.id.startsWith('base_');
+    const edit = matchEditsState[m.id];
+    let metaLine = isBase ? 'Historical record' : `Submitted by ${m.submittedBy || 'unknown'}`;
+    if(edit) metaLine += ` · edited by ${edit.editedBy} (${fmtRelative(edit.editedAt)})`;
+    const isArmed = armedDeleteId === m.id;
+    const unverifiedTag = m.verified === false ? `<span class="strength-pill" style="color:#e8a5a1; border-color:var(--red); margin-left:6px;">Pre-June · single-sourced</span>` : '';
+    html += `<div class="callout-card">
+      <div class="cc-title">${m.winners.join(' & ')} def ${m.losers.join(' & ')}${unverifiedTag}</div>
+      <div class="cc-detail">${m.date} · ${m.sets.map(s=>s.join('-')).join(', ')}${m.note?' · '+m.note:''}<br/>${metaLine}</div>
+      ${isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
+        <button class="preset-btn" data-edit="${m.id}" style="flex:1;">Edit</button>
+        <button class="preset-btn" data-delete="${m.id}" style="flex:1; ${isArmed?'color:#e8a5a1; border-color:var(--red);':''}">${isArmed ? 'Confirm delete?' : 'Delete'}</button>
+      </div>` : ''}
+    </div>`;
+  });
+
+  if(isUnlocked && editingMatchId){
+    html += buildEditFormHtml(editingMatchId);
+  }
+
+  box.innerHTML = html;
+
+  populateMonthSelect(document.getElementById('gamesMonthSelect'));
+  document.getElementById('gamesMonthSelect').addEventListener('change', e=>{
+    selectedMonth = e.target.value;
+    renderGamesTab();
+  });
+
+  const gamesPlayerSelect = document.getElementById('gamesPlayerSelect');
+  const allNames = [...PLAYERS].map(p=>p.name).sort((a,b)=>a.localeCompare(b));
+  gamesPlayerSelect.innerHTML = `<option value="all">All players</option>` + allNames.map(n=>`<option value="${n}" ${n===selectedGamesPlayer?'selected':''}>${n}</option>`).join('');
+  gamesPlayerSelect.value = selectedGamesPlayer;
+  gamesPlayerSelect.addEventListener('change', e=>{
+    selectedGamesPlayer = e.target.value;
+    renderGamesTab();
+  });
+
+  const gamesDataQualitySelect = document.getElementById('gamesDataQualitySelect');
+  gamesDataQualitySelect.value = dataQualityFilter;
+  gamesDataQualitySelect.addEventListener('change', e=>{
+    dataQualityFilter = e.target.value;
+    recomputeAll();
+    renderGamesTab();
+  });
+
+  if(!isUnlocked){
+    wireLockScreen(renderGamesTab);
+    return;
+  }
+
+  document.getElementById('gamesLockNowBtn').onclick = async ()=>{
+    isUnlocked = false;
+    await saveMyUnlocked(false);
+    renderGamesTab();
+  };
+
+  box.querySelectorAll('[data-approve]').forEach(btn=>{
+    btn.onclick = ()=> approveMatch(btn.dataset.approve);
+  });
+  box.querySelectorAll('[data-reject]').forEach(btn=>{
+    btn.onclick = ()=> rejectMatch(btn.dataset.reject);
+  });
+  box.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.onclick = ()=>{ editingMatchId = btn.dataset.edit; armedDeleteId = null; renderGamesTab(); };
+  });
+  box.querySelectorAll('[data-delete]').forEach(btn=>{
+    btn.onclick = ()=>{
+      if(armedDeleteId === btn.dataset.delete){ deleteMatch(btn.dataset.delete); }
+      else { armedDeleteId = btn.dataset.delete; renderGamesTab(); }
+    };
+  });
+
+  if(editingMatchId) wireEditForm(editingMatchId);
+}
+
+async function approveMatch(id){
+  const name = requireName();
+  if(!name) return;
+  const m = extraMatchesState.find(x=>x.id===id);
+  if(!m) return;
+  m.status = 'approved';
+  m.approvedBy = name;
+  m.approvedAt = new Date().toISOString();
+  const ok = await saveExtraMatches(extraMatchesState);
+  if(!ok){ document.getElementById('gamesMessage').textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; return; }
+  recomputeAll();
+  renderGamesTab();
+}
+
+async function rejectMatch(id){
+  const name = requireName();
+  if(!name) return;
+  extraMatchesState = extraMatchesState.filter(x=>x.id!==id);
+  const ok = await saveExtraMatches(extraMatchesState);
+  if(!ok){ document.getElementById('gamesMessage').textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; return; }
+  recomputeAll();
+  renderGamesTab();
+}
+
+async function deleteMatch(id){
+  const name = requireName();
+  if(!name) return;
+  const pendingMatch = extraMatchesState.find(x=>x.id===id && x.status==='pending');
+  if(pendingMatch){
+    extraMatchesState = extraMatchesState.filter(x=>x.id!==id);
+    await saveExtraMatches(extraMatchesState);
+  } else {
+    deletedIdsState.push(id);
+    const ok = await saveDeletedIds(deletedIdsState);
+    if(!ok){ document.getElementById('gamesMessage').textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; deletedIdsState.pop(); return; }
+  }
+  armedDeleteId = null;
+  recomputeAll();
+  renderGamesTab();
+}
+
+function findMatchById(id){
+  return getDisplayMatches().find(m=>m.id===id);
+}
+
+function buildEditFormHtml(id){
+  const m = findMatchById(id);
+  if(!m) return '';
+  const isSingles = m.type === 'singles';
+  return `<div class="section-heading">✏️ Edit game</div>
+  <div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Date</label><input id="edDate" type="date" class="fg-select" value="${m.date}" /></div>
+    <div class="fg-row"><label class="fg-label">Match type</label>
+      <div class="fg-toggle" id="edTypeToggle">
+        <button class="fg-toggle-btn ${!isSingles?'active':''}" data-type="doubles">Doubles</button>
+        <button class="fg-toggle-btn ${isSingles?'active':''}" data-type="singles">Singles</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label">Team A (winners)</label>
+      <input id="edA1" list="playerNamesList2" class="fg-select" style="margin-bottom:6px;" value="${m.winners[0]||''}" />
+      <input id="edA2" list="playerNamesList2" class="fg-select" value="${m.winners[1]||''}" style="${isSingles?'display:none;':''}" />
+    </div>
+    <div class="fg-row"><label class="fg-label">Team B (losers)</label>
+      <input id="edB1" list="playerNamesList2" class="fg-select" style="margin-bottom:6px;" value="${m.losers[0]||''}" />
+      <input id="edB2" list="playerNamesList2" class="fg-select" value="${m.losers[1]||''}" style="${isSingles?'display:none;':''}" />
+    </div>
+    <datalist id="playerNamesList2">${allPlayerNames().map(n=>`<option value="${n}">`).join('')}</datalist>
+    <div class="fg-row"><label class="fg-label">Set scores</label><div id="edSets"></div></div>
+    <div class="fg-row" style="display:flex; gap:8px;">
+      <button class="tab-btn active" id="edSubmit" style="flex:1;">Save changes</button>
+      <button class="preset-btn" id="edCancel" style="flex:1;">Cancel</button>
+    </div>
+    <div id="edMessage" class="section-sub"></div>
+  </div>`;
+}
+
+let editSets = [];
+
+function renderEditSets(){
+  const box = document.getElementById('edSets');
+  if(!box) return;
+  box.innerHTML = editSets.map((s,i)=>`
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+      <input type="number" min="0" max="30" value="${s[0]}" data-idx="${i}" data-side="0" class="ed-set-input fg-select" style="width:70px;" />
+      <span style="color:var(--text-dim);">–</span>
+      <input type="number" min="0" max="30" value="${s[1]}" data-idx="${i}" data-side="1" class="ed-set-input fg-select" style="width:70px;" />
+      ${editSets.length>1 ? `<button class="preset-btn" data-ed-remove="${i}" style="margin-left:auto;">Remove</button>` : ''}
+    </div>
+  `).join('') + `<button class="preset-btn" id="edAddSet" style="margin-top:4px;">+ Add set</button>`;
+  box.querySelectorAll('.ed-set-input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const idx = parseInt(e.target.dataset.idx), side = parseInt(e.target.dataset.side);
+      editSets[idx][side] = parseInt(e.target.value) || 0;
+    });
+  });
+  box.querySelectorAll('[data-ed-remove]').forEach(btn=>{
+    btn.onclick = ()=>{ editSets.splice(parseInt(btn.dataset.edRemove),1); renderEditSets(); };
+  });
+  const addBtn = document.getElementById('edAddSet');
+  if(addBtn) addBtn.onclick = ()=>{ if(editSets.length<5){ editSets.push([0,0]); renderEditSets(); } };
+}
+
+function wireEditForm(id){
+  const m = findMatchById(id);
+  if(!m) return;
+  editSets = m.sets.map(s=>[...s]);
+  renderEditSets();
+
+  document.querySelectorAll('#edTypeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#edTypeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const isSingles = b.dataset.type==='singles';
+      document.getElementById('edA2').style.display = isSingles ? 'none' : 'block';
+      document.getElementById('edB2').style.display = isSingles ? 'none' : 'block';
+    };
+  });
+
+  document.getElementById('edCancel').onclick = ()=>{ editingMatchId = null; renderGamesTab(); };
+
+  document.getElementById('edSubmit').onclick = async ()=>{
+    const name = requireName();
+    if(!name) return;
+    const msg = document.getElementById('edMessage');
+    const date = document.getElementById('edDate').value;
+    const isSingles = document.querySelector('#edTypeToggle .fg-toggle-btn.active').dataset.type === 'singles';
+    const a1 = document.getElementById('edA1').value.trim();
+    const a2 = document.getElementById('edA2').value.trim();
+    const b1 = document.getElementById('edB1').value.trim();
+    const b2 = document.getElementById('edB2').value.trim();
+    if(!date || !a1 || !b1 || (!isSingles && (!a2||!b2))){ msg.textContent='Fill in all fields.'; return; }
+    const winners = isSingles ? [a1] : [a1,a2];
+    const losers = isSingles ? [b1] : [b1,b2];
+    const sets = editSets.filter(s=>!isNaN(s[0]) && !isNaN(s[1]));
+    if(sets.length===0){ msg.textContent='Enter at least one set.'; return; }
+    const setsWon = sets.filter(s=>s[0]>s[1]).length, setsLost = sets.filter(s=>s[1]>s[0]).length;
+    if(setsWon < setsLost){ msg.textContent="Team A's scores should be the winning side."; return; }
+
+    const editedFields = {date, winners, losers, sets, type: isSingles?'singles':'doubles',
+                           editedBy: name, editedAt: new Date().toISOString()};
+
+    const pendingMatch = extraMatchesState.find(x=>x.id===id && x.status==='pending');
+    if(pendingMatch){
+      Object.assign(pendingMatch, {date, winners, losers, sets, type: isSingles?'singles':'doubles'});
+      const ok = await saveExtraMatches(extraMatchesState);
+      if(!ok){ msg.textContent='Save failed.'; return; }
+    } else {
+      matchEditsState[id] = editedFields;
+      const ok = await saveMatchEdits(matchEditsState);
+      if(!ok){ msg.textContent='Save failed.'; return; }
+    }
+    editingMatchId = null;
+    recomputeAll();
+    renderGamesTab();
+  };
+}
+
+
+async function init(){
+  const stored = await loadStoredData();
+  extraMatchesState = stored.extraMatches;
+  tagOverridesState = stored.tagOverrides;
+  matchEditsState = stored.matchEdits;
+  deletedIdsState = stored.deletedIds;
+  currentUserName = await loadMyName();
+  adminPasswordHash = await loadAdminPassword();
+  isUnlocked = await loadMyUnlocked();
+  recomputeAll();
+  render();
+}
+
+init();
+
+</script>
+</body>
+</html>
