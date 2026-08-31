@@ -437,9 +437,9 @@
     <input id="search" type="text" placeholder="Search a player…" />
   </div>
   <div class="sortbar" id="sortbar">
+    <button class="sortbtn" data-sort="wins">Most Wins</button>
     <button class="sortbtn active" data-sort="winpct">Win %</button>
-    <button class="sortbtn" data-sort="total">Games</button>
-    <button class="sortbtn" data-sort="wins">Wins</button>
+    <button class="sortbtn" data-sort="total">Games Played</button>
     <button class="sortbtn" data-sort="name">A–Z</button>
   </div>
   <div class="sortbar" id="sortbarPower" style="display:none;">
@@ -451,12 +451,13 @@
   </div>
   <div class="minGamesRow" id="minGamesRow">
     <span class="minGamesLabel">Min games played:</span>
-    <input id="minGamesInput" type="number" min="0" max="20" value="10" />
+    <input id="minGamesInput" type="number" min="0" max="50" value="10" />
     <div class="minGamesPresets">
       <button class="preset-btn" data-n="0">All</button>
       <button class="preset-btn" data-n="3">3+</button>
       <button class="preset-btn" data-n="5">5+</button>
       <button class="preset-btn active" data-n="10">10+</button>
+      <button class="preset-btn" data-n="20">20+</button>
     </div>
   </div>
 </div>
