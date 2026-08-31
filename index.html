@@ -419,6 +419,7 @@
     <button class="tab-btn" data-tab="players">Players</button>
     <button class="tab-btn" data-tab="manage">Manage</button>
     <button class="tab-btn" data-tab="games">Games</button>
+    <button class="tab-btn" data-tab="h2h">Head to Head</button>
   </div>
   <div class="minGamesRow" id="dataQualityRow" style="background:var(--bg2); border:1px solid var(--gold-dim); border-radius:10px; padding:8px 10px;">
     <span class="minGamesLabel" style="color:var(--gold-bright); font-weight:700;">Data:</span>
@@ -468,6 +469,7 @@
 <div id="playersView" style="display:none; padding:0 16px;"></div>
 <div id="manageView" style="display:none; padding:0 16px;"></div>
 <div id="gamesView" style="display:none; padding:0 16px;"></div>
+<div id="h2hView" style="display:none; padding:0 16px;"></div>
 <div id="findGameView" style="display:none; padding:0 16px;">
   <div class="fg-controls">
     <div class="fg-row">
@@ -513,11 +515,16 @@
 const BASE_MATCHES = [{"date": "2026-07-02", "winners": ["Len", "Eli"], "losers": ["Shaun", "Osh"], "sets": [[0, 6], [6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_0", "verified": true}, {"date": "2026-07-02", "winners": ["Dennis", "Osh"], "losers": ["KC", "Eli"], "sets": [[7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_1", "verified": true}, {"date": "2026-07-02", "winners": ["Tee", "MK"], "losers": ["Rhys", "Fee"], "sets": [[6, 0], [6, 2]], "type": "doubles", "note": "", "id": "base_2", "verified": true}, {"date": "2026-07-02", "winners": ["KC", "Shaun"], "losers": ["Osh", "Carla"], "sets": [[6, 4], [6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_3", "verified": true}, {"date": "2026-07-03", "winners": ["Osh"], "losers": ["Len"], "sets": [[15, 13], [15, 11]], "type": "singles", "note": "", "id": "base_4", "verified": true}, {"date": "2026-07-03", "winners": ["Eli", "Fatch"], "losers": ["Stormzy", "Omar"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_5", "verified": true}, {"date": "2026-07-05", "winners": ["Len", "Eli"], "losers": ["Erf", "Max"], "sets": [[3, 6], [6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_6", "verified": true}, {"date": "2026-07-05", "winners": ["Erf", "Eli"], "losers": ["Len", "Max"], "sets": [[6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_7", "verified": true}, {"date": "2026-07-05", "winners": ["Erf", "Len"], "losers": ["Max", "Eli"], "sets": [[6, 1], [5, 0]], "type": "doubles", "note": "walkover/forfeit", "id": "base_8", "verified": true}, {"date": "2026-07-06", "winners": ["Stormzy", "Osh"], "losers": ["Max", "Len"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_9", "verified": true}, {"date": "2026-07-07", "winners": ["Erf", "Osh"], "losers": ["Len", "Eli"], "sets": [[6, 2], [7, 5]], "type": "doubles", "note": "", "id": "base_10", "verified": true}, {"date": "2026-07-08", "winners": ["Rishi", "Max"], "losers": ["Harry", "Shaun"], "sets": [[7, 5], [7, 5]], "type": "doubles", "note": "", "id": "base_11", "verified": true}, {"date": "2026-07-08", "winners": ["Rishi", "Harry"], "losers": ["Max", "Shaun"], "sets": [[6, 7], [6, 4], [7, 5]], "type": "doubles", "note": "", "id": "base_12", "verified": true}, {"date": "2026-07-09", "winners": ["Harry", "Omar"], "losers": ["Max", "Rishi"], "sets": [[6, 3], [7, 6]], "type": "doubles", "note": "", "id": "base_13", "verified": true}, {"date": "2026-07-10", "winners": ["Eli", "Erf"], "losers": ["Kaz", "Max"], "sets": [[4, 6], [6, 1], [6, 1]], "type": "doubles", "note": "", "id": "base_14", "verified": true}, {"date": "2026-07-12", "winners": ["Erf", "Rishi"], "losers": ["PDM", "Eli"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "", "id": "base_15", "verified": true}, {"date": "2026-07-12", "winners": ["Manny", "Kaz"], "losers": ["Osh", "Dennis"], "sets": [[6, 1], [6, 0]], "type": "doubles", "note": "", "id": "base_16", "verified": true}, {"date": "2026-07-12", "winners": ["Manny", "Dennis"], "losers": ["Osh", "Kaz"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_17", "verified": true}, {"date": "2026-07-12", "winners": ["Eli", "Len"], "losers": ["Rishi", "Osh"], "sets": [[7, 5], [5, 7], [7, 5]], "type": "doubles", "note": "", "id": "base_18", "verified": true}, {"date": "2026-07-13", "winners": ["Jords", "Kaz"], "losers": ["Erf", "Rishi"], "sets": [[6, 4], [6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_19", "verified": true}, {"date": "2026-07-13", "winners": ["Harry", "Antz"], "losers": ["Shaun", "Rocky"], "sets": [[4, 6], [6, 4], [9, 8]], "type": "doubles", "note": "3rd set tie-break", "id": "base_20", "verified": true}, {"date": "2026-07-13", "winners": ["Jams", "Rishi"], "losers": ["Fatch", "Jords"], "sets": [[6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_21", "verified": true}, {"date": "2026-07-14", "winners": ["KC", "Erf"], "losers": ["Osh", "Dennis"], "sets": [[2, 6], [6, 1], [6, 2]], "type": "doubles", "note": "", "id": "base_22", "verified": true}, {"date": "2026-07-15", "winners": ["Rishi", "Antz"], "losers": ["Jords", "MK"], "sets": [[1, 6], [6, 3], [6, 0]], "type": "doubles", "note": "", "id": "base_23", "verified": true}, {"date": "2026-07-15", "winners": ["Kaz", "Rishi"], "losers": ["Max", "Erf"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_24", "verified": true}, {"date": "2026-07-16", "winners": ["Max", "PDM"], "losers": ["Rishi", "Jords"], "sets": [[7, 6], [7, 6]], "type": "doubles", "note": "", "id": "base_25", "verified": true}, {"date": "2026-07-16", "winners": ["Len", "Antz"], "losers": ["Harry", "PDM"], "sets": [[6, 2], [6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_26", "verified": true}, {"date": "2026-07-17", "winners": ["Harry", "Len"], "losers": ["Max", "Eli"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "", "id": "base_27", "verified": true}, {"date": "2026-07-17", "winners": ["Len", "Erf"], "losers": ["Kaz", "Rishi"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_28", "verified": true}, {"date": "2026-07-17", "winners": ["Kaz", "Jords"], "losers": ["Rishi", "Erf"], "sets": [[2, 6], [6, 2], [6, 1]], "type": "doubles", "note": "", "id": "base_29", "verified": true}, {"date": "2026-07-18", "winners": ["Rishi", "Eli"], "losers": ["Max", "PDM"], "sets": [[5, 7], [6, 1], [6, 3]], "type": "doubles", "note": "", "id": "base_30", "verified": true}, {"date": "2026-07-20", "winners": ["Harry", "PDM"], "losers": ["Rishi", "Chloe"], "sets": [[6, 2], [4, 6], [6, 2]], "type": "doubles", "note": "opponent listed as 'CC'", "id": "base_31", "verified": true}, {"date": "2026-07-20", "winners": ["Harry", "Rishi"], "losers": ["Jords", "Omar"], "sets": [[6, 4], [8, 7]], "type": "doubles", "note": "", "id": "base_32", "verified": true}, {"date": "2026-07-21", "winners": ["Dennis", "Rishi"], "losers": ["Harry", "PDM"], "sets": [[6, 2], [4, 6], [6, 4]], "type": "doubles", "note": "", "id": "base_33", "verified": true}, {"date": "2026-07-21", "winners": ["KC", "Rishi"], "losers": ["Antz", "Len"], "sets": [[6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_34", "verified": true}, {"date": "2026-07-22", "winners": ["Harry", "Rocky"], "losers": ["Shaun", "Max"], "sets": [[6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_35", "verified": true}, {"date": "2026-07-22", "winners": ["Harry", "Fatch"], "losers": ["Shaun", "Tee"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_36", "verified": true}, {"date": "2026-07-25", "winners": ["Tee", "Fatch"], "losers": ["Rhys", "Fee"], "sets": [[4, 6], [6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_37", "verified": true}, {"date": "2026-07-25", "winners": ["KC", "Shaun"], "losers": ["Max", "PDM"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "", "id": "base_38", "verified": true}, {"date": "2026-07-25", "winners": ["KC", "Max"], "losers": ["Shaun", "PDM"], "sets": [[6, 2], [7, 6]], "type": "doubles", "note": "", "id": "base_39", "verified": true}, {"date": "2026-07-27", "winners": ["Tom", "Shaun"], "losers": ["Max", "Tee"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "", "id": "base_40", "verified": true}, {"date": "2026-07-30", "winners": ["PDM", "Rishi"], "losers": ["Harry", "Rocky"], "sets": [[6, 0], [6, 0]], "type": "doubles", "note": "", "id": "base_41", "verified": true}, {"date": "2026-07-30", "winners": ["KC", "Fatch"], "losers": ["Max", "Rishi"], "sets": [[6, 4], [6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_42", "verified": true}, {"date": "2026-07-30", "winners": ["Fatch", "Antz"], "losers": ["Rishi", "Jords"], "sets": [[6, 2], [1, 6], [6, 3]], "type": "doubles", "note": "", "id": "base_43", "verified": true}, {"date": "2026-08-01", "winners": ["PDM", "Rishi"], "losers": ["Jords", "Omar"], "sets": [[6, 3], [6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_44", "verified": true}, {"date": "2026-08-02", "winners": ["Jams", "Rishi"], "losers": ["Fatch", "Tom"], "sets": [[6, 4], [3, 6], [7, 6]], "type": "doubles", "note": "", "id": "base_45", "verified": true}, {"date": "2026-08-02", "winners": ["Tee", "MK"], "losers": ["Tom", "Shaun"], "sets": [[5, 7], [6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_46", "verified": true}, {"date": "2026-08-03", "winners": ["KC", "Max"], "losers": ["Erf", "Rishi"], "sets": [[5, 7], [6, 1], [7, 6]], "type": "doubles", "note": "", "id": "base_47", "verified": true}, {"date": "2026-08-04", "winners": ["Aubyn", "Antz"], "losers": ["Fatch", "Jams"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_48", "verified": true}, {"date": "2026-08-04", "winners": ["MK", "Fatch"], "losers": ["Shaun", "Tom"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_49", "verified": true}, {"date": "2026-08-05", "winners": ["Rishi", "Jams"], "losers": ["Aubyn", "Antz"], "sets": [[6, 2], [6, 2], [2, 6]], "type": "doubles", "note": "", "id": "base_50", "verified": true}, {"date": "2026-08-05", "winners": ["Rishi", "Omar"], "losers": ["Max", "Eli"], "sets": [[7, 6], [4, 6], [6, 3]], "type": "doubles", "note": "", "id": "base_51", "verified": true}, {"date": "2026-08-06", "winners": ["Skapz", "Rhys"], "losers": ["Tee", "Fee"], "sets": [[6, 2], [6, 2], [3, 6]], "type": "doubles", "note": "", "id": "base_52", "verified": true}, {"date": "2026-08-08", "winners": ["Tom", "Erf"], "losers": ["Antz", "Fatch"], "sets": [[6, 3], [6, 2], [6, 4]], "type": "doubles", "note": "", "id": "base_53", "verified": true}, {"date": "2026-08-08", "winners": ["Erf", "PDM"], "losers": ["Osh", "Fatch"], "sets": [[8, 6], [6, 2]], "type": "doubles", "note": "", "id": "base_54", "verified": true}, {"date": "2026-08-09", "winners": ["Len", "Fatch"], "losers": ["PDM", "Antz"], "sets": [[8, 6], [5, 7], [9, 7]], "type": "doubles", "note": "", "id": "base_55", "verified": true}, {"date": "2026-08-09", "winners": ["Rocky", "Max"], "losers": ["MK", "Fatch"], "sets": [[6, 4], [6, 4], [7, 6]], "type": "doubles", "note": "", "id": "base_56", "verified": true}, {"date": "2026-08-11", "winners": ["Osh", "Eli"], "losers": ["PDM", "Max"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_57", "verified": true}, {"date": "2026-08-11", "winners": ["PDM", "Shaun"], "losers": ["Tarique", "Max"], "sets": [[6, 3], [6, 2]], "type": "doubles", "note": "", "id": "base_58", "verified": true}, {"date": "2026-08-12", "winners": ["Rocky", "PDM"], "losers": ["Rishi", "Max"], "sets": [[6, 2], [6, 4], [6, 7]], "type": "doubles", "note": "", "id": "base_59", "verified": true}, {"date": "2026-08-14", "winners": ["Mulley", "Osh"], "losers": ["KC", "Shaun"], "sets": [[4, 6], [7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_60", "verified": true}, {"date": "2026-08-14", "winners": ["Max", "Kaz"], "losers": ["PDM", "Rishi"], "sets": [[5, 7], [6, 0], [6, 3]], "type": "doubles", "note": "", "id": "base_61", "verified": true}, {"date": "2026-08-15", "winners": ["KC", "Fatch"], "losers": ["Max", "PDM"], "sets": [[4, 6], [7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_62", "verified": true}, {"date": "2026-08-15", "winners": ["Max", "Fatch"], "losers": ["Rocky", "PDM"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_63", "verified": true}, {"date": "2026-08-16", "winners": ["Len", "Eli"], "losers": ["Rishi", "PDM"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "", "id": "base_64", "verified": true}, {"date": "2026-08-16", "winners": ["Osh", "KC"], "losers": ["Max", "Kaz"], "sets": [[6, 1], [6, 2], [6, 1]], "type": "doubles", "note": "", "id": "base_65", "verified": true}, {"date": "2026-08-17", "winners": ["Osh", "Eli"], "losers": ["Len", "KC"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "score corrected from 6-4 6-4", "id": "base_66", "verified": true}, {"date": "2026-08-19", "winners": ["Rishi", "Omar"], "losers": ["PDM", "Shaun"], "sets": [[7, 5], [6, 3], [6, 4]], "type": "doubles", "note": "double or quits", "id": "base_67", "verified": true}, {"date": "2026-08-19", "winners": ["Max", "Aubyn"], "losers": ["Rishi", "Jams"], "sets": [[6, 4], [6, 0], [8, 6]], "type": "doubles", "note": "", "id": "base_68", "verified": true}, {"date": "2026-08-20", "winners": ["Rishi", "Len"], "losers": ["Eli", "Stormzy"], "sets": [[6, 3], [6, 1], [6, 4]], "type": "doubles", "note": "double or quits", "id": "base_69", "verified": true}, {"date": "2026-08-20", "winners": ["Rishi", "Stormzy"], "losers": ["Fatch", "Max"], "sets": [[6, 3], [3, 6], [6, 3]], "type": "doubles", "note": "", "id": "base_70", "verified": true}, {"date": "2026-08-21", "winners": ["Max"], "losers": ["Fatch"], "sets": [[15, 11], [15, 9]], "type": "singles", "note": "", "id": "base_71", "verified": true}, {"date": "2026-08-21", "winners": ["Rishi", "PDM"], "losers": ["Stormzy", "Max"], "sets": [[7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_72", "verified": true}, {"date": "2026-08-21", "winners": ["Stormzy", "Max"], "losers": ["Rishi", "PDM"], "sets": [[6, 3], [2, 6], [6, 2]], "type": "doubles", "note": "rematch same day", "id": "base_73", "verified": true}, {"date": "2026-08-25", "winners": ["Tom", "Rishi"], "losers": ["Max", "Rocky"], "sets": [[2, 6], [6, 3], [6, 2]], "type": "doubles", "note": "", "id": "base_74", "verified": true}, {"date": "2026-08-25", "winners": ["Erf", "Kaz"], "losers": ["Osh", "KC"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "", "id": "base_75", "verified": true}, {"date": "2026-08-25", "winners": ["Erf", "Kaz"], "losers": ["Osh", "Eli"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "", "id": "base_76", "verified": true}, {"date": "2026-08-27", "winners": ["Eli", "Ant Slice"], "losers": ["Rishi", "Max"], "sets": [[8, 6], [6, 2]], "type": "doubles", "note": "", "id": "base_77", "verified": true}, {"date": "2026-08-27", "winners": ["Max", "PDM"], "losers": ["Ant Slice", "Chloe"], "sets": [[4, 6], [6, 2], [6, 2]], "type": "doubles", "note": "", "id": "base_78", "verified": true}, {"date": "2026-06-02", "winners": ["Rishi", "Jords"], "losers": ["Tarique", "Harry"], "sets": [[4, 6], [6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_79", "verified": true}, {"date": "2026-06-02", "winners": ["Rocky", "Harry"], "losers": ["Rishi", "Jords"], "sets": [[6, 4], [6, 4], [3, 6]], "type": "doubles", "note": "", "id": "base_80", "verified": true}, {"date": "2026-06-03", "winners": ["Harry", "Antz"], "losers": ["Rishi", "MK"], "sets": [[1, 6], [6, 1], [8, 6]], "type": "doubles", "note": "", "id": "base_81", "verified": true}, {"date": "2026-06-04", "winners": ["Harry", "Tom"], "losers": ["Fatch", "Jords"], "sets": [[7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_82", "verified": true}, {"date": "2026-06-04", "winners": ["Fatch", "Harry"], "losers": ["Tom", "Jords"], "sets": [[2, 6], [6, 1], [7, 5]], "type": "doubles", "note": "", "id": "base_83", "verified": true}, {"date": "2026-06-05", "winners": ["Rocky", "Tarique"], "losers": ["Rishi", "Harry"], "sets": [[6, 3], [6, 4], [2, 6]], "type": "doubles", "note": "", "id": "base_84", "verified": true}, {"date": "2026-06-07", "winners": ["Max", "Tom"], "losers": ["Shaun", "MK"], "sets": [[6, 2], [6, 3], [4, 6]], "type": "doubles", "note": "", "id": "base_85", "verified": true}, {"date": "2026-06-07", "winners": ["Stormzy", "Len"], "losers": ["Rishi", "Antz"], "sets": [[6, 3], [6, 0]], "type": "doubles", "note": "", "id": "base_86", "verified": true}, {"date": "2026-06-07", "winners": ["Rishi", "Antz"], "losers": ["Stormzy", "Len"], "sets": [[7, 6], [4, 6], [6, 3]], "type": "doubles", "note": "rematch same session", "id": "base_87", "verified": true}, {"date": "2026-06-09", "winners": ["Rishi", "Fatch"], "losers": ["Chloe", "Jords"], "sets": [[2, 6], [6, 2], [6, 2]], "type": "doubles", "note": "", "id": "base_88", "verified": true}, {"date": "2026-06-09", "winners": ["Rishi", "Chloe"], "losers": ["Fatch", "Jords"], "sets": [[6, 0], [6, 1]], "type": "doubles", "note": "rematch same session", "id": "base_89", "verified": true}, {"date": "2026-06-09", "winners": ["Erf", "Osh"], "losers": ["Eli", "Len"], "sets": [[4, 6], [7, 5], [6, 3]], "type": "doubles", "note": "", "id": "base_90", "verified": true}, {"date": "2026-06-10", "winners": ["Eli", "Harry"], "losers": ["Jords", "KC"], "sets": [[4, 6], [6, 0], [6, 2]], "type": "doubles", "note": "", "id": "base_91", "verified": true}, {"date": "2026-06-14", "winners": ["Jords", "MK"], "losers": ["Rocky", "Fatch"], "sets": [[9, 7], [6, 1]], "type": "doubles", "note": "", "id": "base_92", "verified": true}, {"date": "2026-06-14", "winners": ["Max", "Shaun"], "losers": ["MK", "Harry"], "sets": [[6, 4], [7, 5], [5, 7]], "type": "doubles", "note": "", "id": "base_93", "verified": true}, {"date": "2026-06-16", "winners": ["Max", "Rishi"], "losers": ["KC", "Tom"], "sets": [[6, 3], [6, 3], [8, 6]], "type": "doubles", "note": "", "id": "base_94", "verified": true}, {"date": "2026-06-16", "winners": ["Jords", "Kaz"], "losers": ["Rishi", "Eli"], "sets": [[6, 4], [6, 3], [6, 2], [2, 6]], "type": "doubles", "note": "4 sets as posted", "id": "base_95", "verified": true}, {"date": "2026-06-18", "winners": ["Shaun", "Rocky"], "losers": ["Harry", "Jords"], "sets": [[6, 1], [6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_96", "verified": true}, {"date": "2026-06-21", "winners": ["Max", "Rishi"], "losers": ["Tarique", "Kaz"], "sets": [[7, 5], [3, 6], [7, 5]], "type": "doubles", "note": "", "id": "base_97", "verified": true}, {"date": "2026-06-21", "winners": ["Rishi", "Fatch"], "losers": ["Antz", "Tarique"], "sets": [[7, 5], [6, 8], [6, 3]], "type": "doubles", "note": "", "id": "base_98", "verified": true}, {"date": "2026-06-22", "winners": ["Max", "Kaz"], "losers": ["KC", "Rishi"], "sets": [[6, 4], [6, 4], [4, 6]], "type": "doubles", "note": "", "id": "base_99", "verified": true}, {"date": "2026-06-22", "winners": ["Rishi", "Del"], "losers": ["Harry", "Dennis"], "sets": [[6, 2], [6, 4]], "type": "doubles", "note": "'wolf emoji'=Rishi; Del one-off, Tier A", "id": "base_100", "verified": true}, {"date": "2026-06-23", "winners": ["Erf", "Shaun"], "losers": ["Rishi", "Max"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_101", "verified": true}, {"date": "2026-06-24", "winners": ["Erf", "Eli"], "losers": ["KC", "Shaun"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "game 1", "id": "base_102", "verified": true}, {"date": "2026-06-24", "winners": ["KC", "Shaun"], "losers": ["Erf", "Eli"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "game 2 rematch", "id": "base_103", "verified": true}, {"date": "2026-06-26", "winners": ["Fatch", "Antz"], "losers": ["Jords", "M.R"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "M.R identity unconfirmed, Tier C", "id": "base_104", "verified": true}, {"date": "2026-06-28", "winners": ["Len"], "losers": ["Harry"], "sets": [[6, 7], [6, 2], [6, 4]], "type": "singles", "note": "", "id": "base_105", "verified": true}, {"date": "2026-06-29", "winners": ["Kaz", "Osh"], "losers": ["KC", "Erf"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_106", "verified": true}, {"date": "2026-06-30", "winners": ["KC", "Rishi"], "losers": ["Osh", "Harry"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_107", "verified": true}, {"date": "2026-06-30", "winners": ["KC", "Rishi"], "losers": ["Harry", "Osh"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "2nd match same session", "id": "base_108", "verified": true}, {"date": "2026-06-30", "winners": ["Harry", "Osh"], "losers": ["KC", "Rishi"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "double or quits decider", "id": "base_109", "verified": true}, {"date": "2026-06-30", "winners": ["Max", "MK"], "losers": ["Tarique", "Rocky"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "", "id": "base_110", "verified": true}, {"date": "2026-06-30", "winners": ["Harry", "Len"], "losers": ["Max", "Erf"], "sets": [[6, 3], [3, 6], [6, 4]], "type": "doubles", "note": "", "id": "base_111", "verified": true}, {"date": "2026-07-11", "winners": ["Omar", "Jords"], "losers": ["Tom", "Max"], "sets": [[7, 6], [4, 6], [6, 2]], "type": "doubles", "note": "final corrected version", "id": "base_112", "verified": true}, {"date": "2026-07-18", "winners": ["Tom", "Chloe"], "losers": ["Fatch", "Antz"], "sets": [[6, 2], [7, 5], [7, 5], [6, 3]], "type": "doubles", "note": "4 sets as posted", "id": "base_113", "verified": true}, {"date": "2026-07-19", "winners": ["Kaz", "Tom"], "losers": ["Rocky", "MK"], "sets": [[6, 1], [6, 1]], "type": "doubles", "note": "", "id": "base_114", "verified": true}, {"date": "2026-08-19", "winners": ["Eli", "Stormzy"], "losers": ["Osh", "Jords"], "sets": [[6, 8], [6, 3], [6, 3]], "type": "doubles", "note": "", "id": "base_115", "verified": true}, {"date": "2026-08-19", "winners": ["Eli", "Stormzy"], "losers": ["Osh", "Jords"], "sets": [[7, 5], [6, 1]], "type": "doubles", "note": "part 2, same session", "id": "base_116", "verified": true}, {"date": "2026-08-23", "winners": ["Stormzy", "Chloe"], "losers": ["Jords", "Tom"], "sets": [[6, 1], [5, 7], [6, 2], [5, 7], [6, 1]], "type": "doubles", "note": "5 sets, final corrected version", "id": "base_117", "verified": true}, {"date": "2026-08-26", "winners": ["PDM", "Max"], "losers": ["Chloe", "Antz"], "sets": [[4, 6], [6, 2], [6, 1]], "type": "doubles", "note": "double or quits 2-1, to be continued", "id": "base_118", "verified": true}, {"date": "2026-08-29", "winners": ["PDM", "Tom"], "losers": ["Fatch", "Shaun"], "sets": [[6, 3], [6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_119", "verified": true}, {"date": "2026-04-01", "winners": ["Kaz", "Eli"], "losers": ["Twoshay", "Erf"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0001", "id": "early_0", "verified": false}, {"date": "2026-04-01", "winners": ["Aubyn", "Len"], "losers": ["Stormzy", "Max"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0002", "id": "early_1", "verified": false}, {"date": "2026-04-01", "winners": ["Aubyn", "Len"], "losers": ["Stormzy", "Max"], "sets": [[6, 1], [3, 6], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0003", "id": "early_2", "verified": false}, {"date": "2026-04-02", "winners": ["Tom", "Ant Slice"], "losers": ["Tee", "MK"], "sets": [[6, 3], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0004", "id": "early_3", "verified": false}, {"date": "2026-04-03", "winners": ["Kaz", "Erf"], "losers": ["Eli", "Osh"], "sets": [[6, 2], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0005", "id": "early_4", "verified": false}, {"date": "2026-04-03", "winners": ["Dennis", "Erf"], "losers": ["Stormzy", "Osh"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0006", "id": "early_5", "verified": false}, {"date": "2026-04-04", "winners": ["Eli", "Kam"], "losers": ["Stormzy", "Chloe"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0007", "id": "early_6", "verified": false}, {"date": "2026-04-04", "winners": ["Stormzy", "Chloe"], "losers": ["Eli", "Kam"], "sets": [[7, 5], [4, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0008", "id": "early_7", "verified": false}, {"date": "2026-04-04", "winners": ["Max", "Ant Slice"], "losers": ["Stormzy", "Jords"], "sets": [[7, 6], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0009", "id": "early_8", "verified": false}, {"date": "2026-04-05", "winners": ["Ant Slice", "MK"], "losers": ["Max", "Jords"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0010", "id": "early_9", "verified": false}, {"date": "2026-04-05", "winners": ["Kaz", "Kam"], "losers": ["Len", "Tom"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0011", "id": "early_10", "verified": false}, {"date": "2026-04-05", "winners": ["Kaz", "Erf"], "losers": ["Len", "Osh"], "sets": [[6, 4], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0012", "id": "early_11", "verified": false}, {"date": "2026-04-05", "winners": ["Erf", "Max"], "losers": ["Kaz", "Jords"], "sets": [[2, 6], [3, 6]], "type": "doubles", "note": "from spreadsheet MAT0013", "id": "early_12", "verified": false}, {"date": "2026-04-05", "winners": ["Kaz", "Ant Slice"], "losers": ["Len", "Aubyn"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0014", "id": "early_13", "verified": false}, {"date": "2026-04-05", "winners": ["Len", "Ant Slice"], "losers": ["Kaz", "Aubyn"], "sets": [[1, 6], [3, 6]], "type": "doubles", "note": "from spreadsheet MAT0015", "id": "early_14", "verified": false}, {"date": "2026-04-05", "winners": ["Eli", "Stormzy"], "losers": ["Tom", "Rishi"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0016", "id": "early_15", "verified": false}, {"date": "2026-04-06", "winners": ["Stormzy", "bruh"], "losers": ["Kevin", "Eli"], "sets": [[6, 4], [6, 7], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0018", "id": "early_16", "verified": false}, {"date": "2026-04-07", "winners": ["Erf", "Ant Slice"], "losers": ["Osh", "Eli"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0019", "id": "early_17", "verified": false}, {"date": "2026-04-07", "winners": ["Stormzy", "Jords"], "losers": ["Tom", "Max"], "sets": [[6, 7], [6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0020", "id": "early_18", "verified": false}, {"date": "2026-04-08", "winners": ["Ant Slice", "Kam"], "losers": ["Stormzy", "bruh"], "sets": [[7, 6], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0021", "id": "early_19", "verified": false}, {"date": "2026-04-08", "winners": ["Kaz", "Erf"], "losers": ["Dennis", "Eli"], "sets": [[1, 6], [2, 6]], "type": "doubles", "note": "from spreadsheet MAT0022", "id": "early_20", "verified": false}, {"date": "2026-04-09", "winners": ["Eli", "Twoshay"], "losers": ["Osh", "Jords"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0023", "id": "early_21", "verified": false}, {"date": "2026-04-09", "winners": ["Osh", "Twoshay"], "losers": ["Erf", "KC"], "sets": [[6, 2], [2, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0024", "id": "early_22", "verified": false}, {"date": "2026-04-10", "winners": ["Stormzy", "Chloe"], "losers": ["Tom", "Jords"], "sets": [[5, 7], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0025", "id": "early_23", "verified": false}, {"date": "2026-04-11", "winners": ["Eli", "Erf"], "losers": ["Stormzy", "Osh"], "sets": [[6, 2], [2, 6], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0026", "id": "early_24", "verified": false}, {"date": "2026-04-12", "winners": ["Jords", "Erf"], "losers": ["Tom", "Kevin"], "sets": [[6, 3], [3, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0027", "id": "early_25", "verified": false}, {"date": "2026-04-15", "winners": ["Stormzy", "Chloe"], "losers": ["Max", "Eli"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0028", "id": "early_26", "verified": false}, {"date": "2026-04-16", "winners": ["Eli", "Stormzy"], "losers": ["Rishi", "Erf"], "sets": [[2, 6], [7, 6], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0030", "id": "early_27", "verified": false}, {"date": "2026-04-17", "winners": ["Jords", "Ant Slice"], "losers": ["Stormzy", "Chloe"], "sets": [[7, 6], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0031", "id": "early_28", "verified": false}, {"date": "2026-04-19", "winners": ["Jords", "KC"], "losers": ["Max", "Rishi"], "sets": [[1, 6], [6, 4], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0032", "id": "early_29", "verified": false}, {"date": "2026-04-02", "winners": ["KC", "MK"], "losers": ["Kam", "Stormzy"], "sets": [[6, 3], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0033", "id": "early_30", "verified": false}, {"date": "2026-04-09", "winners": ["Tee", "MK"], "losers": ["Aubyn", "Max"], "sets": [[6, 4], [7, 6]], "type": "doubles", "note": "from spreadsheet MAT0034", "id": "early_31", "verified": false}, {"date": "2026-04-19", "winners": ["Ant Slice", "Jords"], "losers": ["Tom", "Aubyn"], "sets": [[5, 7], [6, 1], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0035", "id": "early_32", "verified": false}, {"date": "2026-04-20", "winners": ["Len", "Mulley"], "losers": ["Twoshay", "Eli"], "sets": [[6, 2], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0036", "id": "early_33", "verified": false}, {"date": "2026-04-21", "winners": ["KC", "Erf"], "losers": ["Rishi", "Kaz"], "sets": [[7, 6], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0038", "id": "early_34", "verified": false}, {"date": "2026-04-22", "winners": ["Jords", "Ant Slice"], "losers": ["Eli", "Chloe"], "sets": [[3, 6], [7, 5], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0039", "id": "early_35", "verified": false}, {"date": "2026-04-21", "winners": ["Jords", "Erf"], "losers": ["Chloe", "Tom"], "sets": [[4, 6], [6, 1], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0040", "id": "early_36", "verified": false}, {"date": "2026-04-22", "winners": ["Rhys", "Aubyn"], "losers": ["Skapz", "Tee"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0042", "id": "early_37", "verified": false}, {"date": "2026-04-23", "winners": ["Max", "Dennis"], "losers": ["Kaz", "Rishi"], "sets": [[6, 7], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0043", "id": "early_38", "verified": false}, {"date": "2026-04-24", "winners": ["Stormzy", "Eli"], "losers": ["Jords", "Max"], "sets": [[4, 6], [6, 2], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0044", "id": "early_39", "verified": false}, {"date": "2026-04-27", "winners": ["Jords", "Erf"], "losers": ["Kaz", "Skapz"], "sets": [[7, 5], [1, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0045", "id": "early_40", "verified": false}, {"date": "2026-04-26", "winners": ["KC", "Erf"], "losers": ["Kaz", "Len"], "sets": [[6, 4], [4, 6], [1, 6]], "type": "doubles", "note": "from spreadsheet MAT0046", "id": "early_41", "verified": false}, {"date": "2026-04-25", "winners": ["Erf", "KC"], "losers": ["Kaz", "Rishi"], "sets": [[6, 7], [1, 6]], "type": "doubles", "note": "from spreadsheet MAT0047", "id": "early_42", "verified": false}, {"date": "2026-04-28", "winners": ["Stormzy", "Chloe"], "losers": ["Manny", "Rishi"], "sets": [[3, 6], [6, 2], [7, 6]], "type": "doubles", "note": "from spreadsheet MAT0048", "id": "early_43", "verified": false}, {"date": "2026-04-25", "winners": ["Kaz", "Erf"], "losers": ["Abby", "Alfie"], "sets": [[6, 7], [6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0050", "id": "early_45", "verified": false}, {"date": "2026-04-30", "winners": ["Jords", "Osh"], "losers": ["Erf", "Max"], "sets": [[7, 5], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0051", "id": "early_46", "verified": false}, {"date": "2026-04-30", "winners": ["Manny", "Osh"], "losers": ["Twoshay", "Erf"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0052", "id": "early_47", "verified": false}, {"date": "2026-04-30", "winners": ["Alfie", "Manny"], "losers": ["Kaz", "Twoshay"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0053", "id": "early_48", "verified": false}, {"date": "2026-04-30", "winners": ["Kaz", "Twoshay"], "losers": ["Alfie", "Manny"], "sets": [[4, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0054", "id": "early_49", "verified": false}, {"date": "2026-05-01", "winners": ["Kaz", "Alfie"], "losers": ["Manny", "Twoshay"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0055", "id": "early_50", "verified": false}, {"date": "2026-07-20", "winners": ["Kaz", "Tom"], "losers": ["Rocky", "MK"], "sets": [[6, 0], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0091", "id": "zgnew_0", "verified": true}, {"date": "2026-07-21", "winners": ["Tom", "Shaun"], "losers": ["Max", "Tee"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0092", "id": "zgnew_1", "verified": true}, {"date": "2026-08-01", "winners": ["Jams", "Rishi"], "losers": ["Fatch", "Tom"], "sets": [[4, 6], [6, 3], [7, 6]], "type": "doubles", "note": "from spreadsheet MAT0098", "id": "zgnew_2", "verified": true}, {"date": "2026-08-02", "winners": ["Tee", "MK"], "losers": ["Tom", "Shaun"], "sets": [[5, 7], [6, 4], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0099", "id": "zgnew_3", "verified": true}, {"date": "2026-08-04", "winners": ["MK", "Fatch"], "losers": ["Shaun", "Tom"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0102", "id": "zgnew_4", "verified": true}, {"date": "2026-08-10", "winners": ["Tom", "Erf"], "losers": ["Antz", "Fatch"], "sets": [[6, 3], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0115", "id": "zgnew_5", "verified": true}, {"date": "2026-08-25", "winners": ["Tom", "Rishi"], "losers": ["Max", "Rocky"], "sets": [[2, 6], [6, 3], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0130", "id": "zgnew_6", "verified": true}];
 const BASE_TIERS = {"Manny": "S", "Erf": "A", "Kaz": "A", "Twoshay": "A", "Osh": "A", "Eli": "A", "Dennis": "A", "Ant Slice": "A", "Len": "A", "Rishi": "B", "Omar": "B", "Chloe": "B", "Max": "B", "James": "B", "MK": "B", "Antz": "B", "Rocky": "B", "Harry": "B", "PDM": "B", "Shaun": "B", "Jords": "B", "Tarique": "B", "Tom": "B", "Fatch": "B", "Jams": "C", "Aubyn": "C", "Rhys": "C", "Tee": "C", "Skapz": "C", "Stormzy": "B", "KC": "A", "Mulley": "B", "Fee": "C", "Carla": "B", "Del": "A", "M.R": "C", "Kam": "B", "bruh": "B", "Kevin": "B", "Abby": "B", "Alfie": "B"};
 const BASE_ACTIVE = {"Manny": true, "Erf": true, "Kaz": true, "Twoshay": false, "Osh": true, "Eli": true, "Dennis": true, "Ant Slice": true, "Len": true, "Rishi": true, "Omar": true, "Chloe": true, "Max": true, "James": true, "MK": true, "Antz": true, "Rocky": true, "Harry": true, "PDM": true, "Shaun": true, "Jords": true, "Tarique": true, "Tom": true, "Fatch": true, "Jams": true, "Aubyn": true, "Rhys": true, "Tee": true, "Skapz": true, "Stormzy": true, "KC": true, "Mulley": true, "Fee": true, "Carla": true, "Del": false, "M.R": true, "Kam": false, "bruh": false, "Kevin": false, "Abby": false, "Alfie": false};
+// Tier a player started at, if different from their current tier (e.g. a promotion/demotion).
+// Used only to seed their rating correctly at their first-ever match -- their current tier
+// (BASE_TIERS, above) is still what's used everywhere else: Find a Game, tier boundaries, badges.
+const BASE_STARTING_TIER = {"Fatch": "C"};
 
 // ===================== LIVE STATE =====================
 let ALL_MATCHES = [];      // BASE_MATCHES + user-added
 let TIER_MAP = {};         // name -> tier (base + overrides + new players)
 let ACTIVE_MAP = {};       // name -> bool
+let STARTING_TIER_MAP = {};// name -> tier they started at, if different from current (used for seeding only)
 
 let PLAYERS = [];
 let MATCHES = [];
@@ -771,10 +778,12 @@ let currentUserName = '';
 function rebuildMapsFromState(){
   TIER_MAP = {...BASE_TIERS};
   ACTIVE_MAP = {...BASE_ACTIVE};
+  STARTING_TIER_MAP = {...BASE_STARTING_TIER};
   Object.keys(tagOverridesState).forEach(name=>{
     const o = tagOverridesState[name];
     if(o.tier) TIER_MAP[name] = o.tier;
     if(typeof o.active === 'boolean') ACTIVE_MAP[name] = o.active;
+    if(o.startingTier) STARTING_TIER_MAP[name] = o.startingTier;
   });
 }
 
@@ -804,10 +813,11 @@ function getDisplayMatches(){
 }
 
 // ===================== RATING ENGINE =====================
-function computeElo(matches, tierMap){
+function computeElo(matches, tierMap, startingTierMap){
+  startingTierMap = startingTierMap || {};
   const ratings = {};
   function R(name){
-    if(!(name in ratings)) ratings[name] = TIER_SEED[tierMap[name] || 'B'];
+    if(!(name in ratings)) ratings[name] = TIER_SEED[startingTierMap[name] || tierMap[name] || 'B'];
     return ratings[name];
   }
   const K = 28, EPOCHS = 300;
@@ -1154,7 +1164,7 @@ function buildDifficultySuggestions(allPlayers, activePlayers){
 function recomputeAll(){
   rebuildMapsFromState();
   ALL_MATCHES = getEffectiveMatches();
-  const ratings = computeElo(ALL_MATCHES, TIER_MAP);
+  const ratings = computeElo(ALL_MATCHES, TIER_MAP, STARTING_TIER_MAP);
   MATCHES = enrichMatches(ALL_MATCHES, ratings);
   PLAYERS = buildPlayers(MATCHES, ratings, TIER_MAP, ACTIVE_MAP);
   H2H = buildH2H(MATCHES);
@@ -1305,7 +1315,8 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
     const isFindGame = activeTab === 'findgame';
     const isManage = activeTab === 'manage';
     const isGames = activeTab === 'games';
-    const isListView = !isCallouts && !isPlayers && !isFindGame && !isManage && !isGames;
+    const isH2H = activeTab === 'h2h';
+    const isListView = !isCallouts && !isPlayers && !isFindGame && !isManage && !isGames && !isH2H;
 
     document.getElementById('tierbar').style.display = isListView ? 'flex' : 'none';
     document.getElementById('searchWrap').style.display = (isListView || isPlayers) ? 'block' : 'none';
@@ -1321,6 +1332,7 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
     document.getElementById('findGameView').style.display = isFindGame ? 'block' : 'none';
     document.getElementById('manageView').style.display = isManage ? 'block' : 'none';
     document.getElementById('gamesView').style.display = isGames ? 'block' : 'none';
+    document.getElementById('h2hView').style.display = isH2H ? 'block' : 'none';
 
     document.getElementById('headerSub').textContent = activeTab==='wl'
       ? 'Parsed from the group chats, June–August 2026 · tap a player for their match log'
@@ -1334,7 +1346,9 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
               ? 'Add results going forward and tag who\'s active — everything above recalculates instantly'
               : (activeTab==='games'
                 ? 'Every game, newest first — pending ones need approval before they count'
-                : 'Every player, A–Z · tap a name for their full profile')))));
+                : (activeTab==='h2h'
+                  ? 'Pick two players and see their full history, as opponents and as teammates'
+                  : 'Every player, A–Z · tap a name for their full profile'))))));
     document.getElementById('explainer').innerHTML = activeTab==='wl'
       ? 'Built from readable trophy-emoji results across the main group chat and Results Only, with names and tiers confirmed against the group. Excludes single-set/"money game" results, matches against non-members, and a couple of results with no opponent named or a disputed winner.'
       : (activeTab==='power'
@@ -1347,13 +1361,16 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
               ? 'This data is shared — anyone who opens this artifact sees the same games and tags. Ratings, tiers, and every suggestion above recompute from scratch the moment you add a game or change a tag.'
               : (activeTab==='games'
                 ? 'Editing or deleting a game recalculates every rating instantly. Your name is required for any change here so the group can see who touched what.'
-                : '')))));
+                : (activeTab==='h2h'
+                  ? 'Opponent record only counts matches where the two were on opposite teams; teammate record only counts matches where they played together.'
+                  : ''))))));
 
     if(isCallouts) renderCallouts();
     else if(isPlayers) renderPlayersTab();
     else if(isFindGame) renderFindGame();
     else if(isManage) renderManage();
     else if(isGames) renderGamesTab();
+    else if(isH2H) renderH2H();
     else render();
   };
 });
@@ -1947,6 +1964,97 @@ function buildRankingNeighborsSection(name){
   return html;
 }
 
+function computePlayerJourney(name){
+  const indexed = ALL_MATCHES.map((m, idx) => ({ ...m, _idx: idx }));
+  const relevant = indexed.filter(m => m.winners.includes(name) || m.losers.includes(name));
+  if(relevant.length === 0) return null;
+
+  relevant.sort((a,b)=>{
+    if(a.date !== b.date) return a.date < b.date ? -1 : 1;
+    return a._idx - b._idx; // stable tie-break for same-day matches
+  });
+
+  const tier = STARTING_TIER_MAP[name] || TIER_MAP[name] || 'B';
+  const journey = [{ type:'start', date: null, rating: TIER_SEED[tier], label: `Tier ${tier} starting point` }];
+
+  relevant.forEach(rm=>{
+    const subset = indexed.filter(m => m.date < rm.date || (m.date === rm.date && m._idx <= rm._idx));
+    const ratings = computeElo(subset, TIER_MAP, STARTING_TIER_MAP);
+    if(!(name in ratings)) return;
+    const newRating = Math.round(ratings[name]*10)/10;
+    const prevRating = journey[journey.length-1].rating;
+    const delta = Math.round((newRating - prevRating)*10)/10;
+    const enriched = MATCHES[rm._idx];
+    const won = rm.winners.includes(name);
+    const myExpected = won ? enriched.expected_winshare : (1 - enriched.expected_winshare);
+    const myActual = won ? enriched.game_share_winner : (1 - enriched.game_share_winner);
+    journey.push({
+      type: 'match', _idx: rm._idx, date: rm.date, rating: newRating, delta, won,
+      overperfPts: Math.round((myActual - myExpected)*1000)/10,
+    });
+  });
+
+  // Always finish on the true current rating. Ratings are solved jointly across everyone, so
+  // matches other people played after this player's own last game can still nudge it slightly --
+  // this final point uses the exact same full-dataset computation as the number shown above it.
+  const finalRatings = computeElo(ALL_MATCHES, TIER_MAP, STARTING_TIER_MAP);
+  const finalVal = Math.round(finalRatings[name]*10)/10;
+  const lastPoint = journey[journey.length-1];
+  if(lastPoint.rating !== finalVal){
+    const delta = Math.round((finalVal - lastPoint.rating)*10)/10;
+    journey.push({ type:'today', date: 'today', rating: finalVal, delta, label: 'Today (current)' });
+  }
+  return journey;
+}
+
+function buildJourneyChartSvg(journey){
+  const w = 320, h = 110, padX = 8, padY = 12;
+  const ratings = journey.map(j=>j.rating);
+  const minR = Math.min(...ratings), maxR = Math.max(...ratings);
+  const range = (maxR - minR) || 1;
+  const stepX = journey.length > 1 ? (w - padX*2) / (journey.length - 1) : 0;
+  const toXY = (j,i) => {
+    const x = padX + i*stepX;
+    const y = padY + (h - padY*2) * (1 - (j.rating - minR)/range);
+    return [x, y];
+  };
+  const points = journey.map((j,i)=> toXY(j,i).map(v=>v.toFixed(1)).join(',')).join(' ');
+
+  const dots = journey.map((j,i)=>{
+    const [x,y] = toXY(j,i);
+    let color = '#a89c82'; // neutral (starting point)
+    if(j.type === 'match' || j.type === 'today'){
+      color = j.delta > 0 ? '#5a9c5a' : (j.delta < 0 ? '#b5453f' : '#a89c82');
+    }
+    const r = (i === journey.length-1) ? 4 : 2.3;
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${color}"/>`;
+  }).join('');
+
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:${h}px; display:block;">
+    <polyline points="${points}" fill="none" stroke="#a89c82" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" opacity="0.45"/>
+    ${dots}
+  </svg>`;
+}
+
+function buildJourneySection(name, journey){
+  if(!journey || journey.length < 2) return '';
+  const start = Math.round(journey[0].rating);
+  const end = Math.round(journey[journey.length-1].rating);
+  const diff = end - start;
+  const diffLabel = diff >= 0 ? `+${diff}` : `${diff}`;
+  const diffClass = diff > 0 ? 'perf-pos' : (diff < 0 ? 'perf-neg' : '');
+  const startingTierOverride = STARTING_TIER_MAP[name];
+  const currentTier = TIER_MAP[name];
+  const tierNote = (startingTierOverride && startingTierOverride !== currentTier)
+    ? ` ${name} started at Tier ${startingTierOverride} and is now Tier ${currentTier} — the starting point reflects Tier ${startingTierOverride}, not the current tier, since that's what was true when they first played.`
+    : '';
+
+  let html = `<div class="section-heading" style="margin-top:14px;">📈 Rating journey</div>`;
+  html += `<div class="section-sub">From tier starting point (${start}) to today (${end}) — <span class="${diffClass}">${diffLabel} pts</span>. Each dot is one game — green moved the rating up, red moved it down, based on games won vs. what was expected, not just the win/loss result. The per-game delta is also shown on each match below.${tierNote}</div>`;
+  html += `<div class="matchup-vs" style="padding:8px;">${buildJourneyChartSvg(journey)}</div>`;
+  return html;
+}
+
 function openSheet(name){
   const p = PLAYERS.find(x=>x.name===name);
   document.getElementById('sheetName').textContent = name;
@@ -1958,8 +2066,12 @@ function openSheet(name){
     <div><b>${p.wins}-${p.losses}</b>Record</div>
     <div><b>${p.upset_wins}-${p.upset_losses}</b>Upset W-L</div>
   `;
-  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
-  const ms = MATCHES.filter(m => m.winners.includes(name) || m.losers.includes(name));
+  const journey = computePlayerJourney(name);
+  const deltaByIdx = {};
+  if(journey) journey.forEach(j=>{ if(j.type==='match') deltaByIdx[j._idx] = j.delta; });
+
+  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildJourneySection(name, journey) + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
+  const ms = MATCHES.map((m, idx)=>({...m, _idx: idx})).filter(m => m.winners.includes(name) || m.losers.includes(name));
   ms.sort((a,b)=> a.date < b.date ? 1 : -1);
   const box = document.getElementById('sheetMatches');
   box.innerHTML = ms.map(m=>{
@@ -1998,6 +2110,14 @@ function openSheet(name){
     const namesWithRatings = myTeam.map(n => `${n} (${ratingOf(n)})`).join(' &amp; ');
     const oppWithRatings = oppTeam.map(n => `${n} (${ratingOf(n)})`).join(' &amp; ');
 
+    const delta = deltaByIdx[m._idx];
+    let deltaLabel = '';
+    if(delta !== undefined){
+      const deltaClass = delta > 0 ? 'perf-pos' : (delta < 0 ? 'perf-neg' : '');
+      const deltaText = delta > 0 ? `+${delta}` : `${delta}`;
+      deltaLabel = `<div style="margin-top:4px; font-weight:700;"><span class="${deltaClass}">${deltaText} pts</span> <span style="color:var(--text-dim); font-weight:400; font-size:11px;">rating change from this game</span></div>`;
+    }
+
     return `<div class="match">
       <div class="top"><span>${m.date}${m.type==='singles' ? ' · Singles' : ''}</span><span style="color:${won?'var(--green)':'var(--red)'}">${won?'WIN':'LOSS'}</span></div>
       ${upsetTag}
@@ -2008,6 +2128,7 @@ function openSheet(name){
         actually took ${myGames}/${myGames+oppGames} games (${Math.round(myActualShare*100)}%)
       </div>
       <div style="margin-top:4px;">${perfLabel}</div>
+      ${deltaLabel}
     </div>`;
   }).join('');
   document.getElementById('overlay').classList.add('show');
@@ -2038,7 +2159,18 @@ function renderManage(){
   </div>`;
 
   html += `<div class="section-heading">➕ Add a game</div>`;
-  html += `<div class="section-sub">Enter the two teams and the set scores (winner's score first in each set). New games go to the <b>Games</b> tab as pending until someone approves them — nothing here affects ratings until then.</div>`;
+  html += `<div class="section-sub">Paste a result in the usual WhatsApp shorthand and it'll fill in the form below for you to check before submitting.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Quick paste</label>
+      <textarea id="agQuickPaste" class="fg-select" rows="5" style="width:100%; font-family:monospace; resize:vertical;" placeholder="Kaz &amp; PDM 🏆
+6-4
+6-4
+Rishi &amp; Dennis"></textarea>
+    </div>
+    <div class="fg-row"><button class="preset-btn" id="agQuickParse" style="width:100%;">Parse &amp; fill form below</button></div>
+    <div id="agQuickMessage" class="section-sub"></div>
+  </div>`;
+  html += `<div class="section-sub">Or fill in the fields directly. New games go to the <b>Games</b> tab as pending until someone approves them — nothing here affects ratings until then.</div>`;
   html += `<div class="fg-controls">
     <div class="fg-row"><label class="fg-label">Date</label><input id="agDate" type="date" class="fg-select" /></div>
     <div class="fg-row"><label class="fg-label">Match type</label>
@@ -2131,6 +2263,34 @@ function renderManage(){
     renderAddGameSets();
   };
 
+  document.getElementById('agQuickParse').onclick = ()=>{
+    const msg = document.getElementById('agQuickMessage');
+    const raw = document.getElementById('agQuickPaste').value;
+    const result = parseQuickEntryText(raw);
+    if(result.error){
+      msg.textContent = result.error;
+      msg.style.color = 'var(--red)';
+      return;
+    }
+    msg.style.color = '';
+    msg.textContent = 'Parsed — check the fields below and hit Submit.';
+
+    const typeBtn = document.querySelector(`#agTypeToggle .fg-toggle-btn[data-type="${result.isSingles ? 'singles' : 'doubles'}"]`);
+    if(typeBtn) typeBtn.click();
+
+    document.getElementById('agA1').value = result.winners[0] || '';
+    document.getElementById('agA2').value = result.winners[1] || '';
+    document.getElementById('agB1').value = result.losers[0] || '';
+    document.getElementById('agB2').value = result.losers[1] || '';
+
+    addGameSets = result.sets.map(([w,l])=>({ w: String(w), l: String(l) }));
+    renderAddGameSets();
+    checkForNewPlayers();
+
+    const dateEl = document.getElementById('agDate');
+    try { dateEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){ /* non-critical */ }
+  };
+
   ['agA1','agA2','agB1','agB2'].forEach(id=>{
     document.getElementById(id).addEventListener('input', checkForNewPlayers);
   });
@@ -2190,6 +2350,64 @@ function renderManage(){
   };
 
   renderPlayerTagsList();
+}
+
+function parseQuickEntryText(text){
+  const rawLines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  if(rawLines.length < 3){
+    return { error: 'Needs a winning team line, at least one set score, and a losing team line.' };
+  }
+
+  const scoreRe = /(\d+)\s*-\s*(\d+)/;
+  const teamLines = [];
+  const setLines = [];
+  rawLines.forEach(line=>{
+    if(!line.includes('&') && !/[a-zA-Z]{3,}/.test(line.replace(/🏆/g,'')) && scoreRe.test(line)){
+      setLines.push(line);
+    } else {
+      teamLines.push(line);
+    }
+  });
+
+  if(teamLines.length !== 2){
+    return { error: `Expected exactly 2 team lines but found ${teamLines.length}. Make sure each set score is on its own line, like "6-4".` };
+  }
+  if(setLines.length === 0){
+    return { error: 'No set scores found — each set should be on its own line, like "6-4".' };
+  }
+
+  const [line1, line2] = teamLines;
+  const line1HasTrophy = line1.includes('🏆');
+  const line2HasTrophy = line2.includes('🏆');
+  if(line1HasTrophy === line2HasTrophy){
+    return { error: 'Could not tell who won — put 🏆 next to exactly one team\'s name.' };
+  }
+
+  const cleanTeam = (line) => line.replace(/🏆/g,'').trim().split('&').map(n=>n.trim()).filter(n=>n.length>0);
+  const team1 = cleanTeam(line1);
+  const team2 = cleanTeam(line2);
+
+  if(team1.length !== team2.length || (team1.length!==1 && team1.length!==2)){
+    return { error: 'Each team needs the same number of players — 1 for singles, 2 for doubles.' };
+  }
+
+  const sets = [];
+  setLines.forEach(line=>{
+    const m = line.match(scoreRe);
+    if(m) sets.push([parseInt(m[1],10), parseInt(m[2],10)]);
+  });
+  if(sets.length === 0){
+    return { error: 'Could not read any set scores.' };
+  }
+
+  const winnerIsTeam1 = line1HasTrophy;
+  const orientedSets = winnerIsTeam1 ? sets : sets.map(([a,b])=>[b,a]);
+  return {
+    winners: winnerIsTeam1 ? team1 : team2,
+    losers: winnerIsTeam1 ? team2 : team1,
+    sets: orientedSets,
+    isSingles: team1.length === 1,
+  };
 }
 
 function renderAddGameSets(){
@@ -2297,20 +2515,38 @@ async function submitNewGame(){
 function renderPlayerTagsList(){
   const box = document.getElementById('playerTagsList');
   const rows = [...PLAYERS].sort((a,b)=>a.name.localeCompare(b.name));
-  box.innerHTML = rows.map(p=>`
-    <div class="alpha-row">
-      <div class="alpha-name">${p.name}</div>
-      <select class="fg-select ptag-tier" data-name="${p.name}" style="width:90px; margin-right:8px;">
+  box.innerHTML = rows.map(p=>{
+    const startingTier = STARTING_TIER_MAP[p.name] || '';
+    return `
+    <div class="alpha-row" style="flex-wrap:wrap; row-gap:6px;">
+      <div class="alpha-name" style="flex-basis:100%;">${p.name}</div>
+      <select class="fg-select ptag-tier" data-name="${p.name}" style="width:80px;">
         ${['S','A','B','C'].map(t=>`<option value="${t}" ${t===p.tier?'selected':''}>${t}</option>`).join('')}
+      </select>
+      <select class="fg-select ptag-starting" data-name="${p.name}" style="width:150px;" title="Only affects how their rating was seeded at their first match">
+        <option value="" ${startingTier===''?'selected':''}>Started: same as now</option>
+        ${['S','A','B','C'].map(t=>`<option value="${t}" ${t===startingTier?'selected':''}>Started at Tier ${t}</option>`).join('')}
       </select>
       <button class="preset-btn ptag-active ${p.active?'active':''}" data-name="${p.name}" style="width:80px;">${p.active?'Active':'Inactive'}</button>
     </div>
-  `).join('');
+  `;}).join('');
 
   box.querySelectorAll('.ptag-tier').forEach(sel=>{
     sel.addEventListener('change', async e=>{
       const name = e.target.dataset.name;
       tagOverridesState[name] = {...(tagOverridesState[name]||{}), tier: e.target.value};
+      await saveTagOverrides(tagOverridesState);
+      recomputeAll();
+      renderPlayerTagsList();
+    });
+  });
+  box.querySelectorAll('.ptag-starting').forEach(sel=>{
+    sel.addEventListener('change', async e=>{
+      const name = e.target.dataset.name;
+      const val = e.target.value;
+      const cur = {...(tagOverridesState[name]||{})};
+      if(val) cur.startingTier = val; else delete cur.startingTier;
+      tagOverridesState[name] = cur;
       await saveTagOverrides(tagOverridesState);
       recomputeAll();
       renderPlayerTagsList();
@@ -2358,6 +2594,102 @@ function requireName(){
   currentUserName = name;
   saveMyName(name);
   return name;
+}
+
+// ===================== HEAD TO HEAD =====================
+let h2hPlayerA = null;
+let h2hPlayerB = null;
+
+function renderH2H(){
+  const box = document.getElementById('h2hView');
+  const names = [...PLAYERS].map(p=>p.name).sort((a,b)=>a.localeCompare(b));
+  if(!h2hPlayerA) h2hPlayerA = names[0];
+  if(!h2hPlayerB) h2hPlayerB = names.find(n=>n!==h2hPlayerA) || names[0];
+
+  let html = `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Player A</label>
+      <select id="h2hSelectA" class="fg-select"></select>
+    </div>
+    <div class="fg-row"><label class="fg-label">Player B</label>
+      <select id="h2hSelectB" class="fg-select"></select>
+    </div>
+  </div>`;
+
+  if(h2hPlayerA === h2hPlayerB){
+    html += `<div class="section-sub">Pick two different players to compare.</div>`;
+    box.innerHTML = html;
+    wireH2HSelects(names);
+    return;
+  }
+
+  const opponentMatches = MATCHES.filter(m=>{
+    const aWon = m.winners.includes(h2hPlayerA) && m.losers.includes(h2hPlayerB);
+    const bWon = m.winners.includes(h2hPlayerB) && m.losers.includes(h2hPlayerA);
+    return aWon || bWon;
+  }).sort((a,b)=> a.date < b.date ? 1 : -1);
+
+  const teammateMatches = MATCHES.filter(m=>{
+    return (m.winners.includes(h2hPlayerA) && m.winners.includes(h2hPlayerB)) ||
+           (m.losers.includes(h2hPlayerA) && m.losers.includes(h2hPlayerB));
+  }).sort((a,b)=> a.date < b.date ? 1 : -1);
+
+  const aWins = opponentMatches.filter(m=>m.winners.includes(h2hPlayerA)).length;
+  const bWins = opponentMatches.filter(m=>m.winners.includes(h2hPlayerB)).length;
+
+  html += `<div class="section-heading" style="margin-top:6px;">⚔️ As opponents</div>`;
+  if(opponentMatches.length === 0){
+    html += `<div class="section-sub">${h2hPlayerA} and ${h2hPlayerB} have never played against each other.</div>`;
+  } else {
+    html += `<div class="matchup-vs" style="text-align:center; font-size:16px; padding:12px;">
+      <b style="color:${aWins>bWins?'var(--gold-bright)':'var(--text)'};">${h2hPlayerA} ${aWins}</b>
+      <span style="color:var(--text-dim); margin:0 6px;">–</span>
+      <b style="color:${bWins>aWins?'var(--gold-bright)':'var(--text)'};">${bWins} ${h2hPlayerB}</b>
+      <div style="font-size:11px; color:var(--text-dim); margin-top:4px;">${opponentMatches.length} meeting${opponentMatches.length===1?'':'s'} as opponents</div>
+    </div>`;
+    opponentMatches.forEach(m=>{
+      const aWon = m.winners.includes(h2hPlayerA);
+      const aTeam = aWon ? m.winners : m.losers;
+      const bTeam = aWon ? m.losers : m.winners;
+      const aPartner = aTeam.filter(n=>n!==h2hPlayerA)[0];
+      const bPartner = bTeam.filter(n=>n!==h2hPlayerB)[0];
+      html += `<div class="callout-card">
+        <div class="cc-title" style="color:${aWon?'var(--green)':'var(--red)'};">${aWon ? h2hPlayerA : h2hPlayerB} won</div>
+        <div class="cc-detail">${m.date} · ${aPartner?`${h2hPlayerA} &amp; ${aPartner}`:h2hPlayerA} vs ${bPartner?`${h2hPlayerB} &amp; ${bPartner}`:h2hPlayerB}<br/>${m.score}</div>
+      </div>`;
+    });
+  }
+
+  html += `<div class="section-heading">🤝 As teammates</div>`;
+  if(teammateMatches.length === 0){
+    html += `<div class="section-sub">${h2hPlayerA} and ${h2hPlayerB} have never partnered together.</div>`;
+  } else {
+    const wins = teammateMatches.filter(m=>m.winners.includes(h2hPlayerA)).length;
+    const losses = teammateMatches.length - wins;
+    const partnership = PARTNERSHIPS.find(p=> p.pair.includes(h2hPlayerA) && p.pair.includes(h2hPlayerB));
+    html += `<div class="matchup-vs" style="padding:10px;">
+      <b>${wins}-${losses}</b> together${partnership ? ` · <span class="${partnership.avg_overperf>3?'perf-pos':(partnership.avg_overperf<-3?'perf-neg':'')}">${partnership.avg_overperf>=0?'+':''}${partnership.avg_overperf}% chemistry</span>` : ''}
+    </div>`;
+    teammateMatches.forEach(m=>{
+      const won = m.winners.includes(h2hPlayerA);
+      const oppTeam = won ? m.losers : m.winners;
+      html += `<div class="callout-card">
+        <div class="cc-title" style="color:${won?'var(--green)':'var(--red)'};">${won?'WIN':'LOSS'}</div>
+        <div class="cc-detail">${m.date} · vs ${oppTeam.join(' &amp; ')}<br/>${m.score}</div>
+      </div>`;
+    });
+  }
+
+  box.innerHTML = html;
+  wireH2HSelects(names);
+}
+
+function wireH2HSelects(names){
+  const selA = document.getElementById('h2hSelectA');
+  const selB = document.getElementById('h2hSelectB');
+  selA.innerHTML = names.map(n=>`<option value="${n}" ${n===h2hPlayerA?'selected':''}>${n}</option>`).join('');
+  selB.innerHTML = names.map(n=>`<option value="${n}" ${n===h2hPlayerB?'selected':''}>${n}</option>`).join('');
+  selA.addEventListener('change', e=>{ h2hPlayerA = e.target.value; renderH2H(); });
+  selB.addEventListener('change', e=>{ h2hPlayerB = e.target.value; renderH2H(); });
 }
 
 function renderGamesTab(){
