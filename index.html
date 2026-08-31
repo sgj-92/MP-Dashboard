@@ -420,6 +420,18 @@
     <button class="tab-btn" data-tab="manage">Manage</button>
     <button class="tab-btn" data-tab="games">Games</button>
   </div>
+  <div class="minGamesRow" id="dataQualityRow" style="background:var(--bg2); border:1px solid var(--gold-dim); border-radius:10px; padding:8px 10px;">
+    <span class="minGamesLabel" style="color:var(--gold-bright); font-weight:700;">Data:</span>
+    <select id="dataQualitySelect" class="fg-select" style="width:220px;">
+      <option value="all">All data</option>
+      <option value="verified">June onwards only (cross-checked)</option>
+      <option value="unverified">Pre-June only (single-sourced)</option>
+    </select>
+  </div>
+  <div class="minGamesRow" id="monthFilterRow">
+    <span class="minGamesLabel">Month:</span>
+    <select id="monthSelect" class="fg-select" style="width:170px;"></select>
+  </div>
   <div class="tierbar" id="tierbar"></div>
   <div class="searchwrap" id="searchWrap">
     <input id="search" type="text" placeholder="Search a player…" />
@@ -446,18 +458,6 @@
       <button class="preset-btn" data-n="5">5+</button>
       <button class="preset-btn active" data-n="10">10+</button>
     </div>
-  </div>
-  <div class="minGamesRow" id="monthFilterRow">
-    <span class="minGamesLabel">Month:</span>
-    <select id="monthSelect" class="fg-select" style="width:170px;"></select>
-  </div>
-  <div class="minGamesRow" id="dataQualityRow">
-    <span class="minGamesLabel">Data:</span>
-    <select id="dataQualitySelect" class="fg-select" style="width:220px;">
-      <option value="all">All data</option>
-      <option value="verified">June onwards only (cross-checked)</option>
-      <option value="unverified">Pre-June only (single-sourced)</option>
-    </select>
   </div>
 </div>
 
@@ -1158,7 +1158,7 @@ let query = "";
 let minGames = 10;
 let selectedMonth = 'all';
 let selectedGamesPlayer = 'all';
-let dataQualityFilter = 'all'; // 'all' | 'verified' (June onwards) | 'unverified' (pre-June, single-sourced)
+let dataQualityFilter = 'verified'; // 'all' | 'verified' (June onwards) | 'unverified' (pre-June, single-sourced)
 
 function getAvailableMonths(){
   const months = new Set();
@@ -1257,6 +1257,7 @@ function applyTabVisibility(){
 function rerenderCurrentTab(){
   if(activeTab==='wl' || activeTab==='power') render();
   else if(activeTab==='games') renderGamesTab();
+  else if(activeTab==='callouts') renderCallouts();
 }
 
 
@@ -1287,7 +1288,7 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
     document.getElementById('searchWrap').style.display = (isListView || isPlayers) ? 'block' : 'none';
     document.getElementById('minGamesRow').style.display = isListView ? 'flex' : 'none';
     document.getElementById('monthFilterRow').style.display = isListView ? 'flex' : 'none';
-    document.getElementById('dataQualityRow').style.display = isListView ? 'flex' : 'none';
+    document.getElementById('dataQualityRow').style.display = (isListView || isCallouts) ? 'flex' : 'none';
     document.getElementById('sortbar').style.display = (activeTab==='wl') ? 'flex' : 'none';
     document.getElementById('sortbarPower').style.display = (activeTab==='power') ? 'flex' : 'none';
     document.getElementById('list').style.display = isListView ? 'block' : 'none';
@@ -1316,7 +1317,7 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
       : (activeTab==='power'
         ? 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much.'
         : (activeTab==='callouts'
-          ? 'Suggested matchups are full 2v2s — a wingman is added to each side, chosen to keep team strength balanced, so these are games you could actually go and organize. This spans every tier, not just the ones with the least data — S/A near-ties get surfaced the same way as small-sample C-tier players. Every player also has their own Easy / Balanced / Hard opponent suggestions on their profile page.'
+          ? 'Suggested matchups are full 2v2s — a wingman is added to each side, chosen to keep team strength balanced, so these are games you could actually go and organize. This spans every tier, not just the ones with the least data — S/A near-ties get surfaced the same way as small-sample C-tier players. Every player also has their own Easy / Balanced / Hard opponent suggestions on their profile page. The Data filter above changes which matches feed these ratings — defaults to June onwards only.'
           : (activeTab==='findgame'
             ? '"Within my tier" keeps every suggested player inside your own tier — easy always means the weakest pair actually in your tier, hard the strongest, never a reach into a different tier. "Any tier" opens it up and targets a rating roughly 150 points below/above your own. Each suggested opponent pair also comes with a partner recommendation — the player who\'d make it an even match, with a proven-chemistry option flagged where one exists. Five options shown each time, ranked by fit — this is computed live, not a fixed list, so try different scopes and difficulties freely. Players who\'ve gone inactive are excluded from every suggestion here, though their history stays visible elsewhere.'
             : (activeTab==='manage'
