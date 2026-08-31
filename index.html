@@ -1917,23 +1917,28 @@ function buildDifficultySection(name){
 }
 
 function buildRankingNeighborsSection(name){
-  const sorted = [...PLAYERS].sort((a,b)=> b.rating - a.rating);
-  const idx = sorted.findIndex(p=>p.name===name);
+  const target = PLAYERS.find(p=>p.name===name);
+  if(!target) return '';
+  const pool = PLAYERS.filter(p => p.active || p.name === name).sort((a,b)=> b.rating - a.rating);
+  const idx = pool.findIndex(p=>p.name===name);
   if(idx === -1) return '';
-  const above = idx > 0 ? sorted[idx-1] : null;
-  const below = idx < sorted.length-1 ? sorted[idx+1] : null;
+  const above = idx > 0 ? pool[idx-1] : null;
+  const below = idx < pool.length-1 ? pool[idx+1] : null;
 
-  let html = `<div class="section-heading" style="margin-top:14px;">📊 Neighbors in the rankings</div>`;
+  let html = `<div class="section-heading" style="margin-top:14px;">📊 Neighbours in the rankings</div>`;
+  if(!target.active){
+    html += `<div class="section-sub">${name} is inactive — shown against the active player list only.</div>`;
+  }
   html += `<div class="matchup-vs">`;
   if(above){
-    const gap = Math.round((above.rating - PLAYERS.find(p=>p.name===name).rating)*10)/10;
+    const gap = Math.round((above.rating - target.rating)*10)/10;
     html += `<div>▲ <b>${above.name}</b> (Tier ${above.tier}, ${Math.round(above.rating)}) — ${gap} pts above</div>`;
   } else {
     html += `<div style="color:var(--text-dim);">▲ Nobody rated higher — top of the board</div>`;
   }
   html += `<div style="margin:6px 0; padding:4px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); text-align:center; color:var(--gold-bright); font-weight:700;">${name}</div>`;
   if(below){
-    const gap = Math.round((PLAYERS.find(p=>p.name===name).rating - below.rating)*10)/10;
+    const gap = Math.round((target.rating - below.rating)*10)/10;
     html += `<div>▼ <b>${below.name}</b> (Tier ${below.tier}, ${Math.round(below.rating)}) — ${gap} pts below</div>`;
   } else {
     html += `<div style="color:var(--text-dim);">▼ Nobody rated lower — bottom of the board</div>`;
