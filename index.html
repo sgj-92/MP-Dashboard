@@ -1117,13 +1117,32 @@ function bestPairNear(players, targetRating, exclude){
 
 function buildDifficultySuggestions(allPlayers, activePlayers){
   const diff = {};
+  const byTier = {};
+  activePlayers.forEach(p=>{ (byTier[p.tier]=byTier[p.tier]||[]).push(p); });
+
   allPlayers.forEach(p=>{
     const R = p.rating;
     const exclude = new Set([p.name]);
+    const tierPeers = (byTier[p.tier]||[]).filter(x=>x.name!==p.name);
+    const withinTier = tierPeers.length >= 2;
+
+    let easy, balanced, hard;
+    if(withinTier){
+      const tierRatings = (byTier[p.tier]||[]).map(x=>x.rating);
+      const tierMin = Math.min(...tierRatings), tierMax = Math.max(...tierRatings);
+      easy = bestPairNear(tierPeers, tierMin, exclude);
+      balanced = bestPairNear(tierPeers, R, exclude);
+      hard = bestPairNear(tierPeers, tierMax, exclude);
+    } else {
+      // not enough same-tier players (e.g. Manny, the only Tier S player) -- fall back to any tier
+      easy = bestPairNear(activePlayers, R-150, exclude);
+      balanced = bestPairNear(activePlayers, R, exclude);
+      hard = bestPairNear(activePlayers, R+150, exclude);
+    }
+
     diff[p.name] = {
-      easy: bestPairNear(activePlayers, R-150, exclude),
-      balanced: bestPairNear(activePlayers, R, exclude),
-      hard: bestPairNear(activePlayers, R+150, exclude),
+      easy, balanced, hard, withinTier,
+      crossTier: bestPairNear(activePlayers, R, exclude), // best overall-rating match regardless of tier
     };
   });
   return diff;
@@ -1602,30 +1621,85 @@ function renderCallouts(){
   box.innerHTML = html;
 }
 
+let playersTierFilter = 'All';
+let playersActiveFilter = 'all'; // 'all' | 'active' | 'inactive'
+let playersSortBy = 'name';      // 'name' | 'rating'
+
 function renderPlayersTab(){
   const box = document.getElementById('playersView');
-  let rows = [...PLAYERS].sort((a,b)=> a.name.localeCompare(b.name));
+
+  let rows = [...PLAYERS];
+  if(playersTierFilter !== 'All') rows = rows.filter(p => p.tier === playersTierFilter);
+  if(playersActiveFilter === 'active') rows = rows.filter(p => p.active);
+  else if(playersActiveFilter === 'inactive') rows = rows.filter(p => !p.active);
   if(query) rows = rows.filter(p => p.name.toLowerCase().includes(query));
 
+  if(playersSortBy === 'rating') rows.sort((a,b)=> b.rating - a.rating);
+  else rows.sort((a,b)=> a.name.localeCompare(b.name));
+
+  let html = `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Tier</label>
+      <div class="tierbar" id="playersTierBar" style="padding:0;"></div>
+    </div>
+    <div class="fg-row"><label class="fg-label">Status</label>
+      <div class="fg-toggle" id="playersActiveToggle">
+        <button class="fg-toggle-btn ${playersActiveFilter==='all'?'active':''}" data-active="all">All</button>
+        <button class="fg-toggle-btn ${playersActiveFilter==='active'?'active':''}" data-active="active">Active</button>
+        <button class="fg-toggle-btn ${playersActiveFilter==='inactive'?'active':''}" data-active="inactive">Inactive</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label">Sort</label>
+      <div class="fg-toggle" id="playersSortToggle">
+        <button class="fg-toggle-btn ${playersSortBy==='name'?'active':''}" data-sortby="name">A–Z</button>
+        <button class="fg-toggle-btn ${playersSortBy==='rating'?'active':''}" data-sortby="rating">Power Rating</button>
+      </div>
+    </div>
+  </div>`;
+
   if(rows.length === 0){
-    box.innerHTML = `<div class="section-sub">No players match that search.</div>`;
+    html += `<div class="section-sub">No players match that filter.</div>`;
+    box.innerHTML = html;
+    wirePlayersControls();
     return;
   }
 
-  let html = '';
   let lastLetter = '';
   rows.forEach(p=>{
+    const showLetter = playersSortBy === 'name';
     const letter = p.name[0].toUpperCase();
-    const showLetter = letter !== lastLetter;
-    lastLetter = letter;
+    const newLetter = showLetter && letter !== lastLetter;
+    if(showLetter) lastLetter = letter;
+    const statusBadge = p.active
+      ? `<span class="risk-badge risk-stable" style="margin-left:6px;">Active</span>`
+      : `<span class="risk-badge risk-unproven" style="margin-left:6px;">Inactive</span>`;
     html += `<div class="alpha-row" onclick="openSheet('${p.name.replace(/'/g,"\\'")}')">
-      <div class="alpha-letter">${showLetter ? letter : ''}</div>
-      <div class="alpha-name">${p.name}</div>
+      <div class="alpha-letter">${newLetter ? letter : ''}</div>
+      <div class="alpha-name">${p.name}${statusBadge}</div>
       <div class="alpha-tier">Tier ${p.tier} · ${Math.round(p.rating)}</div>
     </div>`;
   });
 
   box.innerHTML = html;
+  wirePlayersControls();
+}
+
+function wirePlayersControls(){
+  const bar = document.getElementById('playersTierBar');
+  if(bar){
+    TIERS.forEach(t=>{
+      const b = document.createElement('button');
+      b.className = 'tierbtn' + (t===playersTierFilter ? ' active' : '');
+      b.textContent = t === 'All' ? 'All' : 'Tier ' + t;
+      b.onclick = ()=>{ playersTierFilter = t; renderPlayersTab(); };
+      bar.appendChild(b);
+    });
+  }
+  document.querySelectorAll('#playersActiveToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{ playersActiveFilter = b.dataset.active; renderPlayersTab(); };
+  });
+  document.querySelectorAll('#playersSortToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{ playersSortBy = b.dataset.sortby; renderPlayersTab(); };
+  });
 }
 
 // ===== Find a Game =====
@@ -1808,16 +1882,20 @@ function buildCallOutSection(name){
 function buildDifficultySection(name){
   if(!canSee('difficulty')) return '';
   const d = DIFFICULTY_SUGGESTIONS[name];
-  if(!d) return '';
+  if(!d || !d.easy || !d.balanced || !d.hard) return '';
   const easy = d.easy, bal = d.balanced, hard = d.hard;
+  const player = PLAYERS.find(p=>p.name===name);
+  const tierNote = d.withinTier
+    ? `within Tier ${player ? player.tier : ''}`
+    : `across any tier — not enough other Tier ${player ? player.tier : ''} players to keep this within-tier`;
   const allSame = (easy.pair.join()===bal.pair.join()) && (bal.pair.join()===hard.pair.join());
 
   let html = `<div class="section-heading" style="margin-top:14px;">🎮 Suggest a game for ${name}</div>`;
   if(allSame){
-    html += `<div class="section-sub">${name}'s rating is far enough out on its own that there's no meaningful easy/hard range — this is simply the toughest game available.</div>
+    html += `<div class="section-sub">${name}'s rating is far enough out on its own that there's no meaningful easy/hard range (${tierNote}) — this is simply the toughest game available.</div>
       <div class="matchup-vs"><b>${easy.pair[0]} &amp; ${easy.pair[1]}</b> (avg ${Math.round(easy.avg_rating)})</div>`;
   } else {
-    html += `<div class="section-sub">Opponent pairs picked so the two-player average lands near an easy / even / hard target relative to ${name}'s own rating.</div>
+    html += `<div class="section-sub">Opponent pairs picked so the two-player average lands near an easy / even / hard target relative to ${name}'s own rating, ${tierNote}.</div>
       <div class="difficulty-row">
         <div class="difficulty-pill diff-easy">EASY</div>
         <div class="difficulty-pill diff-balanced">BALANCED</div>
@@ -1826,6 +1904,11 @@ function buildDifficultySection(name){
       <div class="matchup-vs"><b>Easy:</b> ${easy.pair[0]} &amp; ${easy.pair[1]} (avg ${Math.round(easy.avg_rating)})</div>
       <div class="matchup-vs"><b>Balanced:</b> ${bal.pair[0]} &amp; ${bal.pair[1]} (avg ${Math.round(bal.avg_rating)})</div>
       <div class="matchup-vs"><b>Hard:</b> ${hard.pair[0]} &amp; ${hard.pair[1]} (avg ${Math.round(hard.avg_rating)})</div>`;
+  }
+
+  if(d.crossTier && (!d.withinTier || d.crossTier.pair.join() !== bal.pair.join())){
+    html += `<div style="margin-top:10px; font-size:11px; color:var(--gold-dim); text-transform:uppercase; letter-spacing:.04em;">Recommended across tiers</div>
+      <div class="matchup-vs"><b>${d.crossTier.pair[0]} &amp; ${d.crossTier.pair[1]}</b> (avg ${Math.round(d.crossTier.avg_rating)}) <span style="color:var(--text-dim); font-size:11px;">— closest overall rating match, any tier</span></div>`;
   }
   return html;
 }
