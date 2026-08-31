@@ -412,8 +412,8 @@
 
 <div class="controls">
   <div class="tab-row" id="tabrow">
-    <button class="tab-btn active" data-tab="wl">Win / Loss</button>
-    <button class="tab-btn" data-tab="power">Power Rating</button>
+    <button class="tab-btn active" data-tab="power">Power Rating</button>
+    <button class="tab-btn" data-tab="wl">Win / Loss</button>
     <button class="tab-btn" data-tab="callouts">Call-Outs</button>
     <button class="tab-btn" data-tab="findgame">Find a Game</button>
     <button class="tab-btn" data-tab="players">Players</button>
@@ -436,13 +436,13 @@
   <div class="searchwrap" id="searchWrap">
     <input id="search" type="text" placeholder="Search a player…" />
   </div>
-  <div class="sortbar" id="sortbar">
+  <div class="sortbar" id="sortbar" style="display:none;">
     <button class="sortbtn active" data-sort="wins">Most Wins</button>
     <button class="sortbtn" data-sort="winpct">Win %</button>
     <button class="sortbtn" data-sort="total">Games Played</button>
     <button class="sortbtn" data-sort="name">A–Z</button>
   </div>
-  <div class="sortbar" id="sortbarPower" style="display:none;">
+  <div class="sortbar" id="sortbarPower">
     <button class="sortbtn active" data-sortp="rating">Rating</button>
     <button class="sortbtn" data-sortp="avg_match_strength">Avg opp.</button>
     <button class="sortbtn" data-sortp="avg_overperf_pct">Clutch %</button>
@@ -1173,7 +1173,7 @@ function recomputeAll(){
 
 
 const TIERS = ["All","S","A","B","C"];
-let activeTab = "wl";
+let activeTab = "power";
 let activeTier = "All";
 let activeSort = "wins";
 let activeSortP = "rating";
