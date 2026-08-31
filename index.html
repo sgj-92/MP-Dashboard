@@ -1084,7 +1084,10 @@ function buildWithinTierGames(activePlayers, h2h){
       cands.push({tier:t, a:p.name, b:q.name, rating_a:p.rating, rating_b:q.rating,
                   gap:Math.round(gap*10)/10, games_a:p.total, games_b:q.total, played_before:played});
     }
-    cands.sort((x,y)=> (x.played_before-y.played_before) || (x.gap-y.gap));
+    // Balance closeness against staleness: a tiny gap that's been played many times is still
+    // interesting (a settled rivalry), it shouldn't be buried just because it's not "fresh".
+    cands.forEach(c=> c.score = c.gap + c.played_before * 2);
+    cands.sort((x,y)=> x.score - y.score);
     picked.push(...cands.slice(0,2));
   });
   const byTierFocus = {};
@@ -1572,7 +1575,7 @@ function renderCallouts(){
   }
 
   html += `<div class="section-heading">🏆 Within-tier rank clarifiers</div>`;
-  html += `<div class="section-sub">Near-ties inside the same tier, from S down to C — these settle who's actually better among players already grouped together, not just who's borderline.</div>`;
+  html += `<div class="section-sub">Near-ties inside the same tier, from S down to C — a mix of unsettled fresh matchups and razor-thin margins even after plenty of meetings, since both are worth knowing about.</div>`;
   const tierOrderDisplay = ["S","A","B","C"];
   tierOrderDisplay.forEach(t=>{
     const games = WITHIN_TIER_GAMES.filter(c=>c.tier===t);
@@ -1913,6 +1916,32 @@ function buildDifficultySection(name){
   return html;
 }
 
+function buildRankingNeighborsSection(name){
+  const sorted = [...PLAYERS].sort((a,b)=> b.rating - a.rating);
+  const idx = sorted.findIndex(p=>p.name===name);
+  if(idx === -1) return '';
+  const above = idx > 0 ? sorted[idx-1] : null;
+  const below = idx < sorted.length-1 ? sorted[idx+1] : null;
+
+  let html = `<div class="section-heading" style="margin-top:14px;">📊 Neighbors in the rankings</div>`;
+  html += `<div class="matchup-vs">`;
+  if(above){
+    const gap = Math.round((above.rating - PLAYERS.find(p=>p.name===name).rating)*10)/10;
+    html += `<div>▲ <b>${above.name}</b> (Tier ${above.tier}, ${Math.round(above.rating)}) — ${gap} pts above</div>`;
+  } else {
+    html += `<div style="color:var(--text-dim);">▲ Nobody rated higher — top of the board</div>`;
+  }
+  html += `<div style="margin:6px 0; padding:4px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); text-align:center; color:var(--gold-bright); font-weight:700;">${name}</div>`;
+  if(below){
+    const gap = Math.round((PLAYERS.find(p=>p.name===name).rating - below.rating)*10)/10;
+    html += `<div>▼ <b>${below.name}</b> (Tier ${below.tier}, ${Math.round(below.rating)}) — ${gap} pts below</div>`;
+  } else {
+    html += `<div style="color:var(--text-dim);">▼ Nobody rated lower — bottom of the board</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
 function openSheet(name){
   const p = PLAYERS.find(x=>x.name===name);
   document.getElementById('sheetName').textContent = name;
@@ -1924,7 +1953,7 @@ function openSheet(name){
     <div><b>${p.wins}-${p.losses}</b>Record</div>
     <div><b>${p.upset_wins}-${p.upset_losses}</b>Upset W-L</div>
   `;
-  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildCallOutSection(name) + buildDifficultySection(name);
+  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
   const ms = MATCHES.filter(m => m.winners.includes(name) || m.losers.includes(name));
   ms.sort((a,b)=> a.date < b.date ? 1 : -1);
   const box = document.getElementById('sheetMatches');
