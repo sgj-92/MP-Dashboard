@@ -2437,10 +2437,17 @@ function renderGamesTab(){
   });
 
   if(isUnlocked && editingMatchId){
-    html += buildEditFormHtml(editingMatchId);
+    html += `<div id="editFormAnchor"></div>` + buildEditFormHtml(editingMatchId);
   }
 
   box.innerHTML = html;
+
+  if(isUnlocked && editingMatchId){
+    const anchor = document.getElementById('editFormAnchor');
+    if(anchor){
+      try { anchor.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e){ /* non-critical */ }
+    }
+  }
 
   populateMonthSelect(document.getElementById('gamesMonthSelect'));
   document.getElementById('gamesMonthSelect').addEventListener('change', e=>{
