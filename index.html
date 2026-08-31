@@ -572,7 +572,46 @@ const STORAGE_KEY_MATCHES = 'moneypadel_extra_matches';   // pending + approved 
 const STORAGE_KEY_TAGS = 'moneypadel_player_tags';
 const STORAGE_KEY_EDITS = 'moneypadel_match_edits';        // id -> override fields
 const STORAGE_KEY_DELETED = 'moneypadel_deleted_ids';      // array of ids, soft-delete
+const STORAGE_KEY_VISIBILITY = 'moneypadel_visibility';    // shared: which sections non-admins can see
 const STORAGE_KEY_MY_NAME = 'moneypadel_my_name';          // personal — localStorage, this device only
+
+// Sections an admin can hide from non-admin viewers. Admins always see everything.
+const VISIBILITY_DEFAULTS = {
+  findgame: false,      // Find a Game — matchmaking, hidden by default
+  difficulty: false,    // Easy/Balanced/Hard suggestions on player profiles
+  callouts: true,       // Call-Outs tab
+  chemistry: true,      // Partnership chemistry rankings
+  power: true,          // Power Rating tab
+  games: true,          // Games (chronological log)
+  players: true,        // Players A–Z
+};
+const VISIBILITY_LABELS = {
+  findgame: 'Find a Game tab (matchmaking)',
+  difficulty: 'Easy / Balanced / Hard suggestions on profiles',
+  callouts: 'Call-Outs tab',
+  chemistry: 'Partnership chemistry rankings',
+  power: 'Power Rating tab',
+  games: 'Games tab (match log)',
+  players: 'Players tab',
+};
+let visibilityState = {...VISIBILITY_DEFAULTS};
+
+// Admins see everything; everyone else only sees what's switched on.
+function canSee(section){
+  if(isUnlocked) return true;
+  return visibilityState[section] !== false;
+}
+
+async function loadVisibility(){
+  try { const v = await fsGet(STORAGE_KEY_VISIBILITY); if(v) return {...VISIBILITY_DEFAULTS, ...JSON.parse(v)}; } catch(e){ console.error('load visibility failed', e); }
+  return {...VISIBILITY_DEFAULTS};
+}
+async function saveVisibility(vis){
+  try {
+    await fsSet(STORAGE_KEY_VISIBILITY, JSON.stringify(vis));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save visibility failed', e); return false; }
+}
 
 async function loadStoredData(){
   let extraMatches = [];
@@ -678,6 +717,7 @@ function wireLockScreen(onUnlocked){
       adminPasswordHash = hash;
       isUnlocked = true;
       await saveMyUnlocked(true);
+      applyTabVisibility();
       onUnlocked();
     };
   } else {
@@ -687,6 +727,7 @@ function wireLockScreen(onUnlocked){
       if(simpleHash(p) === adminPasswordHash){
         isUnlocked = true;
         await saveMyUnlocked(true);
+        applyTabVisibility();
         onUnlocked();
       } else {
         msg.textContent = 'Incorrect password.';
@@ -1180,6 +1221,39 @@ function populateMonthSelect(selectEl){
   selectEl.value = selectedMonth;
 }
 
+function applyTabVisibility(){
+  const tabSectionMap = {
+    power: 'power',
+    callouts: 'callouts',
+    findgame: 'findgame',
+    games: 'games',
+    players: 'players',
+    // 'wl' and 'manage' are always available (manage is lock-gated on its own)
+  };
+  document.querySelectorAll('#tabrow .tab-btn').forEach(btn=>{
+    const tab = btn.dataset.tab;
+    const section = tabSectionMap[tab];
+    const visible = !section || canSee(section);
+    btn.style.display = visible ? '' : 'none';
+    // if the active tab just got hidden, fall back to Win/Loss
+    if(!visible && activeTab === tab){
+      activeTab = 'wl';
+      document.querySelectorAll('#tabrow .tab-btn').forEach(b=>b.classList.remove('active'));
+      const wlBtn = document.querySelector('#tabrow .tab-btn[data-tab="wl"]');
+      if(wlBtn) wlBtn.classList.add('active');
+      ['calloutsView','playersView','findGameView','manageView','gamesView'].forEach(id=>{
+        const el = document.getElementById(id); if(el) el.style.display = 'none';
+      });
+      const listEl = document.getElementById('list'); if(listEl) listEl.style.display = 'block';
+      ['tierbar','searchWrap','minGamesRow','monthFilterRow','dataQualityRow','sortbar'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(el) el.style.display = (id==='searchWrap') ? 'block' : 'flex';
+      });
+      const sp = document.getElementById('sortbarPower'); if(sp) sp.style.display = 'none';
+    }
+  });
+}
+
 function rerenderCurrentTab(){
   if(activeTab==='wl' || activeTab==='power') render();
   else if(activeTab==='games') renderGamesTab();
@@ -1462,17 +1536,19 @@ function renderCallouts(){
   const box = document.getElementById('calloutsView');
   let html = '';
 
-  html += `<div class="section-heading">🤝 Best chemistry partnerships</div>`;
-  html += `<div class="section-sub">Ranked by how much a pairing overperforms what the matchup alone would predict, not just their win rate — this is what "they barely lose together" actually looks like in the numbers. Minimum 2 games together; small samples are flagged.</div>`;
-  const topPartnerships = PARTNERSHIPS.filter(p=>p.games>=2).sort((a,b)=> b.avg_overperf - a.avg_overperf).slice(0,8);
-  topPartnerships.forEach(p=>{
-    const perfClass = p.avg_overperf > 3 ? 'perf-pos' : (p.avg_overperf < -3 ? 'perf-neg' : '');
-    const smallSample = p.games < 3 ? ` <span style="color:var(--text-dim); font-size:10px;">(small sample)</span>` : '';
-    html += `<div class="callout-card">
-      <div class="cc-title">${p.pair[0]} (Tier ${p.tier_a}) &amp; ${p.pair[1]} (Tier ${p.tier_b})${smallSample}</div>
-      <div class="cc-detail">${p.games} games together · ${p.wins}-${p.losses} (${p.winpct}%) · <span class="${perfClass}">${p.avg_overperf>=0?'+':''}${p.avg_overperf}% chemistry</span></div>
-    </div>`;
-  });
+  if(canSee('chemistry')){
+    html += `<div class="section-heading">🤝 Best chemistry partnerships</div>`;
+    html += `<div class="section-sub">Ranked by how much a pairing overperforms what the matchup alone would predict, not just their win rate — this is what "they barely lose together" actually looks like in the numbers. Minimum 2 games together; small samples are flagged.</div>`;
+    const topPartnerships = PARTNERSHIPS.filter(p=>p.games>=2).sort((a,b)=> b.avg_overperf - a.avg_overperf).slice(0,8);
+    topPartnerships.forEach(p=>{
+      const perfClass = p.avg_overperf > 3 ? 'perf-pos' : (p.avg_overperf < -3 ? 'perf-neg' : '');
+      const smallSample = p.games < 3 ? ` <span style="color:var(--text-dim); font-size:10px;">(small sample)</span>` : '';
+      html += `<div class="callout-card">
+        <div class="cc-title">${p.pair[0]} (Tier ${p.tier_a}) &amp; ${p.pair[1]} (Tier ${p.tier_b})${smallSample}</div>
+        <div class="cc-detail">${p.games} games together · ${p.wins}-${p.losses} (${p.winpct}%) · <span class="${perfClass}">${p.avg_overperf>=0?'+':''}${p.avg_overperf}% chemistry</span></div>
+      </div>`;
+    });
+  }
 
   html += `<div class="section-heading">🏆 Within-tier rank clarifiers</div>`;
   html += `<div class="section-sub">Near-ties inside the same tier, from S down to C — these settle who's actually better among players already grouped together, not just who's borderline.</div>`;
@@ -1714,6 +1790,7 @@ function renderFindGame(){
 }
 
 function buildCallOutSection(name){
+  if(!canSee('callouts')) return '';
   const relevant = [];
   WITHIN_TIER_GAMES.forEach(c=>{ if(c.a===name || c.b===name) relevant.push(c.matchup); });
   BOUNDARY_TESTS.forEach(c=>{ if(c.a===name || c.b===name) relevant.push(c.matchup); });
@@ -1727,6 +1804,7 @@ function buildCallOutSection(name){
 }
 
 function buildDifficultySection(name){
+  if(!canSee('difficulty')) return '';
   const d = DIFFICULTY_SUGGESTIONS[name];
   if(!d) return '';
   const easy = d.easy, bal = d.balanced, hard = d.hard;
@@ -1889,6 +1967,14 @@ function renderManage(){
 
   html += `<div id="playerTagsList"></div>`;
 
+  html += `<div class="section-heading">👁️ Visible to everyone</div>`;
+  html += `<div class="section-sub">Switch off anything you'd rather keep admin-only. You always see everything; these toggles only affect people who haven't unlocked. Matchmaking suggestions are hidden by default since they'd otherwise show everyone's ideal opponents to the whole group.</div>`;
+  html += `<div class="fg-controls">` + Object.keys(VISIBILITY_DEFAULTS).map(key=>`
+    <div class="alpha-row">
+      <div class="alpha-name" style="font-size:13px;">${VISIBILITY_LABELS[key]}</div>
+      <button class="preset-btn vis-toggle ${visibilityState[key]!==false?'active':''}" data-vis="${key}" style="width:100px;">${visibilityState[key]!==false?'Visible':'Admin only'}</button>
+    </div>`).join('') + `<div id="visMessage" class="section-sub"></div></div>`;
+
   html += `<div class="section-heading">🔑 Admin lock</div>`;
   html += `<div class="fg-controls">
     <div class="fg-row"><button class="preset-btn" id="lockNowBtn" style="width:100%;">🔒 Lock admin area</button></div>
@@ -1947,9 +2033,27 @@ function renderManage(){
     document.getElementById('npName').value = '';
   };
 
+  document.querySelectorAll('.vis-toggle').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const key = btn.dataset.vis;
+      visibilityState[key] = !(visibilityState[key] !== false);
+      const ok = await saveVisibility(visibilityState);
+      const msg = document.getElementById('visMessage');
+      if(!ok){
+        visibilityState[key] = !visibilityState[key]; // revert
+        if(msg) msg.textContent = 'Save failed — try again.';
+        return;
+      }
+      if(msg) msg.textContent = '';
+      applyTabVisibility();
+      renderManage();
+    };
+  });
+
   document.getElementById('lockNowBtn').onclick = async ()=>{
     isUnlocked = false;
     await saveMyUnlocked(false);
+    applyTabVisibility();
     renderManage();
   };
 
@@ -2250,6 +2354,7 @@ function renderGamesTab(){
   document.getElementById('gamesLockNowBtn').onclick = async ()=>{
     isUnlocked = false;
     await saveMyUnlocked(false);
+    applyTabVisibility();
     renderGamesTab();
   };
 
@@ -2439,7 +2544,9 @@ async function init(){
   currentUserName = await loadMyName();
   adminPasswordHash = await loadAdminPassword();
   isUnlocked = await loadMyUnlocked();
+  visibilityState = await loadVisibility();
   recomputeAll();
+  applyTabVisibility();
   render();
 }
 
