@@ -437,8 +437,8 @@
     <input id="search" type="text" placeholder="Search a player…" />
   </div>
   <div class="sortbar" id="sortbar">
-    <button class="sortbtn" data-sort="wins">Most Wins</button>
-    <button class="sortbtn active" data-sort="winpct">Win %</button>
+    <button class="sortbtn active" data-sort="wins">Most Wins</button>
+    <button class="sortbtn" data-sort="winpct">Win %</button>
     <button class="sortbtn" data-sort="total">Games Played</button>
     <button class="sortbtn" data-sort="name">A–Z</button>
   </div>
@@ -1175,7 +1175,7 @@ function recomputeAll(){
 const TIERS = ["All","S","A","B","C"];
 let activeTab = "wl";
 let activeTier = "All";
-let activeSort = "winpct";
+let activeSort = "wins";
 let activeSortP = "rating";
 let query = "";
 let minGames = 10;
