@@ -1031,17 +1031,25 @@ function buildMatchup(players, focusA, focusB, globalExclude, tier){
   if(!byName[focusA] || !byName[focusB]) return null;
   const ra=byName[focusA].rating, rb=byName[focusB].rating;
   const exclude = new Set([focusA,focusB,...globalExclude]);
+
+  // Prefer staying within the same tier even with a less-experienced wingman, over reaching
+  // outside the tier for someone more proven -- especially matters for thin tiers like C.
   let wingA = tier ? findWingman(players, rb, exclude, tier, 4) : null;
+  if(!wingA && tier) wingA = findWingman(players, rb, exclude, tier, 1);
   if(!wingA) wingA = findWingman(players, rb, exclude, null, 4);
   if(!wingA) return null;
+
   const exclude2 = new Set([...exclude, wingA.name]);
   let wingB = tier ? findWingman(players, ra, exclude2, tier, 4) : null;
+  if(!wingB && tier) wingB = findWingman(players, ra, exclude2, tier, 1);
   if(!wingB) wingB = findWingman(players, ra, exclude2, null, 4);
   if(!wingB) return null;
+
   const team1=[focusA,wingA.name], team2=[focusB,wingB.name];
   const t1r=(ra+wingA.rating)/2, t2r=(rb+wingB.rating)/2;
   return {team1,team2, team1_rating:Math.round(t1r*10)/10, team2_rating:Math.round(t2r*10)/10,
-          team_gap: Math.round(Math.abs(t1r-t2r)*10)/10};
+          team_gap: Math.round(Math.abs(t1r-t2r)*10)/10,
+          wingA_games: wingA.total, wingB_games: wingB.total};
 }
 
 function buildBoundaryTests(activePlayers, h2h){
@@ -1124,6 +1132,7 @@ function buildWithinTierGames(activePlayers, h2h){
       const tiersInvolved = [...new Set(allP.map(n=>byName[n].tier))].sort();
       c.matchup.pure_tier = (tiersInvolved.length===1 && tiersInvolved[0]===c.tier);
       c.matchup.tiers_involved = tiersInvolved;
+      c.matchup.has_light_wingman = (c.matchup.wingA_games < 4 || c.matchup.wingB_games < 4);
     }
   });
   return picked.filter(c=>c.matchup);
@@ -1613,9 +1622,12 @@ function renderCallouts(){
     html += `<div style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:11.5px; color:var(--gold-dim); font-weight:700; margin:8px 0 4px;">TIER ${t}</div>`;
     games.forEach(c=>{
       const m = c.matchup;
-      const wingNote = m.pure_tier
-        ? ''
-        : `<br/><span style="color:var(--text-dim); font-size:10.5px;">wingmen pulled partly from Tier ${m.tiers_involved.filter(x=>x!==t).join(', ')} — not enough proven Tier ${t} players to fill both sides</span>`;
+      let wingNote = '';
+      if(!m.pure_tier){
+        wingNote = `<br/><span style="color:var(--text-dim); font-size:10.5px;">wingmen pulled partly from Tier ${m.tiers_involved.filter(x=>x!==t).join(', ')} — no other Tier ${t} player available to fill both sides</span>`;
+      } else if(m.has_light_wingman){
+        wingNote = `<br/><span style="color:var(--text-dim); font-size:10.5px;">stays all Tier ${t} — one wingman has fewer than 4 games, so treat the balance as a bit more provisional</span>`;
+      }
       html += `<div class="callout-card">
         <div class="cc-title">${c.a} (${Math.round(c.rating_a)}, ${c.games_a}g) vs ${c.b} (${Math.round(c.rating_b)}, ${c.games_b}g)</div>
         <div class="cc-detail">Just ${c.gap} rating points apart · played each other ${c.played_before}x so far</div>
@@ -2554,6 +2566,7 @@ function renderPlayerTagsList(){
 let editingMatchId = null;
 let armedDeleteId = null;
 let expandedGameId = null;
+let addGameExpanded = false;
 
 function computeMatchDelta(idxInAllMatches){
   if(idxInAllMatches === undefined || idxInAllMatches === null) return null;
@@ -2760,7 +2773,8 @@ function renderGamesTab(){
     </div>
   </div>`;
 
-  html += `<div class="section-heading">➕ Add a game</div>`;
+  html += `<div class="section-heading" id="addGameToggle" style="cursor:pointer; display:flex; align-items:center; gap:6px;"><span id="addGameArrow">${addGameExpanded ? '▾' : '▸'}</span> ➕ Add a game</div>`;
+  html += `<div id="addGameBody" style="display:${addGameExpanded ? 'block' : 'none'};">`;
   html += `<div class="section-sub">Anyone can submit a result — it lands below as pending until an admin approves it. Paste a result in the usual WhatsApp shorthand and it'll fill in the form for you to check before submitting.</div>`;
   html += `<div class="fg-controls">
     <div class="fg-row"><label class="fg-label">Quick paste</label>
@@ -2809,6 +2823,7 @@ Player C &amp; Player D"></textarea>
     </div>
     <div id="agMessage" class="section-sub"></div>
   </div>`;
+  html += `</div>`; // close addGameBody
 
   if(!isUnlocked){
     html += `<div class="section-heading">🔒 Admin actions</div>`;
@@ -2919,6 +2934,12 @@ Player C &amp; Player D"></textarea>
   });
 
   // ===== Add a game (always available, not gated by admin lock) =====
+  document.getElementById('addGameToggle').onclick = ()=>{
+    addGameExpanded = !addGameExpanded;
+    document.getElementById('addGameBody').style.display = addGameExpanded ? 'block' : 'none';
+    document.getElementById('addGameArrow').textContent = addGameExpanded ? '▾' : '▸';
+  };
+
   document.getElementById('gamesYourName').addEventListener('change', e=>{
     currentUserName = e.target.value.trim();
     saveMyName(currentUserName);
