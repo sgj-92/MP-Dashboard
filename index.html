@@ -424,6 +424,8 @@
     <button class="tab-btn" data-tab="manage">Manage</button>
     <button class="tab-btn" data-tab="games">Games</button>
     <button class="tab-btn" data-tab="h2h">Head to Head</button>
+    <button class="tab-btn" data-tab="wishlist">Wishlist</button>
+    <button class="tab-btn" data-tab="upcoming">Upcoming</button>
   </div>
   <div class="minGamesRow" id="dataQualityRow" style="background:var(--bg2); border:1px solid var(--gold-dim); border-radius:10px; padding:8px 10px;">
     <span class="minGamesLabel" style="color:var(--gold-bright); font-weight:700;">Data:</span>
@@ -449,6 +451,7 @@
   </div>
   <div class="sortbar" id="sortbarPower">
     <button class="sortbtn active" data-sortp="rating">Rating</button>
+    <button class="sortbtn" data-sortp="recent_form">Recent Form</button>
     <button class="sortbtn" data-sortp="avg_match_strength">Avg opp.</button>
     <button class="sortbtn" data-sortp="avg_overperf_pct">Clutch %</button>
     <button class="sortbtn" data-sortp="upset_total">Upsets</button>
@@ -474,6 +477,8 @@
 <div id="manageView" style="display:none; padding:0 16px;"></div>
 <div id="gamesView" style="display:none; padding:0 16px;"></div>
 <div id="h2hView" style="display:none; padding:0 16px;"></div>
+<div id="wishlistView" style="display:none; padding:0 16px;"></div>
+<div id="upcomingView" style="display:none; padding:0 16px;"></div>
 <div id="findGameView" style="display:none; padding:0 16px;">
   <div class="fg-controls">
     <div class="fg-row">
@@ -586,6 +591,7 @@ const STORAGE_KEY_EDITS = 'moneypadel_match_edits';        // id -> override fie
 const STORAGE_KEY_DELETED = 'moneypadel_deleted_ids';      // array of ids, soft-delete
 const STORAGE_KEY_VISIBILITY = 'moneypadel_visibility';    // shared: which sections non-admins can see
 const STORAGE_KEY_MY_NAME = 'moneypadel_my_name';          // personal — localStorage, this device only
+const STORAGE_KEY_GAME_REQUESTS = 'moneypadel_game_requests'; // shared: wishlist + upcoming games
 
 // Sections an admin can hide from non-admin viewers. Admins always see everything.
 const VISIBILITY_DEFAULTS = {
@@ -596,6 +602,8 @@ const VISIBILITY_DEFAULTS = {
   power: true,          // Power Rating tab
   games: true,          // Games (chronological log)
   players: true,        // Players A–Z
+  wishlist: true,        // Game requests / wishlist
+  upcoming: true,        // Confirmed upcoming games
 };
 const VISIBILITY_LABELS = {
   findgame: 'Find a Game tab (matchmaking)',
@@ -605,6 +613,8 @@ const VISIBILITY_LABELS = {
   power: 'Power Rating tab',
   games: 'Games tab (match log)',
   players: 'Players tab',
+  wishlist: 'Wishlist tab (game requests)',
+  upcoming: 'Upcoming tab (confirmed games)',
 };
 let visibilityState = {...VISIBILITY_DEFAULTS};
 
@@ -623,6 +633,19 @@ async function saveVisibility(vis){
     await fsSet(STORAGE_KEY_VISIBILITY, JSON.stringify(vis));
     return true;
   } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save visibility failed', e); return false; }
+}
+
+let gameRequestsState = []; // {id, requestedBy, requestedAt, players:[4 names], confirmations:{name:bool}, status:'pending'|'confirmed'|'removed'}
+
+async function loadGameRequests(){
+  try { const v = await fsGet(STORAGE_KEY_GAME_REQUESTS); if(v) return JSON.parse(v); } catch(e){ console.error('load game requests failed', e); }
+  return [];
+}
+async function saveGameRequests(requests){
+  try {
+    await fsSet(STORAGE_KEY_GAME_REQUESTS, JSON.stringify(requests));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save game requests failed', e); return false; }
 }
 
 async function loadStoredData(){
@@ -864,7 +887,7 @@ function enrichMatches(matches, ratings){
     const lr = m.losers.reduce((s,p)=>s+ratings[p],0)/m.losers.length;
     const expected = 1/(1+Math.pow(10,(lr-wr)/400));
     return {
-      date: m.date, winners: m.winners, losers: m.losers,
+      id: m.id, date: m.date, winners: m.winners, losers: m.losers,
       score: m.sets.map(s=>s.join('-')).join(', '),
       type: m.type, note: m.note||'', verified: m.verified !== false,
       games_winner: gw, games_loser: gl,
@@ -1192,6 +1215,11 @@ function recomputeAll(){
   const ratings = computeElo(ALL_MATCHES, TIER_MAP, STARTING_TIER_MAP);
   MATCHES = enrichMatches(ALL_MATCHES, ratings);
   PLAYERS = buildPlayers(MATCHES, ratings, TIER_MAP, ACTIVE_MAP);
+  PLAYERS.forEach(p=>{
+    const form = computeRecentForm(p.name, 10);
+    p.recent_form = form ? form.avgPct : null;
+    p.recent_form_games = form ? form.games : 0;
+  });
   H2H = buildH2H(MATCHES);
   PARTNERSHIPS = buildPartnerships(MATCHES, TIER_MAP);
   BEST_PARTNER = buildBestPartner(PARTNERSHIPS);
@@ -1286,6 +1314,8 @@ function applyTabVisibility(){
     findgame: 'findgame',
     games: 'games',
     players: 'players',
+    wishlist: 'wishlist',
+    upcoming: 'upcoming',
     // 'wl' and 'manage' are always available (manage is lock-gated on its own)
   };
   document.querySelectorAll('#tabrow .tab-btn').forEach(btn=>{
@@ -1299,7 +1329,7 @@ function applyTabVisibility(){
       document.querySelectorAll('#tabrow .tab-btn').forEach(b=>b.classList.remove('active'));
       const wlBtn = document.querySelector('#tabrow .tab-btn[data-tab="wl"]');
       if(wlBtn) wlBtn.classList.add('active');
-      ['calloutsView','playersView','findGameView','manageView','gamesView'].forEach(id=>{
+      ['calloutsView','playersView','findGameView','manageView','gamesView','h2hView','wishlistView','upcomingView'].forEach(id=>{
         const el = document.getElementById(id); if(el) el.style.display = 'none';
       });
       const listEl = document.getElementById('list'); if(listEl) listEl.style.display = 'block';
@@ -1341,7 +1371,9 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
     const isManage = activeTab === 'manage';
     const isGames = activeTab === 'games';
     const isH2H = activeTab === 'h2h';
-    const isListView = !isCallouts && !isPlayers && !isFindGame && !isManage && !isGames && !isH2H;
+    const isWishlist = activeTab === 'wishlist';
+    const isUpcoming = activeTab === 'upcoming';
+    const isListView = !isCallouts && !isPlayers && !isFindGame && !isManage && !isGames && !isH2H && !isWishlist && !isUpcoming;
 
     document.getElementById('tierbar').style.display = isListView ? 'flex' : 'none';
     document.getElementById('searchWrap').style.display = (isListView || isPlayers) ? 'block' : 'none';
@@ -1358,6 +1390,8 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
     document.getElementById('manageView').style.display = isManage ? 'block' : 'none';
     document.getElementById('gamesView').style.display = isGames ? 'block' : 'none';
     document.getElementById('h2hView').style.display = isH2H ? 'block' : 'none';
+    document.getElementById('wishlistView').style.display = isWishlist ? 'block' : 'none';
+    document.getElementById('upcomingView').style.display = isUpcoming ? 'block' : 'none';
 
     document.getElementById('headerSub').textContent = activeTab==='wl'
       ? 'Parsed from the group chats, June–August 2026 · tap a player for their match log'
@@ -1373,11 +1407,15 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
                 ? 'Every game, newest first — pending ones need approval before they count'
                 : (activeTab==='h2h'
                   ? 'Pick two players and see their full history, as opponents and as teammates'
-                  : 'Every player, A–Z · tap a name for their full profile'))))));
+                  : (activeTab==='wishlist'
+                    ? 'Propose a game — once all four players confirm, it moves to Upcoming'
+                    : (activeTab==='upcoming'
+                      ? 'Games everyone has confirmed they\'re in for'
+                      : 'Every player, A–Z · tap a name for their full profile'))))))));
     document.getElementById('explainer').innerHTML = activeTab==='wl'
       ? 'Built from readable trophy-emoji results across the main group chat and Results Only, with names and tiers confirmed against the group. Excludes single-set/"money game" results, matches against non-members, and a couple of results with no opponent named or a disputed winner.'
       : (activeTab==='power'
-        ? 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much.'
+        ? 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much. "Recent Form" sorts by average overperformance over just the last 10 games — a faster-moving signal than the season-long rating, useful for spotting who\'s trending right now.'
         : (activeTab==='callouts'
           ? 'Suggested matchups are full 2v2s — a wingman is added to each side, chosen to keep team strength balanced, so these are games you could actually go and organize. This spans every tier, not just the ones with the least data — S/A near-ties get surfaced the same way as small-sample C-tier players. Every player also has their own Easy / Balanced / Hard opponent suggestions on their profile page. The Data filter above changes which matches feed these ratings — defaults to June onwards only.'
           : (activeTab==='findgame'
@@ -1388,7 +1426,11 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
                 ? 'Editing or deleting a game recalculates every rating instantly. Your name is required for any change here so the group can see who touched what.'
                 : (activeTab==='h2h'
                   ? 'Opponent record only counts matches where the two were on opposite teams; teammate record only counts matches where they played together.'
-                  : ''))))));
+                  : (activeTab==='wishlist'
+                    ? 'Anyone can propose a game. Each of the four named players confirms it themselves from their own player profile — once all four are in, it moves to the Upcoming tab automatically.'
+                    : (activeTab==='upcoming'
+                      ? 'These four have all confirmed. Once the game is actually played, add the real result from the Games tab as normal.'
+                      : ''))))))));
 
     if(isCallouts) renderCallouts();
     else if(isPlayers) renderPlayersTab();
@@ -1396,6 +1438,8 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
     else if(isManage) renderManage();
     else if(isGames) renderGamesTab();
     else if(isH2H) renderH2H();
+    else if(isWishlist) renderWishlist();
+    else if(isUpcoming) renderUpcoming();
     else render();
   };
 });
@@ -1452,6 +1496,7 @@ function sortRows(rows){
     else if(activeSort==='name') arr.sort((a,b)=> a.name.localeCompare(b.name));
   } else {
     if(activeSortP==='rating') arr.sort((a,b)=> b.rating - a.rating);
+    else if(activeSortP==='recent_form') arr.sort((a,b)=> (b.recent_form ?? -999) - (a.recent_form ?? -999));
     else if(activeSortP==='avg_match_strength') arr.sort((a,b)=> b.avg_match_strength - a.avg_match_strength);
     else if(activeSortP==='avg_overperf_pct') arr.sort((a,b)=> b.avg_overperf_pct - a.avg_overperf_pct);
     else if(activeSortP==='upset_total') arr.sort((a,b)=> b.upset_rate - a.upset_rate || b.upset_total - a.upset_total);
@@ -1505,6 +1550,13 @@ function render(){
     } else {
       const perfClass = p.avg_overperf_pct > 0.5 ? 'perf-pos' : (p.avg_overperf_pct < -0.5 ? 'perf-neg' : '');
       const perfSign = p.avg_overperf_pct > 0 ? '+' : '';
+      const formHtml = (p.recent_form !== null && p.recent_form !== undefined)
+        ? (()=>{
+            const fClass = p.recent_form > 3 ? 'perf-pos' : (p.recent_form < -3 ? 'perf-neg' : '');
+            const fSign = p.recent_form >= 0 ? '+' : '';
+            return `<div class="rating-sub ${fClass}" style="font-size:10px;">form (${p.recent_form_games}g): ${fSign}${p.recent_form}%</div>`;
+          })()
+        : '';
       row.innerHTML = `
         <div class="rank">${i+1}</div>
         <div class="badge ${p.tier}">${p.tier}</div>
@@ -1516,6 +1568,7 @@ function render(){
         <div class="wl">
           <div class="rating-big">${Math.round(p.rating)}</div>
           <div class="rating-sub ${perfClass}">${perfSign}${p.avg_overperf_pct}% clutch</div>
+          ${formHtml}
         </div>
       `;
     }
@@ -1531,6 +1584,20 @@ const RISK_LABELS = {
   unproven: {text: "Unproven — small sample", cls: "risk-unproven"},
   stable: {text: "Stable", cls: "risk-stable"},
 };
+
+function computeRecentForm(name, windowSize){
+  windowSize = windowSize || 10;
+  const own = MATCHES.filter(m => m.winners.includes(name) || m.losers.includes(name))
+    .sort((a,b)=> a.date < b.date ? 1 : -1) // newest first
+    .slice(0, windowSize);
+  if(own.length === 0) return null;
+  const vals = own.map(m=>{
+    const won = m.winners.includes(name);
+    return won ? m.overperformance_winner : -m.overperformance_winner;
+  });
+  const avg = vals.reduce((s,x)=>s+x,0) / vals.length;
+  return { avgPct: Math.round(avg*1000)/10, games: own.length };
+}
 
 function buildProfileText(p){
   const parts = [];
@@ -2084,6 +2151,22 @@ function buildJourneySection(name, journey){
   return html;
 }
 
+function buildRecentFormSection(name){
+  const form = computeRecentForm(name, 10);
+  if(!form || form.games < 3) return ''; // not enough recent data to be meaningful
+  const pct = form.avgPct;
+  const cls = pct > 3 ? 'perf-pos' : (pct < -3 ? 'perf-neg' : '');
+  const sign = pct >= 0 ? '+' : '';
+  let note;
+  if(pct > 8) note = 'trending up clearly — worth watching for a promotion case';
+  else if(pct > 3) note = 'trending up modestly';
+  else if(pct < -8) note = 'trending down clearly';
+  else if(pct < -3) note = 'trending down modestly';
+  else note = 'holding roughly steady';
+  return `<div class="section-heading" style="margin-top:14px;">📊 Recent form (last ${form.games} games)</div>
+    <div class="matchup-vs"><span class="${cls}" style="font-weight:700; font-size:15px;">${sign}${pct}%</span> <span style="color:var(--text-dim); font-size:11.5px;">average overperformance vs. expectation — ${note}. This is separate from the season-long rating above and moves faster, since it's a short window.</span></div>`;
+}
+
 function openSheet(name){
   const p = PLAYERS.find(x=>x.name===name);
   document.getElementById('sheetName').textContent = name;
@@ -2099,7 +2182,7 @@ function openSheet(name){
   const deltaByIdx = {};
   if(journey) journey.forEach(j=>{ if(j.type==='match') deltaByIdx[j._idx] = j.delta; });
 
-  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildJourneySection(name, journey) + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
+  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildGameRequestsForPlayerSection(name) + buildRecentFormSection(name) + buildJourneySection(name, journey) + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
   const ms = MATCHES.map((m, idx)=>({...m, _idx: idx})).filter(m => m.winners.includes(name) || m.losers.includes(name));
   ms.sort((a,b)=> a.date < b.date ? 1 : -1);
   const box = document.getElementById('sheetMatches');
@@ -2148,6 +2231,12 @@ function openSheet(name){
       deltaLabel = `<div style="margin-top:4px; font-weight:700;"><span class="${deltaClass}">${deltaText} pts</span> <span style="color:var(--text-dim); font-weight:400; font-size:11px;">rating change from this game</span></div>`;
     }
 
+    const isArmed = armedDeleteId === m.id;
+    const adminButtons = isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
+      <button class="preset-btn profile-edit-btn" data-match-id="${m.id}" style="flex:1;">Edit</button>
+      <button class="preset-btn profile-delete-btn" data-match-id="${m.id}" style="flex:1; ${isArmed?'color:#e8a5a1; border-color:var(--red);':''}">${isArmed ? 'Confirm delete?' : 'Delete'}</button>
+    </div>` : '';
+
     return `<div class="match">
       <div class="top"><span>${m.date}${m.type==='singles' ? ' · Singles' : ''}</span><span style="color:${won?'var(--green)':'var(--red)'}">${won?'WIN':'LOSS'}</span></div>
       ${upsetTag}
@@ -2159,9 +2248,51 @@ function openSheet(name){
       </div>
       <div style="margin-top:4px;">${perfLabel}</div>
       ${deltaLabel}
+      ${adminButtons}
     </div>`;
   }).join('');
   document.getElementById('overlay').classList.add('show');
+
+  box.querySelectorAll('.profile-edit-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.dataset.matchId;
+      closeSheet();
+      navigateToGamesTabForEdit(id);
+    };
+  });
+  box.querySelectorAll('.profile-delete-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.matchId;
+      if(armedDeleteId === id){
+        await deleteMatch(id);
+        openSheet(name); // refresh this sheet with the deletion applied
+      } else {
+        armedDeleteId = id;
+        openSheet(name); // re-render to show "Confirm delete?"
+      }
+    };
+  });
+
+  document.querySelectorAll('.confirm-request-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.requestId;
+      const player = btn.dataset.player;
+      const req = gameRequestsState.find(r=>r.id===id);
+      if(!req) return;
+      req.confirmations[player] = true;
+      if(req.players.every(n=>req.confirmations[n])) req.status = 'confirmed';
+      const ok = await saveGameRequests(gameRequestsState);
+      if(!ok){ req.confirmations[player] = false; return; }
+      openSheet(name); // refresh to reflect the confirmation
+    };
+  });
+}
+
+function navigateToGamesTabForEdit(matchId){
+  editingMatchId = matchId;
+  armedDeleteId = null;
+  const gamesTabBtn = document.querySelector('#tabrow .tab-btn[data-tab="games"]');
+  if(gamesTabBtn) gamesTabBtn.click();
 }
 function closeSheet(){ document.getElementById('overlay').classList.remove('show'); }
 document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeSheet(); });
@@ -2664,11 +2795,19 @@ function fmtRelative(iso){
 
 function requireName(){
   const el = document.getElementById('gamesYourName');
-  const name = el ? el.value.trim() : currentUserName;
+  let name = el ? el.value.trim() : currentUserName;
   if(!name){
-    const msg = document.getElementById('gamesMessage');
-    if(msg) msg.textContent = 'Enter your name at the top first.';
-    return null;
+    if(el){
+      // On the Games tab, the name field is visible -- show the inline message there.
+      const msg = document.getElementById('gamesMessage');
+      if(msg) msg.textContent = 'Enter your name at the top first.';
+      return null;
+    }
+    // Acting from somewhere without a name field (profile, H2H) -- ask directly.
+    let typed = '';
+    try { typed = (window.prompt('Enter your name so the group knows who made this change:') || '').trim(); } catch(e){ /* prompt unavailable */ }
+    if(!typed) return null;
+    name = typed;
   }
   currentUserName = name;
   saveMyName(name);
@@ -2731,9 +2870,15 @@ function renderH2H(){
       const bTeam = aWon ? m.losers : m.winners;
       const aPartner = aTeam.filter(n=>n!==h2hPlayerA)[0];
       const bPartner = bTeam.filter(n=>n!==h2hPlayerB)[0];
+      const isArmed = armedDeleteId === m.id;
+      const adminButtons = isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
+        <button class="preset-btn h2h-edit-btn" data-match-id="${m.id}" style="flex:1;">Edit</button>
+        <button class="preset-btn h2h-delete-btn" data-match-id="${m.id}" style="flex:1; ${isArmed?'color:#e8a5a1; border-color:var(--red);':''}">${isArmed ? 'Confirm delete?' : 'Delete'}</button>
+      </div>` : '';
       html += `<div class="callout-card">
         <div class="cc-title" style="color:${aWon?'var(--green)':'var(--red)'};">${aWon ? h2hPlayerA : h2hPlayerB} won</div>
         <div class="cc-detail">${m.date} · ${aPartner?`${h2hPlayerA} &amp; ${aPartner}`:h2hPlayerA} vs ${bPartner?`${h2hPlayerB} &amp; ${bPartner}`:h2hPlayerB}<br/>${m.score}</div>
+        ${adminButtons}
       </div>`;
     });
   }
@@ -2751,14 +2896,31 @@ function renderH2H(){
     teammateMatches.forEach(m=>{
       const won = m.winners.includes(h2hPlayerA);
       const oppTeam = won ? m.losers : m.winners;
+      const isArmed = armedDeleteId === m.id;
+      const adminButtons = isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
+        <button class="preset-btn h2h-edit-btn" data-match-id="${m.id}" style="flex:1;">Edit</button>
+        <button class="preset-btn h2h-delete-btn" data-match-id="${m.id}" style="flex:1; ${isArmed?'color:#e8a5a1; border-color:var(--red);':''}">${isArmed ? 'Confirm delete?' : 'Delete'}</button>
+      </div>` : '';
       html += `<div class="callout-card">
         <div class="cc-title" style="color:${won?'var(--green)':'var(--red)'};">${won?'WIN':'LOSS'}</div>
         <div class="cc-detail">${m.date} · vs ${oppTeam.join(' &amp; ')}<br/>${m.score}</div>
+        ${adminButtons}
       </div>`;
     });
   }
 
   box.innerHTML = html;
+
+  box.querySelectorAll('.h2h-edit-btn').forEach(btn=>{
+    btn.onclick = ()=> navigateToGamesTabForEdit(btn.dataset.matchId);
+  });
+  box.querySelectorAll('.h2h-delete-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.matchId;
+      if(armedDeleteId === id){ await deleteMatch(id); renderH2H(); }
+      else { armedDeleteId = id; renderH2H(); }
+    };
+  });
   wireH2HSelects(names);
 }
 
@@ -2769,6 +2931,154 @@ function wireH2HSelects(names){
   selB.innerHTML = names.map(n=>`<option value="${n}" ${n===h2hPlayerB?'selected':''}>${n}</option>`).join('');
   selA.addEventListener('change', e=>{ h2hPlayerA = e.target.value; renderH2H(); });
   selB.addEventListener('change', e=>{ h2hPlayerB = e.target.value; renderH2H(); });
+}
+
+// ===================== WISHLIST / UPCOMING GAME REQUESTS =====================
+function fmtRequestConfirmations(req){
+  const confirmedCount = req.players.filter(n=>req.confirmations[n]).length;
+  const pillClass = confirmedCount === req.players.length ? 'perf-pos' : '';
+  return `<div style="margin-top:6px; font-size:11.5px;">
+    <span class="${pillClass}" style="font-weight:700;">${confirmedCount}/${req.players.length} confirmed</span>
+    <div style="margin-top:4px; color:var(--text-dim);">
+      ${req.players.map(n=> `${req.confirmations[n] ? '✅' : '⬜'} ${n}`).join(' &nbsp; ')}
+    </div>
+  </div>`;
+}
+
+function buildRequestCardHtml(req, showRemove){
+  const dateLine = req.preferredDate ? `${req.preferredDate} · ` : '';
+  return `<div class="callout-card">
+    <div class="cc-title">${req.players.join(' & ')}</div>
+    <div class="cc-detail">${dateLine}requested by ${req.requestedBy} (${fmtRelative(req.requestedAt)})</div>
+    ${fmtRequestConfirmations(req)}
+    ${showRemove ? `<div class="difficulty-row" style="margin-top:8px;"><button class="preset-btn request-remove-btn" data-request-id="${req.id}" style="flex:1;">Remove</button></div>` : ''}
+  </div>`;
+}
+
+function renderWishlist(flashMessage){
+  const box = document.getElementById('wishlistView');
+  const pending = gameRequestsState.filter(r=>r.status==='pending');
+
+  let html = `<div class="section-heading">🙋 Request a game</div>`;
+  html += `<div class="section-sub">Name four players. Once all four confirm from their own profile, it moves to Upcoming automatically.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Requested by</label>
+      <input id="reqYourName" class="fg-select" value="${currentUserName}" placeholder="Your name" />
+    </div>
+    <div class="fg-row"><label class="fg-label">Players</label>
+      <input id="reqP1" list="playerNamesList" class="fg-select" placeholder="Player 1" style="margin-bottom:6px;" />
+      <input id="reqP2" list="playerNamesList" class="fg-select" placeholder="Player 2" style="margin-bottom:6px;" />
+      <input id="reqP3" list="playerNamesList" class="fg-select" placeholder="Player 3" style="margin-bottom:6px;" />
+      <input id="reqP4" list="playerNamesList" class="fg-select" placeholder="Player 4" />
+    </div>
+    <datalist id="playerNamesList">${allPlayerNames().map(n=>`<option value="${n}">`).join('')}</datalist>
+    <div class="fg-row"><label class="fg-label">Preferred date (optional)</label><input id="reqDate" type="date" class="fg-select" /></div>
+    <div class="fg-row"><button class="tab-btn active" id="reqSubmit" style="width:100%;">Request this game</button></div>
+    <div id="reqMessage" class="section-sub">${flashMessage || ''}</div>
+  </div>`;
+
+  html += `<div class="section-heading">⏳ Pending (${pending.length})</div>`;
+  if(pending.length === 0){
+    html += `<div class="section-sub">No open requests right now.</div>`;
+  } else {
+    pending.slice().sort((a,b)=> a.requestedAt < b.requestedAt ? 1 : -1).forEach(req=>{
+      html += buildRequestCardHtml(req, true);
+    });
+  }
+
+  box.innerHTML = html;
+
+  document.getElementById('reqYourName').addEventListener('change', e=>{
+    currentUserName = e.target.value.trim();
+    saveMyName(currentUserName);
+  });
+
+  document.getElementById('reqSubmit').onclick = async ()=>{
+    const msg = document.getElementById('reqMessage');
+    const requestedBy = document.getElementById('reqYourName').value.trim();
+    if(!requestedBy){ msg.textContent = 'Enter your name first.'; return; }
+    const names = ['reqP1','reqP2','reqP3','reqP4'].map(id=>document.getElementById(id).value.trim());
+    if(names.some(n=>!n)){ msg.textContent = 'Enter all four players.'; return; }
+    if(new Set(names.map(n=>n.toLowerCase())).size !== 4){ msg.textContent = 'The same name appears more than once.'; return; }
+    const unrecognized = names.filter(n => !PLAYERS.find(p=>p.name.toLowerCase()===n.toLowerCase()));
+    if(unrecognized.length){ msg.textContent = `Unrecognized name${unrecognized.length>1?'s':''}: ${unrecognized.join(', ')}. Add them via Manage first if they're new.`; return; }
+
+    currentUserName = requestedBy;
+    await saveMyName(requestedBy);
+
+    const confirmations = {};
+    names.forEach(n=> confirmations[n] = false);
+    // If the requester is one of the four, they're implicitly in.
+    const requesterMatch = names.find(n=>n.toLowerCase()===requestedBy.toLowerCase());
+    if(requesterMatch) confirmations[requesterMatch] = true;
+
+    const req = {
+      id: 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+      requestedBy, requestedAt: new Date().toISOString(),
+      players: names, preferredDate: document.getElementById('reqDate').value || '',
+      confirmations,
+      status: Object.values(confirmations).every(v=>v) ? 'confirmed' : 'pending',
+    };
+    gameRequestsState.push(req);
+    const ok = await saveGameRequests(gameRequestsState);
+    if(!ok){
+      gameRequestsState.pop();
+      msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage.`;
+      return;
+    }
+    renderWishlist('Requested! Each player can confirm from their own profile.');
+  };
+
+  box.querySelectorAll('.request-remove-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.requestId;
+      gameRequestsState = gameRequestsState.filter(r=>r.id!==id);
+      await saveGameRequests(gameRequestsState);
+      renderWishlist();
+    };
+  });
+}
+
+function renderUpcoming(){
+  const box = document.getElementById('upcomingView');
+  const confirmed = gameRequestsState.filter(r=>r.status==='confirmed');
+
+  let html = `<div class="section-heading">📅 Upcoming (${confirmed.length})</div>`;
+  if(confirmed.length === 0){
+    html += `<div class="section-sub">Nothing fully confirmed yet — once all four players confirm a Wishlist request, it'll show up here.</div>`;
+  } else {
+    confirmed.slice().sort((a,b)=> a.requestedAt < b.requestedAt ? 1 : -1).forEach(req=>{
+      html += buildRequestCardHtml(req, true);
+    });
+  }
+  box.innerHTML = html;
+
+  box.querySelectorAll('.request-remove-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.requestId;
+      gameRequestsState = gameRequestsState.filter(r=>r.id!==id);
+      await saveGameRequests(gameRequestsState);
+      renderUpcoming();
+    };
+  });
+}
+
+function buildGameRequestsForPlayerSection(name){
+  const relevant = gameRequestsState.filter(r=> r.status==='pending' && r.players.includes(name) && !r.confirmations[name]);
+  if(relevant.length === 0) return '';
+  let html = `<div class="section-heading" style="margin-top:14px;">📋 Game requests involving you</div>`;
+  relevant.forEach(req=>{
+    const others = req.players.filter(n=>n!==name);
+    html += `<div class="callout-card">
+      <div class="cc-title">With ${others.join(', ')}</div>
+      <div class="cc-detail">Requested by ${req.requestedBy} (${fmtRelative(req.requestedAt)})${req.preferredDate ? ' · '+req.preferredDate : ''}</div>
+      ${fmtRequestConfirmations(req)}
+      <div class="difficulty-row" style="margin-top:8px;">
+        <button class="preset-btn confirm-request-btn" data-request-id="${req.id}" data-player="${name}" style="flex:1; color:var(--green); border-color:var(--green);">I'm in!</button>
+      </div>
+    </div>`;
+  });
+  return html;
 }
 
 function renderGamesTab(){
@@ -3110,11 +3420,16 @@ async function deleteMatch(id){
   } else {
     deletedIdsState.push(id);
     const ok = await saveDeletedIds(deletedIdsState);
-    if(!ok){ document.getElementById('gamesMessage').textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; deletedIdsState.pop(); return; }
+    if(!ok){
+      const msg = document.getElementById('gamesMessage');
+      const text = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;
+      if(msg) msg.textContent = text; else alert(text);
+      deletedIdsState.pop(); return;
+    }
   }
   armedDeleteId = null;
   recomputeAll();
-  renderGamesTab();
+  if(document.getElementById('gamesView')) renderGamesTab();
 }
 
 function findMatchById(id){
@@ -3265,6 +3580,7 @@ async function init(){
   boardPasswordHash = await loadPasswordHash(STORAGE_KEY_ADMIN_PW_BOARD);
   isUnlocked = await loadMyUnlocked();
   visibilityState = await loadVisibility();
+  gameRequestsState = await loadGameRequests();
   recomputeAll();
   applyTabVisibility();
   render();
