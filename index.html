@@ -421,11 +421,11 @@
     <button class="tab-btn" data-tab="callouts">Call-Outs</button>
     <button class="tab-btn" data-tab="findgame">Find a Game</button>
     <button class="tab-btn" data-tab="players">Players</button>
-    <button class="tab-btn" data-tab="manage">Manage</button>
     <button class="tab-btn" data-tab="games">Games</button>
     <button class="tab-btn" data-tab="h2h">Head to Head</button>
     <button class="tab-btn" data-tab="wishlist">Wishlist</button>
     <button class="tab-btn" data-tab="upcoming">Upcoming</button>
+    <button class="tab-btn" data-tab="manage">Manage</button>
   </div>
   <div class="minGamesRow" id="dataQualityRow" style="background:var(--bg2); border:1px solid var(--gold-dim); border-radius:10px; padding:8px 10px;">
     <span class="minGamesLabel" style="color:var(--gold-bright); font-weight:700;">Data:</span>
@@ -451,6 +451,7 @@
   </div>
   <div class="sortbar" id="sortbarPower">
     <button class="sortbtn active" data-sortp="rating">Rating</button>
+    <button class="sortbtn" data-sortp="month_rating" id="sortMonthRatingBtn" style="display:none;">Month Rating</button>
     <button class="sortbtn" data-sortp="recent_form">Recent Form</button>
     <button class="sortbtn" data-sortp="avg_match_strength">Avg opp.</button>
     <button class="sortbtn" data-sortp="avg_overperf_pct">Clutch %</button>
@@ -1298,6 +1299,15 @@ function computeMonthlyStats(month){
   });
   return stats;
 }
+
+// A genuine tier-seeded rating computed from ONLY the given month's matches -- as if that month
+// were its own mini-season. Uses the exact same engine as the official Power Rating, just on a
+// restricted match set. Players with no games that month simply won't appear in the result.
+function computeMonthlyRating(month){
+  if(month === 'all') return {};
+  const monthMatches = ALL_MATCHES.filter(m => m.date.slice(0,7) === month);
+  return computeElo(monthMatches, TIER_MAP, STARTING_TIER_MAP);
+}
 const ZERO_MONTH_STATS = {wins:0,losses:0,total:0,winpct:0,avg_match_strength:0,avg_overperf_pct:0,game_diff:0,upset_wins:0,upset_losses:0,upset_total:0,upset_rate:0};
 
 function populateMonthSelect(selectEl){
@@ -1415,7 +1425,7 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
     document.getElementById('explainer').innerHTML = activeTab==='wl'
       ? 'Built from readable trophy-emoji results across the main group chat and Results Only, with names and tiers confirmed against the group. Excludes single-set/"money game" results, matches against non-members, and a couple of results with no opponent named or a disputed winner.'
       : (activeTab==='power'
-        ? 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much. "Recent Form" sorts by average overperformance over just the last 10 games — a faster-moving signal than the season-long rating, useful for spotting who\'s trending right now.'
+        ? 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much. "Recent Form" sorts by average overperformance over just the last 10 games — a faster-moving signal than the overall rating, useful for spotting who\'s trending right now.'
         : (activeTab==='callouts'
           ? 'Suggested matchups are full 2v2s — a wingman is added to each side, chosen to keep team strength balanced, so these are games you could actually go and organize. This spans every tier, not just the ones with the least data — S/A near-ties get surfaced the same way as small-sample C-tier players. Every player also has their own Easy / Balanced / Hard opponent suggestions on their profile page. The Data filter above changes which matches feed these ratings — defaults to June onwards only.'
           : (activeTab==='findgame'
@@ -1457,6 +1467,11 @@ document.getElementById('search').addEventListener('input', e=>{
 });
 
 const minGamesInput = document.getElementById('minGamesInput');
+function setMinGames(n){
+  minGames = n;
+  minGamesInput.value = n;
+  document.querySelectorAll('.preset-btn').forEach(b=> b.classList.toggle('active', parseInt(b.dataset.n)===n));
+}
 minGamesInput.addEventListener('input', e=>{
   minGames = Math.max(0, parseInt(e.target.value) || 0);
   document.querySelectorAll('.preset-btn').forEach(b=> b.classList.toggle('active', parseInt(b.dataset.n)===minGames));
@@ -1474,7 +1489,14 @@ document.querySelectorAll('.preset-btn').forEach(b=>{
 
 const monthSelect = document.getElementById('monthSelect');
 monthSelect.addEventListener('change', e=>{
+  const wasAll = selectedMonth === 'all';
+  const isNowAll = e.target.value === 'all';
   selectedMonth = e.target.value;
+  if(wasAll && !isNowAll){
+    setMinGames(5); // switching into a monthly review -- games-per-month are naturally lower
+  } else if(!wasAll && isNowAll){
+    setMinGames(10); // back to the overall view -- restore the usual default
+  }
   rerenderCurrentTab();
 });
 
@@ -1496,6 +1518,7 @@ function sortRows(rows){
     else if(activeSort==='name') arr.sort((a,b)=> a.name.localeCompare(b.name));
   } else {
     if(activeSortP==='rating') arr.sort((a,b)=> b.rating - a.rating);
+    else if(activeSortP==='month_rating') arr.sort((a,b)=> (b.month_rating ?? -Infinity) - (a.month_rating ?? -Infinity));
     else if(activeSortP==='recent_form') arr.sort((a,b)=> (b.recent_form ?? -999) - (a.recent_form ?? -999));
     else if(activeSortP==='avg_match_strength') arr.sort((a,b)=> b.avg_match_strength - a.avg_match_strength);
     else if(activeSortP==='avg_overperf_pct') arr.sort((a,b)=> b.avg_overperf_pct - a.avg_overperf_pct);
@@ -1506,10 +1529,24 @@ function sortRows(rows){
 }
 
 function render(){
+  const monthRatingBtn = document.getElementById('sortMonthRatingBtn');
+  if(monthRatingBtn){
+    const showIt = selectedMonth !== 'all';
+    monthRatingBtn.style.display = showIt ? '' : 'none';
+    if(!showIt && activeSortP === 'month_rating'){
+      // The month filter was cleared while sorted by it -- fall back to the season rating.
+      activeSortP = 'rating';
+      document.querySelectorAll('#sortbarPower .sortbtn').forEach(b=> b.classList.toggle('active', b.dataset.sortp==='rating'));
+    }
+  }
+
   let rows = PLAYERS.filter(p => activeTier==='All' || p.tier===activeTier);
+  let monthlyRatings = {};
   if(selectedMonth !== 'all'){
     const monthly = computeMonthlyStats(selectedMonth);
-    rows = rows.map(p => ({...p, ...(monthly[p.name] || ZERO_MONTH_STATS)}));
+    monthlyRatings = computeMonthlyRating(selectedMonth);
+    rows = rows.map(p => ({...p, ...(monthly[p.name] || ZERO_MONTH_STATS),
+      month_rating: (p.name in monthlyRatings) ? Math.round(monthlyRatings[p.name]*10)/10 : null}));
   }
   rows = rows.filter(p => p.total >= minGames);
   if(query) rows = rows.filter(p => p.name.toLowerCase().includes(query));
@@ -1525,7 +1562,7 @@ function render(){
     note.className = 'section-sub';
     note.style.padding = '8px 2px';
     note.innerHTML = activeTab==='power'
-      ? `Showing <b style="color:var(--text);">${monthLabel(selectedMonth)}</b> only — record, avg opp., clutch and upsets are for this month; rating stays the season-long number.`
+      ? `Showing <b style="color:var(--text);">${monthLabel(selectedMonth)}</b> only — record, avg opp., clutch and upsets are for this month. "This month" is a genuine tier-seeded rating using only ${monthLabel(selectedMonth)}'s matches, as if it were its own mini-season — separate from the overall rating, which stays as-is.`
       : `Showing <b style="color:var(--text);">${monthLabel(selectedMonth)}</b> only.`;
     list.appendChild(note);
   }
@@ -1557,22 +1594,45 @@ function render(){
             return `<div class="rating-sub ${fClass}" style="font-size:10px;">form (${p.recent_form_games}g): ${fSign}${p.recent_form}%</div>`;
           })()
         : '';
+
+      const inMonthView = selectedMonth !== 'all';
+      const hasMonthGames = inMonthView && p.month_rating !== null && p.month_rating !== undefined;
+      const bigNumberHtml = (inMonthView && hasMonthGames)
+        ? `<div class="rating-big">${Math.round(p.month_rating)}</div>`
+        : (inMonthView
+            ? `<div class="rating-big" style="color:var(--text-dim); font-size:20px;">–</div>`
+            : `<div class="rating-big">${Math.round(p.rating)}</div>`);
+      const seasonSubHtml = inMonthView
+        ? `<div class="rating-sub" style="font-size:10px; color:var(--text-dim);">overall: ${Math.round(p.rating)}</div>`
+        : '';
+      const monthRatingHtml = (inMonthView && !hasMonthGames)
+        ? `<div class="rating-sub" style="font-size:10px; color:var(--text-dim);">no games this month</div>`
+        : '';
+
       row.innerHTML = `
         <div class="rank">${i+1}</div>
         <div class="badge ${p.tier}">${p.tier}</div>
         <div class="namecol">
           <div class="nm">${p.name}</div>
           <div class="meta">avg opp. ${Math.round(p.avg_match_strength)} · ${p.total} games</div>
-          <div class="upset-mini"><span class="uw">${p.upset_wins} upset win${p.upset_wins===1?'':'s'}</span> · <span class="ul">${p.upset_losses} upset loss${p.upset_losses===1?'':'es'}</span> (${p.upset_rate}% of games)</div>
+          <div class="upset-mini"><span class="uw upset-drill" data-player="${p.name}" data-kind="upset_wins" style="cursor:pointer; text-decoration:underline;">${p.upset_wins} upset win${p.upset_wins===1?'':'s'}</span> · <span class="ul upset-drill" data-player="${p.name}" data-kind="upset_losses" style="cursor:pointer; text-decoration:underline;">${p.upset_losses} upset loss${p.upset_losses===1?'':'es'}</span> (${p.upset_rate}% of games)</div>
         </div>
         <div class="wl">
-          <div class="rating-big">${Math.round(p.rating)}</div>
+          ${bigNumberHtml}
           <div class="rating-sub ${perfClass}">${perfSign}${p.avg_overperf_pct}% clutch</div>
           ${formHtml}
+          ${seasonSubHtml}
+          ${monthRatingHtml}
         </div>
       `;
     }
     list.appendChild(row);
+    row.querySelectorAll('.upset-drill').forEach(el=>{
+      el.onclick = (e)=>{
+        e.stopPropagation();
+        openSheet(el.dataset.player, el.dataset.kind);
+      };
+    });
   });
 }
 
@@ -2164,10 +2224,25 @@ function buildRecentFormSection(name){
   else if(pct < -3) note = 'trending down modestly';
   else note = 'holding roughly steady';
   return `<div class="section-heading" style="margin-top:14px;">📊 Recent form (last ${form.games} games)</div>
-    <div class="matchup-vs"><span class="${cls}" style="font-weight:700; font-size:15px;">${sign}${pct}%</span> <span style="color:var(--text-dim); font-size:11.5px;">average overperformance vs. expectation — ${note}. This is separate from the season-long rating above and moves faster, since it's a short window.</span></div>`;
+    <div class="matchup-vs"><span class="${cls}" style="font-weight:700; font-size:15px;">${sign}${pct}%</span> <span style="color:var(--text-dim); font-size:11.5px;">average overperformance vs. expectation — ${note}. This is separate from the overall rating above and moves faster, since it's a short window.</span></div>`;
 }
 
-function openSheet(name){
+function buildMonthlyRatingSection(name){
+  if(selectedMonth === 'all') return '';
+  const monthlyRatings = computeMonthlyRating(selectedMonth);
+  const p = PLAYERS.find(x=>x.name===name);
+  const label = monthLabel(selectedMonth);
+  if(!(name in monthlyRatings)){
+    return `<div class="section-heading" style="margin-top:14px;">📅 ${label} rating</div>
+      <div class="section-sub">No games for ${name} in ${label}.</div>`;
+  }
+  const rating = Math.round(monthlyRatings[name]*10)/10;
+  const gamesThisMonth = MATCHES.filter(m => (m.winners.includes(name) || m.losers.includes(name)) && m.date.slice(0,7)===selectedMonth).length;
+  return `<div class="section-heading" style="margin-top:14px;">📅 ${label} rating</div>
+    <div class="matchup-vs"><b style="font-size:15px;">${Math.round(rating)}</b> <span style="color:var(--text-dim); font-size:11.5px;">— a tier-seeded rating using only ${gamesThisMonth} game${gamesThisMonth===1?'':'s'} from ${label}, as if that month were its own mini-season. Overall rating (${Math.round(p.rating)}) stays the official number.</span></div>`;
+}
+
+function openSheet(name, matchFilter){
   const p = PLAYERS.find(x=>x.name===name);
   document.getElementById('sheetName').textContent = name;
   const riskInfo = RISK_LABELS[p.risk] || RISK_LABELS.stable;
@@ -2182,11 +2257,30 @@ function openSheet(name){
   const deltaByIdx = {};
   if(journey) journey.forEach(j=>{ if(j.type==='match') deltaByIdx[j._idx] = j.delta; });
 
-  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildGameRequestsForPlayerSection(name) + buildRecentFormSection(name) + buildJourneySection(name, journey) + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
-  const ms = MATCHES.map((m, idx)=>({...m, _idx: idx})).filter(m => m.winners.includes(name) || m.losers.includes(name));
+  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildGameRequestsForPlayerSection(name) + buildRecentFormSection(name) + buildMonthlyRatingSection(name) + buildJourneySection(name, journey) + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
+  let ms = MATCHES.map((m, idx)=>({...m, _idx: idx})).filter(m => m.winners.includes(name) || m.losers.includes(name));
   ms.sort((a,b)=> a.date < b.date ? 1 : -1);
+
+  let filterBannerHtml = '';
+  if(matchFilter === 'upset_wins' || matchFilter === 'upset_losses'){
+    ms = ms.filter(m=>{
+      const won = m.winners.includes(name);
+      const myTeamRating = won ? m.team_w_rating : m.team_l_rating;
+      const oppTeamRating = won ? m.team_l_rating : m.team_w_rating;
+      const gap = Math.abs(myTeamRating - oppTeamRating);
+      const favored = myTeamRating > oppTeamRating;
+      if(gap < 15) return false; // must be a genuine gap on paper to count as an upset
+      return matchFilter === 'upset_wins' ? (won && !favored) : (!won && favored);
+    });
+    const label = matchFilter === 'upset_wins' ? 'upset wins' : 'upset losses';
+    filterBannerHtml = `<div class="section-sub" style="padding:8px 2px;">Showing only ${label} for ${name} — <span id="clearProfileFilter" style="text-decoration:underline; cursor:pointer; color:var(--gold-bright);">show all games</span></div>`;
+    if(ms.length === 0){
+      filterBannerHtml += `<div class="section-sub">No ${label} to show.</div>`;
+    }
+  }
+
   const box = document.getElementById('sheetMatches');
-  box.innerHTML = ms.map(m=>{
+  box.innerHTML = filterBannerHtml + ms.map(m=>{
     const won = m.winners.includes(name);
     const myTeam = won ? m.winners : m.losers;
     const oppTeam = won ? m.losers : m.winners;
@@ -2287,6 +2381,9 @@ function openSheet(name){
     };
   });
   wireRequestPlayerLinks(document.getElementById('sheetProfile'));
+
+  const clearFilterEl = document.getElementById('clearProfileFilter');
+  if(clearFilterEl) clearFilterEl.onclick = ()=> openSheet(name);
 }
 
 function navigateToGamesTabForEdit(matchId){
@@ -3287,7 +3384,14 @@ Player C &amp; Player D"></textarea>
     html += `<div class="section-sub">Submitted but not yet counted in any rating.</div>`;
     pendingFiltered.forEach(m=>{
       const titleText = m.isDraw ? `${m.winners.join(' & ')} vs ${m.losers.join(' & ')} <span class="strength-pill" style="margin-left:6px;">DRAW</span>` : `${m.winners.join(' & ')} def ${m.losers.join(' & ')}`;
-      html += `<div class="callout-card">
+      let pendingCardStyle = '';
+      if(selectedGamesPlayer !== 'all' && !m.isDraw){
+        const playerWon = m.winners.includes(selectedGamesPlayer);
+        pendingCardStyle = playerWon
+          ? 'background:rgba(90,156,90,0.12); border-color:rgba(90,156,90,0.4);'
+          : 'background:rgba(181,69,63,0.12); border-color:rgba(181,69,63,0.4);';
+      }
+      html += `<div class="callout-card" style="${pendingCardStyle}">
         <div class="cc-title">${titleText}</div>
         <div class="cc-detail">${m.date} · ${m.sets.map(s=>s.join('-')).join(', ')} · submitted by ${m.submittedBy} (${fmtRelative(m.submittedAt)})</div>
         ${isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
@@ -3320,7 +3424,14 @@ Player C &amp; Player D"></textarea>
           ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--line); font-size:11.5px; color:var(--text-dim);">Recorded as unfinished / a draw — doesn't count as a win or loss for anyone, and doesn't affect any rating.</div>`
           : (enriched ? buildMatchDetailBlock(enriched, idToIdx[m.id]) : ''))
       : '';
-    html += `<div class="callout-card">
+    let cardStyle = '';
+    if(selectedGamesPlayer !== 'all' && !m.isDraw){
+      const playerWon = m.winners.includes(selectedGamesPlayer);
+      cardStyle = playerWon
+        ? 'background:rgba(90,156,90,0.12); border-color:rgba(90,156,90,0.4);'
+        : 'background:rgba(181,69,63,0.12); border-color:rgba(181,69,63,0.4);';
+    }
+    html += `<div class="callout-card" style="${cardStyle}">
       <div class="game-card-clickable" data-gameid="${m.id}" style="cursor:pointer;">
         <div class="cc-title">${titleText}</div>
         <div class="cc-detail">${m.date} · ${m.sets.map(s=>s.join('-')).join(', ')}${m.note?' · '+m.note:''}<br/>${metaLine}</div>
