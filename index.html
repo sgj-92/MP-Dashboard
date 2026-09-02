@@ -792,16 +792,20 @@ function rebuildMapsFromState(){
 }
 
 // The list used for rating computation: base + approved submissions, edits applied, deletions removed.
-function getEffectiveMatches(){
+// Every approved match, edits applied, deletions removed. Includes draws -- this is the source
+// of truth for "what exists", used for display. Rating computation uses getEffectiveMatches()
+// below, which filters draws out, since an unfinished game has no defined winner to rate.
+function getAllApprovedMatches(){
   let all = BASE_MATCHES.concat(extraMatchesState.filter(m=>m.status==='approved'));
   all = all.map(m=>{
     const edit = matchEditsState[m.id];
     if(!edit) return m;
-    const {date,winners,losers,sets,type,note} = edit;
+    const {date,winners,losers,sets,type,note,isDraw} = edit;
     return {...m,
       date: date!==undefined?date:m.date, winners: winners!==undefined?winners:m.winners,
       losers: losers!==undefined?losers:m.losers, sets: sets!==undefined?sets:m.sets,
-      type: type!==undefined?type:m.type, note: note!==undefined?note:m.note};
+      type: type!==undefined?type:m.type, note: note!==undefined?note:m.note,
+      isDraw: isDraw!==undefined?isDraw:m.isDraw};
   });
   all = all.filter(m=>!deletedIdsState.includes(m.id));
   if(dataQualityFilter === 'verified') all = all.filter(m => m.verified !== false);
@@ -809,9 +813,14 @@ function getEffectiveMatches(){
   return all;
 }
 
-// The list used for the Games tab display: effective matches + pending (not yet approved), never deleted.
+// The list used for rating computation: same as above, minus draws (no winner to rate).
+function getEffectiveMatches(){
+  return getAllApprovedMatches().filter(m => !m.isDraw);
+}
+
+// The list used for the Games tab display: all approved matches (including draws) + pending, never deleted.
 function getDisplayMatches(){
-  const effective = getEffectiveMatches().map(m=>({...m, _status:'approved'}));
+  const effective = getAllApprovedMatches().map(m=>({...m, _status:'approved'}));
   const pending = extraMatchesState.filter(m=>m.status==='pending' && !deletedIdsState.includes(m.id)).map(m=>({...m, _status:'pending'}));
   return effective.concat(pending);
 }
@@ -2156,54 +2165,18 @@ function renderManage(){
   }
   let html = '';
 
+  html += `<div class="section-heading">🔮 Predict a matchup</div>`;
+  html += `<div class="section-sub">Pick up to two names per side and see what the current ratings expect — no game needs to exist yet. Leave a second name blank for singles.</div>`;
   html += `<div class="fg-controls">
-    <div class="fg-row"><label class="fg-label">Your name</label>
-      <input id="yourNameInput" class="fg-select" placeholder="So the group knows who added this" value="${currentUserName}" />
+    <div class="fg-row"><label class="fg-label">Team A</label>
+      <input id="predA1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
+      <input id="predA2" list="playerNamesList" class="fg-select" placeholder="Partner (optional)" />
     </div>
-  </div>`;
-
-  html += `<div class="section-heading">➕ Add a game</div>`;
-  html += `<div class="section-sub">Paste a result in the usual WhatsApp shorthand and it'll fill in the form below for you to check before submitting.</div>`;
-  html += `<div class="fg-controls">
-    <div class="fg-row"><label class="fg-label">Quick paste</label>
-      <textarea id="agQuickPaste" class="fg-select" rows="5" style="width:100%; font-family:monospace; resize:vertical;" placeholder="Kaz &amp; PDM 🏆
-6-4
-6-4
-Rishi &amp; Dennis"></textarea>
+    <div class="fg-row"><label class="fg-label">Team B</label>
+      <input id="predB1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
+      <input id="predB2" list="playerNamesList" class="fg-select" placeholder="Partner (optional)" />
     </div>
-    <div class="fg-row"><button class="preset-btn" id="agQuickParse" style="width:100%;">Parse &amp; fill form below</button></div>
-    <div id="agQuickMessage" class="section-sub"></div>
-  </div>`;
-  html += `<div class="section-sub">Or fill in the fields directly. New games go to the <b>Games</b> tab as pending until someone approves them — nothing here affects ratings until then.</div>`;
-  html += `<div class="fg-controls">
-    <div class="fg-row"><label class="fg-label">Date</label><input id="agDate" type="date" class="fg-select" /></div>
-    <div class="fg-row"><label class="fg-label">Match type</label>
-      <div class="fg-toggle" id="agTypeToggle">
-        <button class="fg-toggle-btn active" data-type="doubles">Doubles</button>
-        <button class="fg-toggle-btn" data-type="singles">Singles</button>
-      </div>
-    </div>
-    <div class="fg-row"><label class="fg-label">Team A (winners)</label>
-      <input id="agA1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
-      <input id="agA2" list="playerNamesList" class="fg-select" placeholder="Partner (leave blank for singles)" />
-    </div>
-    <div class="fg-row"><label class="fg-label">Team B (losers)</label>
-      <input id="agB1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
-      <input id="agB2" list="playerNamesList" class="fg-select" placeholder="Partner (leave blank for singles)" />
-    </div>
-    <datalist id="playerNamesList">${allPlayerNames().map(n=>`<option value="${n}">`).join('')}</datalist>
-    <div class="fg-row"><label class="fg-label">Set scores (Team A – Team B)</label>
-      <div id="agSets"></div>
-      <button class="preset-btn" id="agAddSet" style="margin-top:6px;">+ Add set</button>
-    </div>
-    <div class="fg-row" id="agNewPlayerRow" style="display:none;">
-      <label class="fg-label" style="color:var(--gold-bright);">New player(s) detected — pick a starting tier</label>
-      <div id="agNewPlayerTiers"></div>
-    </div>
-    <div class="fg-row">
-      <button class="tab-btn active" id="agSubmit" style="width:100%;">Submit for approval</button>
-    </div>
-    <div id="agMessage" class="section-sub"></div>
+    <div id="predResult"></div>
   </div>`;
 
   html += `<div class="section-heading">🏷️ Player tags</div>`;
@@ -2243,63 +2216,55 @@ Rishi &amp; Dennis"></textarea>
   box.innerHTML = html;
 
   const today = new Date().toISOString().slice(0,10);
-  document.getElementById('agDate').value = today;
 
-  document.getElementById('yourNameInput').addEventListener('change', e=>{
-    currentUserName = e.target.value.trim();
-    saveMyName(currentUserName);
-  });
+  function renderPrediction(){
+    const resultBox = document.getElementById('predResult');
+    const a1 = document.getElementById('predA1').value.trim();
+    const a2 = document.getElementById('predA2').value.trim();
+    const b1 = document.getElementById('predB1').value.trim();
+    const b2 = document.getElementById('predB2').value.trim();
 
-  document.querySelectorAll('#agTypeToggle .fg-toggle-btn').forEach(b=>{
-    b.onclick = ()=>{
-      document.querySelectorAll('#agTypeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
-      const isSingles = b.dataset.type==='singles';
-      document.getElementById('agA2').style.display = isSingles ? 'none' : 'block';
-      document.getElementById('agB2').style.display = isSingles ? 'none' : 'block';
-    };
-  });
+    if(!a1 || !b1){ resultBox.innerHTML = ''; return; }
 
-  renderAddGameSets();
-  document.getElementById('agAddSet').onclick = ()=>{
-    if(addGameSets.length>=5) return;
-    addGameSets.push({w:'',l:''});
-    renderAddGameSets();
-  };
-
-  document.getElementById('agQuickParse').onclick = ()=>{
-    const msg = document.getElementById('agQuickMessage');
-    const raw = document.getElementById('agQuickPaste').value;
-    const result = parseQuickEntryText(raw);
-    if(result.error){
-      msg.textContent = result.error;
-      msg.style.color = 'var(--red)';
+    const teamA = [a1, a2].filter(Boolean);
+    const teamB = [b1, b2].filter(Boolean);
+    const allNames = [...teamA, ...teamB];
+    const missing = allNames.filter(n => !PLAYERS.find(p=>p.name.toLowerCase()===n.toLowerCase()));
+    if(missing.length){
+      resultBox.innerHTML = `<div class="section-sub" style="color:var(--red);">Unrecognized name${missing.length>1?'s':''}: ${missing.join(', ')}</div>`;
       return;
     }
-    msg.style.color = '';
-    msg.textContent = 'Parsed — check the fields below and hit Submit.';
+    if(new Set(allNames.map(n=>n.toLowerCase())).size !== allNames.length){
+      resultBox.innerHTML = `<div class="section-sub" style="color:var(--red);">The same name appears on both sides.</div>`;
+      return;
+    }
 
-    const typeBtn = document.querySelector(`#agTypeToggle .fg-toggle-btn[data-type="${result.isSingles ? 'singles' : 'doubles'}"]`);
-    if(typeBtn) typeBtn.click();
+    const getP = (n) => PLAYERS.find(p=>p.name.toLowerCase()===n.toLowerCase());
+    const ratingA = teamA.reduce((s,n)=>s+getP(n).rating,0) / teamA.length;
+    const ratingB = teamB.reduce((s,n)=>s+getP(n).rating,0) / teamB.length;
+    const gap = Math.abs(ratingA - ratingB);
+    const isClose = gap < 15;
+    const aFavored = ratingA > ratingB;
+    const expectedA = 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
 
-    document.getElementById('agA1').value = result.winners[0] || '';
-    document.getElementById('agA2').value = result.winners[1] || '';
-    document.getElementById('agB1').value = result.losers[0] || '';
-    document.getElementById('agB2').value = result.losers[1] || '';
+    const teamALabel = teamA.map(n=>`${n} (${Math.round(getP(n).rating)})`).join(' &amp; ');
+    const teamBLabel = teamB.map(n=>`${n} (${Math.round(getP(n).rating)})`).join(' &amp; ');
+    const favLine = isClose
+      ? `Evenly matched on paper (${Math.round(gap)} pt gap).`
+      : (aFavored
+        ? `<b>${teamA.join(' & ')}</b> favored by ${Math.round(gap)} pts on paper.`
+        : `<b>${teamB.join(' & ')}</b> favored by ${Math.round(gap)} pts on paper.`);
 
-    addGameSets = result.sets.map(([w,l])=>({ w: String(w), l: String(l) }));
-    renderAddGameSets();
-    checkForNewPlayers();
-
-    const dateEl = document.getElementById('agDate');
-    try { dateEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){ /* non-critical */ }
-  };
-
-  ['agA1','agA2','agB1','agB2'].forEach(id=>{
-    document.getElementById(id).addEventListener('input', checkForNewPlayers);
+    resultBox.innerHTML = `<div class="matchup-vs" style="margin-top:8px;">
+      <div><b style="color:var(--text);">${teamALabel}</b> vs <b style="color:var(--text);">${teamBLabel}</b></div>
+      <div style="margin-top:6px; font-size:12.5px;">${favLine}</div>
+      <div style="margin-top:4px; font-size:12.5px; color:var(--text-dim);">Expected split of games: ${Math.round(expectedA*100)}% / ${Math.round((1-expectedA)*100)}%</div>
+      <div style="margin-top:6px; font-size:10.5px; color:var(--text-dim);">Based on current ratings only — nothing here is recorded, and this doesn't need a real game to exist.</div>
+    </div>`;
+  }
+  ['predA1','predA2','predB1','predB2'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', renderPrediction);
   });
-
-  document.getElementById('agSubmit').onclick = submitNewGame;
 
   document.getElementById('npAdd').onclick = async ()=>{
     const name = document.getElementById('npName').value.trim();
@@ -2383,9 +2348,10 @@ function parseQuickEntryText(text){
   const [line1, line2] = teamLines;
   const line1HasTrophy = line1.includes('🏆');
   const line2HasTrophy = line2.includes('🏆');
-  if(line1HasTrophy === line2HasTrophy){
-    return { error: 'Could not tell who won — put 🏆 next to exactly one team\'s name.' };
+  if(line1HasTrophy && line2HasTrophy){
+    return { error: 'Both teams have 🏆 — put it next to at most one team, or remove it from both if this was a draw.' };
   }
+  const isDraw = !line1HasTrophy && !line2HasTrophy;
 
   const cleanTeam = (line) => line.replace(/🏆/g,'').trim().split('&').map(n=>n.trim()).filter(n=>n.length>0);
   const team1 = cleanTeam(line1);
@@ -2402,6 +2368,10 @@ function parseQuickEntryText(text){
   });
   if(sets.length === 0){
     return { error: 'Could not read any set scores.' };
+  }
+
+  if(isDraw){
+    return { winners: team1, losers: team2, sets, isSingles: team1.length === 1, isDraw: true };
   }
 
   const winnerIsTeam1 = line1HasTrophy;
@@ -2456,7 +2426,7 @@ function checkForNewPlayers(){
 
 async function submitNewGame(){
   const msg = document.getElementById('agMessage');
-  currentUserName = document.getElementById('yourNameInput').value.trim();
+  currentUserName = document.getElementById('gamesYourName').value.trim();
   if(!currentUserName){
     msg.textContent = 'Enter your name at the top first — every submission needs one.'; return;
   }
@@ -2464,6 +2434,7 @@ async function submitNewGame(){
 
   const date = document.getElementById('agDate').value;
   const isSingles = document.querySelector('#agTypeToggle .fg-toggle-btn.active').dataset.type === 'singles';
+  const isDraw = document.querySelector('#agOutcomeToggle .fg-toggle-btn.active').dataset.outcome === 'draw';
   const a1 = document.getElementById('agA1').value.trim();
   const a2 = document.getElementById('agA2').value.trim();
   const b1 = document.getElementById('agB1').value.trim();
@@ -2485,9 +2456,11 @@ async function submitNewGame(){
     sets.push([w,l]);
   }
   if(sets.length===0){ msg.textContent = 'Enter at least one set score.'; return; }
-  const setsWon = sets.filter(s=>s[0]>s[1]).length, setsLost = sets.filter(s=>s[1]>s[0]).length;
-  if(setsWon < setsLost){
-    msg.textContent = 'Team A\'s scores should be the winning side — swap the teams or check your set scores.'; return;
+  if(!isDraw){
+    const setsWon = sets.filter(s=>s[0]>s[1]).length, setsLost = sets.filter(s=>s[1]>s[0]).length;
+    if(setsWon < setsLost){
+      msg.textContent = 'Team A\'s scores should be the winning side — swap the teams, check your set scores, or mark this as not finished / a draw.'; return;
+    }
   }
 
   // register any new players with chosen tiers
@@ -2500,20 +2473,25 @@ async function submitNewGame(){
   }
 
   const id = 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-  const newMatch = {id, date, winners, losers, sets, type: isSingles?'singles':'doubles', note:'',
+  const newMatch = {id, date, winners, losers, sets, type: isSingles?'singles':'doubles', note:'', isDraw,
                      status:'pending', submittedBy: currentUserName, submittedAt: new Date().toISOString()};
   extraMatchesState.push(newMatch);
   const ok = await saveExtraMatches(extraMatchesState);
   if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; extraMatchesState.pop(); return; }
 
   recomputeAll();
-  msg.textContent = `Submitted. ${winners.join(' & ')} def ${losers.join(' & ')} — waiting for approval in the Games tab.`;
+  msg.textContent = isDraw
+    ? `Submitted as a draw. ${winners.join(' & ')} vs ${losers.join(' & ')} — waiting for approval, won't affect any rating.`
+    : `Submitted. ${winners.join(' & ')} def ${losers.join(' & ')} — waiting for approval in the Games tab.`;
   document.getElementById('agA1').value=''; document.getElementById('agA2').value='';
   document.getElementById('agB1').value=''; document.getElementById('agB2').value='';
+  document.querySelectorAll('#agOutcomeToggle .fg-toggle-btn').forEach(x=>x.classList.toggle('active', x.dataset.outcome==='decisive'));
+  document.getElementById('agTeamALabel').textContent = 'Team A (winners)';
+  document.getElementById('agTeamBLabel').textContent = 'Team B (losers)';
+  document.getElementById('agSetsLabel').textContent = 'Set scores (Team A – Team B)';
   addGameSets = [{w:'',l:''},{w:'',l:''}];
   renderAddGameSets();
   document.getElementById('agNewPlayerRow').style.display='none';
-  renderPlayerTagsList();
 }
 
 function renderPlayerTagsList(){
@@ -2776,13 +2754,68 @@ function renderGamesTab(){
     </div>
   </div>`;
 
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Your name</label>
+      <input id="gamesYourName" class="fg-select" placeholder="So the group knows who added this" value="${currentUserName}" />
+    </div>
+  </div>`;
+
+  html += `<div class="section-heading">➕ Add a game</div>`;
+  html += `<div class="section-sub">Anyone can submit a result — it lands below as pending until an admin approves it. Paste a result in the usual WhatsApp shorthand and it'll fill in the form for you to check before submitting.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Quick paste</label>
+      <textarea id="agQuickPaste" class="fg-select" rows="5" style="width:100%; font-family:monospace; resize:vertical;" placeholder="Player A &amp; Player B 🏆
+6-4
+6-4
+Player C &amp; Player D"></textarea>
+    </div>
+    <div class="fg-row"><button class="preset-btn" id="agQuickParse" style="width:100%;">Parse &amp; fill form below</button></div>
+    <div id="agQuickMessage" class="section-sub"></div>
+  </div>`;
+  html += `<div class="section-sub">Or fill in the fields directly. New games go into Pending below until an admin approves them — nothing here affects ratings until then.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Date</label><input id="agDate" type="date" class="fg-select" /></div>
+    <div class="fg-row"><label class="fg-label">Match type</label>
+      <div class="fg-toggle" id="agTypeToggle">
+        <button class="fg-toggle-btn active" data-type="doubles">Doubles</button>
+        <button class="fg-toggle-btn" data-type="singles">Singles</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label">Outcome</label>
+      <div class="fg-toggle" id="agOutcomeToggle">
+        <button class="fg-toggle-btn active" data-outcome="decisive">Finished</button>
+        <button class="fg-toggle-btn" data-outcome="draw">Not finished / draw</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label" id="agTeamALabel">Team A (winners)</label>
+      <input id="agA1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
+      <input id="agA2" list="playerNamesList" class="fg-select" placeholder="Partner (leave blank for singles)" />
+    </div>
+    <div class="fg-row"><label class="fg-label" id="agTeamBLabel">Team B (losers)</label>
+      <input id="agB1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
+      <input id="agB2" list="playerNamesList" class="fg-select" placeholder="Partner (leave blank for singles)" />
+    </div>
+    <datalist id="playerNamesList">${allPlayerNames().map(n=>`<option value="${n}">`).join('')}</datalist>
+    <div class="fg-row"><label class="fg-label" id="agSetsLabel">Set scores (Team A – Team B)</label>
+      <div id="agSets"></div>
+      <button class="preset-btn" id="agAddSet" style="margin-top:6px;">+ Add set</button>
+    </div>
+    <div class="fg-row" id="agNewPlayerRow" style="display:none;">
+      <label class="fg-label" style="color:var(--gold-bright);">New player(s) detected — pick a starting tier</label>
+      <div id="agNewPlayerTiers"></div>
+    </div>
+    <div class="fg-row">
+      <button class="tab-btn active" id="agSubmit" style="width:100%;">Submit for approval</button>
+    </div>
+    <div id="agMessage" class="section-sub"></div>
+  </div>`;
+
   if(!isUnlocked){
+    html += `<div class="section-heading">🔒 Admin actions</div>`;
+    html += `<div class="section-sub">Approving, editing, or deleting a game needs the admin password.</div>`;
     html += buildLockScreenHtml();
   } else {
     html += `<div class="fg-controls">
-      <div class="fg-row"><label class="fg-label">Your name</label>
-        <input id="gamesYourName" class="fg-select" placeholder="Required to approve, edit, or delete" value="${currentUserName}" />
-      </div>
       <div class="fg-row"><button class="preset-btn" id="gamesLockNowBtn">🔒 Lock admin area</button></div>
       <div id="gamesMessage" class="section-sub"></div>
     </div>`;
@@ -2794,8 +2827,9 @@ function renderGamesTab(){
     html += `<div class="section-heading">⏳ Pending approval (${pendingFiltered.length})</div>`;
     html += `<div class="section-sub">Submitted but not yet counted in any rating.</div>`;
     pendingFiltered.forEach(m=>{
+      const titleText = m.isDraw ? `${m.winners.join(' & ')} vs ${m.losers.join(' & ')} <span class="strength-pill" style="margin-left:6px;">DRAW</span>` : `${m.winners.join(' & ')} def ${m.losers.join(' & ')}`;
       html += `<div class="callout-card">
-        <div class="cc-title">${m.winners.join(' & ')} def ${m.losers.join(' & ')}</div>
+        <div class="cc-title">${titleText}</div>
         <div class="cc-detail">${m.date} · ${m.sets.map(s=>s.join('-')).join(', ')} · submitted by ${m.submittedBy} (${fmtRelative(m.submittedAt)})</div>
         ${isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
           <button class="preset-btn" data-approve="${m.id}" style="flex:1; color:var(--green); border-color:var(--green);">Approve</button>
@@ -2819,12 +2853,19 @@ function renderGamesTab(){
     const isArmed = armedDeleteId === m.id;
     const unverifiedTag = m.verified === false ? `<span class="strength-pill" style="color:#e8a5a1; border-color:var(--red); margin-left:6px;">Pre-June · single-sourced</span>` : '';
     const isExpanded = expandedGameId === m.id;
-    const enriched = MATCHES[idToIdx[m.id]];
+    const enriched = m.isDraw ? null : MATCHES[idToIdx[m.id]];
+    const drawTag = m.isDraw ? `<span class="strength-pill" style="margin-left:6px;">DRAW · not finished</span>` : '';
+    const titleText = m.isDraw ? `${m.winners.join(' & ')} vs ${m.losers.join(' & ')}${drawTag}${unverifiedTag}` : `${m.winners.join(' & ')} def ${m.losers.join(' & ')}${unverifiedTag}`;
+    const detailContent = isExpanded
+      ? (m.isDraw
+          ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--line); font-size:11.5px; color:var(--text-dim);">Recorded as unfinished / a draw — doesn't count as a win or loss for anyone, and doesn't affect any rating.</div>`
+          : (enriched ? buildMatchDetailBlock(enriched, idToIdx[m.id]) : ''))
+      : '';
     html += `<div class="callout-card">
       <div class="game-card-clickable" data-gameid="${m.id}" style="cursor:pointer;">
-        <div class="cc-title">${m.winners.join(' & ')} def ${m.losers.join(' & ')}${unverifiedTag}</div>
+        <div class="cc-title">${titleText}</div>
         <div class="cc-detail">${m.date} · ${m.sets.map(s=>s.join('-')).join(', ')}${m.note?' · '+m.note:''}<br/>${metaLine}</div>
-        ${isExpanded && enriched ? buildMatchDetailBlock(enriched, idToIdx[m.id]) : ''}
+        ${detailContent}
       </div>
       ${isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
         <button class="preset-btn" data-edit="${m.id}" style="flex:1;">Edit</button>
@@ -2876,6 +2917,82 @@ function renderGamesTab(){
     recomputeAll();
     renderGamesTab();
   });
+
+  // ===== Add a game (always available, not gated by admin lock) =====
+  document.getElementById('gamesYourName').addEventListener('change', e=>{
+    currentUserName = e.target.value.trim();
+    saveMyName(currentUserName);
+  });
+
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('agDate').value = today;
+
+  document.querySelectorAll('#agTypeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#agTypeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const isSingles = b.dataset.type==='singles';
+      document.getElementById('agA2').style.display = isSingles ? 'none' : 'block';
+      document.getElementById('agB2').style.display = isSingles ? 'none' : 'block';
+    };
+  });
+
+  function updateOutcomeLabels(isDraw){
+    document.getElementById('agTeamALabel').textContent = isDraw ? 'Team A' : 'Team A (winners)';
+    document.getElementById('agTeamBLabel').textContent = isDraw ? 'Team B' : 'Team B (losers)';
+    document.getElementById('agSetsLabel').textContent = isDraw ? 'Set scores (Team A – Team B) — as played, doesn\'t need a winning side' : 'Set scores (Team A – Team B)';
+  }
+  document.querySelectorAll('#agOutcomeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#agOutcomeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      updateOutcomeLabels(b.dataset.outcome === 'draw');
+    };
+  });
+
+  renderAddGameSets();
+  document.getElementById('agAddSet').onclick = ()=>{
+    if(addGameSets.length>=5) return;
+    addGameSets.push({w:'',l:''});
+    renderAddGameSets();
+  };
+
+  document.getElementById('agQuickParse').onclick = ()=>{
+    const msg = document.getElementById('agQuickMessage');
+    const raw = document.getElementById('agQuickPaste').value;
+    const result = parseQuickEntryText(raw);
+    if(result.error){
+      msg.textContent = result.error;
+      msg.style.color = 'var(--red)';
+      return;
+    }
+    msg.style.color = '';
+    msg.textContent = result.isDraw ? 'Parsed as a draw — check the fields below and hit Submit.' : 'Parsed — check the fields below and hit Submit.';
+
+    const typeBtn = document.querySelector(`#agTypeToggle .fg-toggle-btn[data-type="${result.isSingles ? 'singles' : 'doubles'}"]`);
+    if(typeBtn) typeBtn.click();
+
+    const outcomeBtn = document.querySelector(`#agOutcomeToggle .fg-toggle-btn[data-outcome="${result.isDraw ? 'draw' : 'decisive'}"]`);
+    if(outcomeBtn) outcomeBtn.click();
+
+    document.getElementById('agA1').value = result.winners[0] || '';
+    document.getElementById('agA2').value = result.winners[1] || '';
+    document.getElementById('agB1').value = result.losers[0] || '';
+    document.getElementById('agB2').value = result.losers[1] || '';
+
+    addGameSets = result.sets.map(([w,l])=>({ w: String(w), l: String(l) }));
+    renderAddGameSets();
+    checkForNewPlayers();
+
+    const dateEl = document.getElementById('agDate');
+    try { dateEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){ /* non-critical */ }
+  };
+
+  ['agA1','agA2','agB1','agB2'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', checkForNewPlayers);
+  });
+
+  document.getElementById('agSubmit').onclick = submitNewGame;
 
   if(!isUnlocked){
     wireLockScreen(renderGamesTab);
@@ -2957,6 +3074,7 @@ function buildEditFormHtml(id){
   const m = findMatchById(id);
   if(!m) return '';
   const isSingles = m.type === 'singles';
+  const isDraw = !!m.isDraw;
   return `<div class="section-heading">✏️ Edit game</div>
   <div class="fg-controls">
     <div class="fg-row"><label class="fg-label">Date</label><input id="edDate" type="date" class="fg-select" value="${m.date}" /></div>
@@ -2966,11 +3084,17 @@ function buildEditFormHtml(id){
         <button class="fg-toggle-btn ${isSingles?'active':''}" data-type="singles">Singles</button>
       </div>
     </div>
-    <div class="fg-row"><label class="fg-label">Team A (winners)</label>
+    <div class="fg-row"><label class="fg-label">Outcome</label>
+      <div class="fg-toggle" id="edOutcomeToggle">
+        <button class="fg-toggle-btn ${!isDraw?'active':''}" data-outcome="decisive">Finished</button>
+        <button class="fg-toggle-btn ${isDraw?'active':''}" data-outcome="draw">Not finished / draw</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label" id="edTeamALabel">Team A${isDraw?'':' (winners)'}</label>
       <input id="edA1" list="playerNamesList2" class="fg-select" style="margin-bottom:6px;" value="${m.winners[0]||''}" />
       <input id="edA2" list="playerNamesList2" class="fg-select" value="${m.winners[1]||''}" style="${isSingles?'display:none;':''}" />
     </div>
-    <div class="fg-row"><label class="fg-label">Team B (losers)</label>
+    <div class="fg-row"><label class="fg-label" id="edTeamBLabel">Team B${isDraw?'':' (losers)'}</label>
       <input id="edB1" list="playerNamesList2" class="fg-select" style="margin-bottom:6px;" value="${m.losers[0]||''}" />
       <input id="edB2" list="playerNamesList2" class="fg-select" value="${m.losers[1]||''}" style="${isSingles?'display:none;':''}" />
     </div>
@@ -3026,6 +3150,16 @@ function wireEditForm(id){
     };
   });
 
+  document.querySelectorAll('#edOutcomeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#edOutcomeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const isDraw = b.dataset.outcome === 'draw';
+      document.getElementById('edTeamALabel').textContent = isDraw ? 'Team A' : 'Team A (winners)';
+      document.getElementById('edTeamBLabel').textContent = isDraw ? 'Team B' : 'Team B (losers)';
+    };
+  });
+
   document.getElementById('edCancel').onclick = ()=>{ editingMatchId = null; renderGamesTab(); };
 
   document.getElementById('edSubmit').onclick = async ()=>{
@@ -3034,6 +3168,7 @@ function wireEditForm(id){
     const msg = document.getElementById('edMessage');
     const date = document.getElementById('edDate').value;
     const isSingles = document.querySelector('#edTypeToggle .fg-toggle-btn.active').dataset.type === 'singles';
+    const isDraw = document.querySelector('#edOutcomeToggle .fg-toggle-btn.active').dataset.outcome === 'draw';
     const a1 = document.getElementById('edA1').value.trim();
     const a2 = document.getElementById('edA2').value.trim();
     const b1 = document.getElementById('edB1').value.trim();
@@ -3043,15 +3178,17 @@ function wireEditForm(id){
     const losers = isSingles ? [b1] : [b1,b2];
     const sets = editSets.filter(s=>!isNaN(s[0]) && !isNaN(s[1]));
     if(sets.length===0){ msg.textContent='Enter at least one set.'; return; }
-    const setsWon = sets.filter(s=>s[0]>s[1]).length, setsLost = sets.filter(s=>s[1]>s[0]).length;
-    if(setsWon < setsLost){ msg.textContent="Team A's scores should be the winning side."; return; }
+    if(!isDraw){
+      const setsWon = sets.filter(s=>s[0]>s[1]).length, setsLost = sets.filter(s=>s[1]>s[0]).length;
+      if(setsWon < setsLost){ msg.textContent="Team A's scores should be the winning side, or mark this as not finished / a draw."; return; }
+    }
 
-    const editedFields = {date, winners, losers, sets, type: isSingles?'singles':'doubles',
+    const editedFields = {date, winners, losers, sets, type: isSingles?'singles':'doubles', isDraw,
                            editedBy: name, editedAt: new Date().toISOString()};
 
     const pendingMatch = extraMatchesState.find(x=>x.id===id && x.status==='pending');
     if(pendingMatch){
-      Object.assign(pendingMatch, {date, winners, losers, sets, type: isSingles?'singles':'doubles'});
+      Object.assign(pendingMatch, {date, winners, losers, sets, type: isSingles?'singles':'doubles', isDraw});
       const ok = await saveExtraMatches(extraMatchesState);
       if(!ok){ msg.textContent='Save failed.'; return; }
     } else {
