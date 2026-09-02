@@ -646,10 +646,12 @@ async function saveMyName(name){
 }
 
 // ===================== ADMIN LOCK (deterrent, not real security) =====================
-const STORAGE_KEY_ADMIN_PW = 'moneypadel_admin_pw_hash';   // shared, in Firestore
+const STORAGE_KEY_ADMIN_PW_OWNER = 'moneypadel_admin_pw_owner_hash'; // shared, in Firestore
+const STORAGE_KEY_ADMIN_PW_BOARD = 'moneypadel_admin_pw_board_hash'; // shared, in Firestore
 const STORAGE_KEY_MY_UNLOCKED = 'moneypadel_my_unlocked';  // personal — localStorage, this device only
 
-let adminPasswordHash = null;
+let ownerPasswordHash = null;
+let boardPasswordHash = null;
 let isUnlocked = false;
 
 function simpleHash(str){
@@ -661,17 +663,17 @@ function simpleHash(str){
   return (hash>>>0).toString(16);
 }
 
-async function loadAdminPassword(){
-  try { const v = await fsGet(STORAGE_KEY_ADMIN_PW); if(v) return JSON.parse(v); } catch(e){ console.error('load admin password failed', e); }
+async function loadPasswordHash(key){
+  try { const v = await fsGet(key); if(v) return JSON.parse(v); } catch(e){ console.error('load password failed', key, e); }
   return null;
 }
-async function saveAdminPassword(hash){
+async function savePasswordHash(key, hash){
   try {
-    await fsSet(STORAGE_KEY_ADMIN_PW, JSON.stringify(hash));
+    await fsSet(key, JSON.stringify(hash));
     return true;
   } catch(e){
     lastStorageError = (e && e.message) ? e.message : String(e);
-    console.error('saveAdminPassword failed:', e);
+    console.error('savePasswordHash failed:', key, e);
     return false;
   }
 }
@@ -684,7 +686,7 @@ async function saveMyUnlocked(val){
 }
 
 function buildLockScreenHtml(){
-  const settingNew = !adminPasswordHash;
+  const settingNew = !ownerPasswordHash && !boardPasswordHash;
   const storageWarning = !storageAvailable()
     ? `<div class="section-sub" style="color:#e8a5a1; margin-bottom:8px;">⚠️ This page can't reach shared storage right now. That usually means you're viewing a downloaded copy of this file, or an embed, rather than the actual published/shared link on claude.ai — open that link directly and this should work.</div>`
     : '';
@@ -692,7 +694,7 @@ function buildLockScreenHtml(){
     return `<div class="fg-controls">
       <div class="section-heading" style="margin-top:0;">🔒 Set an admin password</div>
       ${storageWarning}
-      <div class="section-sub">No password has been set yet. Whatever you set here will be needed by anyone adding, approving, editing, or deleting games — share it with whoever should have access. This is a deterrent, not real security: the result is the ledger anyway, this just avoids accidental or casual changes.</div>
+      <div class="section-sub">No password has been set yet. Whatever you set here will be needed by anyone adding, approving, editing, or deleting games — share it with whoever should have access. You can add a second, independent password later (e.g. for the board to manage themselves) once this one is set. This is a deterrent, not real security: the result is the ledger anyway, this just avoids accidental or casual changes.</div>
       <div class="fg-row"><label class="fg-label">New password</label><input id="lockPw1" type="password" class="fg-select" /></div>
       <div class="fg-row"><label class="fg-label">Confirm password</label><input id="lockPw2" type="password" class="fg-select" /></div>
       <div class="fg-row"><button class="tab-btn active" id="lockSetBtn" style="width:100%;">Set password &amp; unlock</button></div>
@@ -702,7 +704,7 @@ function buildLockScreenHtml(){
   return `<div class="fg-controls">
     <div class="section-heading" style="margin-top:0;">🔒 Admin area</div>
     ${storageWarning}
-    <div class="section-sub">Enter the admin password to add, approve, edit, or delete games.</div>
+    <div class="section-sub">Enter either admin password to add, approve, edit, or delete games.</div>
     <div class="fg-row"><label class="fg-label">Password</label><input id="lockPwInput" type="password" class="fg-select" /></div>
     <div class="fg-row"><button class="tab-btn active" id="lockUnlockBtn" style="width:100%;">Unlock</button></div>
     <div id="lockMessage" class="section-sub"></div>
@@ -710,7 +712,7 @@ function buildLockScreenHtml(){
 }
 
 function wireLockScreen(onUnlocked){
-  const settingNew = !adminPasswordHash;
+  const settingNew = !ownerPasswordHash && !boardPasswordHash;
   if(settingNew){
     document.getElementById('lockSetBtn').onclick = async ()=>{
       const p1 = document.getElementById('lockPw1').value;
@@ -719,14 +721,14 @@ function wireLockScreen(onUnlocked){
       if(!p1 || p1.length<4){ msg.textContent='Use at least 4 characters.'; return; }
       if(p1!==p2){ msg.textContent="Passwords don't match."; return; }
       const hash = simpleHash(p1);
-      const ok = await saveAdminPassword(hash);
+      const ok = await savePasswordHash(STORAGE_KEY_ADMIN_PW_OWNER, hash);
       if(!ok){
         msg.textContent = storageAvailable()
           ? `Save failed (${lastStorageError || 'unknown error'}) — try again in a moment.`
           : `Save failed — this page can't reach shared storage. Make sure you're on the actual published/shared claude.ai link, not a downloaded file.`;
         return;
       }
-      adminPasswordHash = hash;
+      ownerPasswordHash = hash;
       isUnlocked = true;
       await saveMyUnlocked(true);
       applyTabVisibility();
@@ -736,7 +738,8 @@ function wireLockScreen(onUnlocked){
     document.getElementById('lockUnlockBtn').onclick = async ()=>{
       const p = document.getElementById('lockPwInput').value;
       const msg = document.getElementById('lockMessage');
-      if(simpleHash(p) === adminPasswordHash){
+      const h = simpleHash(p);
+      if(h === ownerPasswordHash || h === boardPasswordHash){
         isUnlocked = true;
         await saveMyUnlocked(true);
         applyTabVisibility();
@@ -1989,46 +1992,47 @@ function buildRankingNeighborsSection(name){
   return html;
 }
 
-function computePlayerJourney(name){
-  const indexed = ALL_MATCHES.map((m, idx) => ({ ...m, _idx: idx }));
-  const relevant = indexed.filter(m => m.winners.includes(name) || m.losers.includes(name));
-  if(relevant.length === 0) return null;
+// The per-game rating weight shown to users. Derived from the real engine's K (28) times the
+// damping factor removed (x3 epochs-per-pass), i.e. the full-weight contribution one match's
+// performance signal carries. Used only for this readable breakdown, not for the official rating.
+const DISPLAY_MATCH_WEIGHT = 84;
 
-  relevant.sort((a,b)=>{
+// A result within this band of the prediction counts as "played to expectation" -- no rating
+// movement at all. Once a result crosses the line, the full overperformance counts, not just
+// the amount past the threshold. Hardcoded, not a per-group setting.
+const NEUTRAL_PERFORMANCE_BAND = 0.05; // 5 percentage points of game-share
+
+function displayDeltaFromOverperf(overperf){
+  if(Math.abs(overperf) < NEUTRAL_PERFORMANCE_BAND) return 0;
+  return Math.round(DISPLAY_MATCH_WEIGHT * overperf * 10) / 10;
+}
+
+function computePlayerJourney(name){
+  const indexed = MATCHES.map((m, idx) => ({ ...m, _idx: idx })).filter(m => m.winners.includes(name) || m.losers.includes(name));
+  if(indexed.length === 0) return null;
+
+  indexed.sort((a,b)=>{
     if(a.date !== b.date) return a.date < b.date ? -1 : 1;
     return a._idx - b._idx; // stable tie-break for same-day matches
   });
 
   const tier = STARTING_TIER_MAP[name] || TIER_MAP[name] || 'B';
-  const journey = [{ type:'start', date: null, rating: TIER_SEED[tier], label: `Tier ${tier} starting point` }];
+  let running = TIER_SEED[tier];
+  const journey = [{ type:'start', date: null, rating: running, label: `Tier ${tier} starting point` }];
 
-  relevant.forEach(rm=>{
-    const subset = indexed.filter(m => m.date < rm.date || (m.date === rm.date && m._idx <= rm._idx));
-    const ratings = computeElo(subset, TIER_MAP, STARTING_TIER_MAP);
-    if(!(name in ratings)) return;
-    const newRating = Math.round(ratings[name]*10)/10;
-    const prevRating = journey[journey.length-1].rating;
-    const delta = Math.round((newRating - prevRating)*10)/10;
-    const enriched = MATCHES[rm._idx];
-    const won = rm.winners.includes(name);
-    const myExpected = won ? enriched.expected_winshare : (1 - enriched.expected_winshare);
-    const myActual = won ? enriched.game_share_winner : (1 - enriched.game_share_winner);
+  indexed.forEach(m=>{
+    const won = m.winners.includes(name);
+    // Same basis as the "favored/expected/actual/over-under-performed" text shown alongside this:
+    // both now come from this one overperformance value, so they can never contradict each other.
+    const overperf = won ? m.overperformance_winner : -m.overperformance_winner;
+    const delta = displayDeltaFromOverperf(overperf);
+    running = Math.round((running + delta) * 10) / 10;
     journey.push({
-      type: 'match', _idx: rm._idx, date: rm.date, rating: newRating, delta, won,
-      overperfPts: Math.round((myActual - myExpected)*1000)/10,
+      type: 'match', _idx: m._idx, date: m.date, rating: running, delta, won,
+      overperfPts: Math.round(overperf*1000)/10,
     });
   });
 
-  // Always finish on the true current rating. Ratings are solved jointly across everyone, so
-  // matches other people played after this player's own last game can still nudge it slightly --
-  // this final point uses the exact same full-dataset computation as the number shown above it.
-  const finalRatings = computeElo(ALL_MATCHES, TIER_MAP, STARTING_TIER_MAP);
-  const finalVal = Math.round(finalRatings[name]*10)/10;
-  const lastPoint = journey[journey.length-1];
-  if(lastPoint.rating !== finalVal){
-    const delta = Math.round((finalVal - lastPoint.rating)*10)/10;
-    journey.push({ type:'today', date: 'today', rating: finalVal, delta, label: 'Today (current)' });
-  }
   return journey;
 }
 
@@ -2075,7 +2079,7 @@ function buildJourneySection(name, journey){
     : '';
 
   let html = `<div class="section-heading" style="margin-top:14px;">📈 Rating journey</div>`;
-  html += `<div class="section-sub">From tier starting point (${start}) to today (${end}) — <span class="${diffClass}">${diffLabel} pts</span>. Each dot is one game — green moved the rating up, red moved it down, based on games won vs. what was expected, not just the win/loss result. The per-game delta is also shown on each match below.${tierNote}</div>`;
+  html += `<div class="section-sub">From tier starting point (${start}) to a rough ${end} today — <span class="${diffClass}">${diffLabel} pts</span>. Each dot is one game — green moved this estimate up, red moved it down, based on games won vs. what was expected, matching the same figures shown on each match below. This is a readable breakdown of your results, not the official calculation — the real rating is solved jointly across everyone's games at once, so this total won't always land exactly on the Power Rating shown above, but the direction and shape of the trend will match your actual results.${tierNote}</div>`;
   html += `<div class="matchup-vs" style="padding:8px;">${buildJourneyChartSvg(journey)}</div>`;
   return html;
 }
@@ -2117,8 +2121,9 @@ function openSheet(name){
 
     const perf = (myActualShare - myExpectedShare) * 100;
     const perfRounded = Math.round(perf * 10) / 10;
-    const perfLabel = perfRounded > 3 ? `<span class="perf-pos">overperformed +${perfRounded}pts on games</span>`
-                     : (perfRounded < -3 ? `<span class="perf-neg">underperformed ${perfRounded}pts on games</span>`
+    const neutralPts = NEUTRAL_PERFORMANCE_BAND * 100;
+    const perfLabel = perfRounded >= neutralPts ? `<span class="perf-pos">overperformed +${perfRounded}pts on games</span>`
+                     : (perfRounded <= -neutralPts ? `<span class="perf-neg">underperformed ${perfRounded}pts on games</span>`
                      : `<span style="color:var(--text-dim)">games roughly as expected</span>`);
 
     const isCloseOnPaper = gap < 15;
@@ -2218,11 +2223,24 @@ function renderManage(){
   html += `<div class="section-heading">🔑 Admin lock</div>`;
   html += `<div class="fg-controls">
     <div class="fg-row"><button class="preset-btn" id="lockNowBtn" style="width:100%;">🔒 Lock admin area</button></div>
-    <div style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:11px; color:var(--text-dim); margin:10px 0 6px;">Change password</div>
-    <div class="fg-row"><input id="cpCurrent" type="password" class="fg-select" placeholder="Current password" style="margin-bottom:6px;" /></div>
-    <div class="fg-row"><input id="cpNew" type="password" class="fg-select" placeholder="New password" /></div>
-    <div class="fg-row"><button class="preset-btn" id="cpSubmit">Update password</button></div>
-    <div id="cpMessage" class="section-sub"></div>
+  </div>`;
+
+  html += `<div class="section-heading">🔑 Your password</div>`;
+  html += `<div class="section-sub">${ownerPasswordHash ? 'Change your own password. This never touches the board password.' : 'Not set yet — this shouldn\'t normally happen once one exists, but you can set it here if needed.'}</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><input id="cpOwnerCurrent" type="password" class="fg-select" placeholder="${ownerPasswordHash ? 'Current password' : '(leave blank — not set yet)'}" style="margin-bottom:6px;" /></div>
+    <div class="fg-row"><input id="cpOwnerNew" type="password" class="fg-select" placeholder="New password" /></div>
+    <div class="fg-row"><button class="preset-btn" id="cpOwnerSubmit">Update your password</button></div>
+    <div id="cpOwnerMessage" class="section-sub"></div>
+  </div>`;
+
+  html += `<div class="section-heading">🔑 Board password</div>`;
+  html += `<div class="section-sub">${boardPasswordHash ? 'A second, independent password — whoever knows it can change it themselves without touching yours.' : 'Not set up yet. Set one here to give the board their own password, separate from yours.'}</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><input id="cpBoardCurrent" type="password" class="fg-select" placeholder="${boardPasswordHash ? 'Current board password' : '(leave blank — not set yet)'}" style="margin-bottom:6px;" /></div>
+    <div class="fg-row"><input id="cpBoardNew" type="password" class="fg-select" placeholder="New board password" /></div>
+    <div class="fg-row"><button class="preset-btn" id="cpBoardSubmit">${boardPasswordHash ? 'Update board password' : 'Set board password'}</button></div>
+    <div id="cpBoardMessage" class="section-sub"></div>
   </div>`;
 
   box.innerHTML = html;
@@ -2317,17 +2335,30 @@ function renderManage(){
     renderManage();
   };
 
-  document.getElementById('cpSubmit').onclick = async ()=>{
-    const cur = document.getElementById('cpCurrent').value;
-    const next = document.getElementById('cpNew').value;
-    const msg = document.getElementById('cpMessage');
-    if(simpleHash(cur) !== adminPasswordHash){ msg.textContent = 'Current password is incorrect.'; return; }
+  document.getElementById('cpOwnerSubmit').onclick = async ()=>{
+    const cur = document.getElementById('cpOwnerCurrent').value;
+    const next = document.getElementById('cpOwnerNew').value;
+    const msg = document.getElementById('cpOwnerMessage');
+    if(ownerPasswordHash && simpleHash(cur) !== ownerPasswordHash){ msg.textContent = 'Current password is incorrect.'; return; }
     if(!next || next.length<4){ msg.textContent = 'New password needs at least 4 characters.'; return; }
-    const ok = await saveAdminPassword(simpleHash(next));
-    if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; return; }
-    adminPasswordHash = simpleHash(next);
-    msg.textContent = 'Password updated.';
-    document.getElementById('cpCurrent').value=''; document.getElementById('cpNew').value='';
+    const ok = await savePasswordHash(STORAGE_KEY_ADMIN_PW_OWNER, simpleHash(next));
+    if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`; return; }
+    ownerPasswordHash = simpleHash(next);
+    msg.textContent = 'Your password has been updated.';
+    document.getElementById('cpOwnerCurrent').value=''; document.getElementById('cpOwnerNew').value='';
+  };
+
+  document.getElementById('cpBoardSubmit').onclick = async ()=>{
+    const cur = document.getElementById('cpBoardCurrent').value;
+    const next = document.getElementById('cpBoardNew').value;
+    const msg = document.getElementById('cpBoardMessage');
+    if(boardPasswordHash && simpleHash(cur) !== boardPasswordHash){ msg.textContent = 'Current board password is incorrect.'; return; }
+    if(!next || next.length<4){ msg.textContent = 'New password needs at least 4 characters.'; return; }
+    const ok = await savePasswordHash(STORAGE_KEY_ADMIN_PW_BOARD, simpleHash(next));
+    if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`; return; }
+    boardPasswordHash = simpleHash(next);
+    msg.textContent = 'Board password has been updated.';
+    document.getElementById('cpBoardCurrent').value=''; document.getElementById('cpBoardNew').value='';
   };
 
   renderPlayerTagsList();
@@ -2570,17 +2601,11 @@ let addGameExpanded = false;
 
 function computeMatchDelta(idxInAllMatches){
   if(idxInAllMatches === undefined || idxInAllMatches === null) return null;
-  const m = ALL_MATCHES[idxInAllMatches];
+  const m = MATCHES[idxInAllMatches];
   if(!m) return null;
-  const beforeSubset = ALL_MATCHES.filter((x,i)=> x.date < m.date || (x.date===m.date && i < idxInAllMatches));
-  const afterSubset = ALL_MATCHES.filter((x,i)=> x.date < m.date || (x.date===m.date && i <= idxInAllMatches));
-  const beforeRatings = computeElo(beforeSubset, TIER_MAP, STARTING_TIER_MAP);
-  const afterRatings = computeElo(afterSubset, TIER_MAP, STARTING_TIER_MAP);
-  const anyWinner = m.winners[0];
-  const startTier = STARTING_TIER_MAP[anyWinner] || TIER_MAP[anyWinner] || 'B';
-  const before = (anyWinner in beforeRatings) ? beforeRatings[anyWinner] : TIER_SEED[startTier];
-  const after = afterRatings[anyWinner];
-  return Math.round((after - before)*10)/10;
+  // Same basis as the "favored/expected/actual/over-under-performed" text shown alongside this,
+  // so the two can never contradict each other the way two different calculations could.
+  return displayDeltaFromOverperf(m.overperformance_winner);
 }
 
 function buildMatchDetailBlock(m, idxInAllMatches){
@@ -2597,18 +2622,23 @@ function buildMatchDetailBlock(m, idxInAllMatches){
   const expectedPct = Math.round(m.expected_winshare*100);
   const actualPct = Math.round(m.game_share_winner*100);
   const perf = Math.round(m.overperformance_winner*1000)/10;
-  const perfLabel = perf > 3 ? `<span class="perf-pos">winners overperformed +${perf}pts on games</span>`
-                   : (perf < -3 ? `<span class="perf-neg">winners underperformed ${perf}pts on games</span>`
+  const neutralPts = NEUTRAL_PERFORMANCE_BAND * 100;
+  const perfLabel = perf >= neutralPts ? `<span class="perf-pos">winners overperformed +${perf}pts on games</span>`
+                   : (perf <= -neutralPts ? `<span class="perf-neg">winners underperformed ${perf}pts on games</span>`
                    : `<span style="color:var(--text-dim);">games roughly as expected</span>`);
 
   const delta = computeMatchDelta(idxInAllMatches);
   let deltaHtml = '';
   if(delta !== null){
-    const mag = Math.abs(delta);
+    const winnerLabel = delta >= 0 ? `+${delta}` : `${delta}`;
+    const loserVal = Math.round(-delta*10)/10;
+    const loserLabel = loserVal >= 0 ? `+${loserVal}` : `${loserVal}`;
+    const winnerClass = delta >= 0 ? 'perf-pos' : 'perf-neg';
+    const loserClass = loserVal >= 0 ? 'perf-pos' : 'perf-neg';
     deltaHtml = `<div style="margin-top:6px;">
-      <span class="perf-pos" style="font-weight:700;">+${mag} pts</span> <span style="color:var(--text-dim); font-size:11px;">for winners</span>
+      <span class="${winnerClass}" style="font-weight:700;">${winnerLabel} pts</span> <span style="color:var(--text-dim); font-size:11px;">for winners</span>
       &nbsp;·&nbsp;
-      <span class="perf-neg" style="font-weight:700;">-${mag} pts</span> <span style="color:var(--text-dim); font-size:11px;">for losers</span>
+      <span class="${loserClass}" style="font-weight:700;">${loserLabel} pts</span> <span style="color:var(--text-dim); font-size:11px;">for losers</span>
     </div>`;
   }
 
@@ -3231,7 +3261,8 @@ async function init(){
   matchEditsState = stored.matchEdits;
   deletedIdsState = stored.deletedIds;
   currentUserName = await loadMyName();
-  adminPasswordHash = await loadAdminPassword();
+  ownerPasswordHash = await loadPasswordHash(STORAGE_KEY_ADMIN_PW_OWNER);
+  boardPasswordHash = await loadPasswordHash(STORAGE_KEY_ADMIN_PW_BOARD);
   isUnlocked = await loadMyUnlocked();
   visibilityState = await loadVisibility();
   recomputeAll();
