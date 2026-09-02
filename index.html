@@ -2286,6 +2286,7 @@ function openSheet(name){
       openSheet(name); // refresh to reflect the confirmation
     };
   });
+  wireRequestPlayerLinks(document.getElementById('sheetProfile'));
 }
 
 function navigateToGamesTabForEdit(matchId){
@@ -2293,6 +2294,28 @@ function navigateToGamesTabForEdit(matchId){
   armedDeleteId = null;
   const gamesTabBtn = document.querySelector('#tabrow .tab-btn[data-tab="games"]');
   if(gamesTabBtn) gamesTabBtn.click();
+}
+
+let linkedRequestId = null;
+
+function navigateToGamesTabForResult(req){
+  linkedRequestId = req.id;
+  addGameExpanded = true;
+  editingMatchId = null;
+  armedDeleteId = null;
+  const gamesTabBtn = document.querySelector('#tabrow .tab-btn[data-tab="games"]');
+  if(gamesTabBtn) gamesTabBtn.click();
+
+  const a1 = document.getElementById('agA1');
+  if(a1){
+    a1.value = req.players[0] || '';
+    document.getElementById('agA2').value = req.players[1] || '';
+    document.getElementById('agB1').value = req.players[2] || '';
+    document.getElementById('agB2').value = req.players[3] || '';
+    checkForNewPlayers();
+    const anchor = document.getElementById('addGameBody');
+    if(anchor){ try { anchor.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e){ /* non-critical */ } }
+  }
 }
 function closeSheet(){ document.getElementById('overlay').classList.remove('show'); }
 document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeSheet(); });
@@ -2654,9 +2677,18 @@ async function submitNewGame(){
   if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; extraMatchesState.pop(); return; }
 
   recomputeAll();
+
+  let linkedNote = '';
+  if(linkedRequestId){
+    gameRequestsState = gameRequestsState.filter(r=>r.id!==linkedRequestId);
+    await saveGameRequests(gameRequestsState);
+    linkedNote = ' Removed from Upcoming.';
+    linkedRequestId = null;
+  }
+
   msg.textContent = isDraw
-    ? `Submitted as a draw. ${winners.join(' & ')} vs ${losers.join(' & ')} — waiting for approval, won't affect any rating.`
-    : `Submitted. ${winners.join(' & ')} def ${losers.join(' & ')} — waiting for approval in the Games tab.`;
+    ? `Submitted as a draw. ${winners.join(' & ')} vs ${losers.join(' & ')} — waiting for approval, won't affect any rating.${linkedNote}`
+    : `Submitted. ${winners.join(' & ')} def ${losers.join(' & ')} — waiting for approval in the Games tab.${linkedNote}`;
   document.getElementById('agA1').value=''; document.getElementById('agA2').value='';
   document.getElementById('agB1').value=''; document.getElementById('agB2').value='';
   document.querySelectorAll('#agOutcomeToggle .fg-toggle-btn').forEach(x=>x.classList.toggle('active', x.dataset.outcome==='decisive'));
@@ -2940,22 +2972,36 @@ function fmtRequestConfirmations(req){
   return `<div style="margin-top:6px; font-size:11.5px;">
     <span class="${pillClass}" style="font-weight:700;">${confirmedCount}/${req.players.length} confirmed</span>
     <div style="margin-top:4px; color:var(--text-dim);">
-      ${req.players.map(n=> `${req.confirmations[n] ? '✅' : '⬜'} ${n}`).join(' &nbsp; ')}
+      ${req.players.map(n=> `${req.confirmations[n] ? '✅' : '⬜'} <span class="request-player-link" data-player="${n}" style="text-decoration:underline; cursor:pointer; color:var(--text);">${n}</span>`).join(' &nbsp; ')}
     </div>
   </div>`;
 }
 
-function buildRequestCardHtml(req, showRemove){
+function buildRequestCardHtml(req, showRemove, showAddResult){
   const dateLine = req.preferredDate ? `${req.preferredDate} · ` : '';
+  const playerLinks = req.players.map(n=>`<span class="request-player-link" data-player="${n}" style="text-decoration:underline; cursor:pointer;">${n}</span>`).join(' &amp; ');
+  let buttons = '';
+  if(showAddResult || showRemove){
+    buttons = `<div class="difficulty-row" style="margin-top:8px;">
+      ${showAddResult ? `<button class="preset-btn request-addresult-btn" data-request-id="${req.id}" style="flex:1; color:var(--green); border-color:var(--green);">Add result</button>` : ''}
+      ${showRemove ? `<button class="preset-btn request-remove-btn" data-request-id="${req.id}" style="flex:1;">Remove</button>` : ''}
+    </div>`;
+  }
   return `<div class="callout-card">
-    <div class="cc-title">${req.players.join(' & ')}</div>
+    <div class="cc-title">${playerLinks}</div>
     <div class="cc-detail">${dateLine}requested by ${req.requestedBy} (${fmtRelative(req.requestedAt)})</div>
     ${fmtRequestConfirmations(req)}
-    ${showRemove ? `<div class="difficulty-row" style="margin-top:8px;"><button class="preset-btn request-remove-btn" data-request-id="${req.id}" style="flex:1;">Remove</button></div>` : ''}
+    ${buttons}
   </div>`;
 }
 
-function renderWishlist(flashMessage){
+function wireRequestPlayerLinks(box){
+  box.querySelectorAll('.request-player-link').forEach(el=>{
+    el.onclick = ()=> openSheet(el.dataset.player);
+  });
+}
+
+function renderWishlist(flashMessage, adminFlashMessage){
   const box = document.getElementById('wishlistView');
   const pending = gameRequestsState.filter(r=>r.status==='pending');
 
@@ -2977,16 +3023,33 @@ function renderWishlist(flashMessage){
     <div id="reqMessage" class="section-sub">${flashMessage || ''}</div>
   </div>`;
 
+  if(isUnlocked){
+    html += `<div class="section-heading">⚡ Admin: add straight to Upcoming</div>`;
+    html += `<div class="section-sub">For a game already agreed in WhatsApp — skips the confirmation step entirely.</div>`;
+    html += `<div class="fg-controls">
+      <div class="fg-row"><label class="fg-label">Players</label>
+        <input id="adminReqP1" list="playerNamesList" class="fg-select" placeholder="Player 1" style="margin-bottom:6px;" />
+        <input id="adminReqP2" list="playerNamesList" class="fg-select" placeholder="Player 2" style="margin-bottom:6px;" />
+        <input id="adminReqP3" list="playerNamesList" class="fg-select" placeholder="Player 3" style="margin-bottom:6px;" />
+        <input id="adminReqP4" list="playerNamesList" class="fg-select" placeholder="Player 4" />
+      </div>
+      <div class="fg-row"><label class="fg-label">Preferred date (optional)</label><input id="adminReqDate" type="date" class="fg-select" /></div>
+      <div class="fg-row"><button class="preset-btn" id="adminReqSubmit" style="width:100%;">Add directly to Upcoming</button></div>
+      <div id="adminReqMessage" class="section-sub">${adminFlashMessage || ''}</div>
+    </div>`;
+  }
+
   html += `<div class="section-heading">⏳ Pending (${pending.length})</div>`;
   if(pending.length === 0){
     html += `<div class="section-sub">No open requests right now.</div>`;
   } else {
     pending.slice().sort((a,b)=> a.requestedAt < b.requestedAt ? 1 : -1).forEach(req=>{
-      html += buildRequestCardHtml(req, true);
+      html += buildRequestCardHtml(req, true, false);
     });
   }
 
   box.innerHTML = html;
+  wireRequestPlayerLinks(box);
 
   document.getElementById('reqYourName').addEventListener('change', e=>{
     currentUserName = e.target.value.trim();
@@ -3029,6 +3092,37 @@ function renderWishlist(flashMessage){
     renderWishlist('Requested! Each player can confirm from their own profile.');
   };
 
+  const adminReqSubmit = document.getElementById('adminReqSubmit');
+  if(adminReqSubmit){
+    adminReqSubmit.onclick = async ()=>{
+      const msg = document.getElementById('adminReqMessage');
+      const names = ['adminReqP1','adminReqP2','adminReqP3','adminReqP4'].map(id=>document.getElementById(id).value.trim());
+      if(names.some(n=>!n)){ msg.textContent = 'Enter all four players.'; return; }
+      if(new Set(names.map(n=>n.toLowerCase())).size !== 4){ msg.textContent = 'The same name appears more than once.'; return; }
+      const unrecognized = names.filter(n => !PLAYERS.find(p=>p.name.toLowerCase()===n.toLowerCase()));
+      if(unrecognized.length){ msg.textContent = `Unrecognized name${unrecognized.length>1?'s':''}: ${unrecognized.join(', ')}.`; return; }
+      const adminName = requireName();
+      if(!adminName) return;
+
+      const confirmations = {};
+      names.forEach(n=> confirmations[n] = true);
+      const req = {
+        id: 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+        requestedBy: adminName, requestedAt: new Date().toISOString(),
+        players: names, preferredDate: document.getElementById('adminReqDate').value || '',
+        confirmations, status: 'confirmed',
+      };
+      gameRequestsState.push(req);
+      const ok = await saveGameRequests(gameRequestsState);
+      if(!ok){
+        gameRequestsState.pop();
+        msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage.`;
+        return;
+      }
+      renderWishlist(undefined, 'Added to Upcoming.');
+    };
+  }
+
   box.querySelectorAll('.request-remove-btn').forEach(btn=>{
     btn.onclick = async ()=>{
       const id = btn.dataset.requestId;
@@ -3044,14 +3138,16 @@ function renderUpcoming(){
   const confirmed = gameRequestsState.filter(r=>r.status==='confirmed');
 
   let html = `<div class="section-heading">📅 Upcoming (${confirmed.length})</div>`;
+  html += `<div class="section-sub">Once a game has actually been played, tap "Add result" to record it — that moves it into the Games tab and clears it from here.</div>`;
   if(confirmed.length === 0){
     html += `<div class="section-sub">Nothing fully confirmed yet — once all four players confirm a Wishlist request, it'll show up here.</div>`;
   } else {
     confirmed.slice().sort((a,b)=> a.requestedAt < b.requestedAt ? 1 : -1).forEach(req=>{
-      html += buildRequestCardHtml(req, true);
+      html += buildRequestCardHtml(req, true, true);
     });
   }
   box.innerHTML = html;
+  wireRequestPlayerLinks(box);
 
   box.querySelectorAll('.request-remove-btn').forEach(btn=>{
     btn.onclick = async ()=>{
@@ -3059,6 +3155,14 @@ function renderUpcoming(){
       gameRequestsState = gameRequestsState.filter(r=>r.id!==id);
       await saveGameRequests(gameRequestsState);
       renderUpcoming();
+    };
+  });
+
+  box.querySelectorAll('.request-addresult-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      const req = gameRequestsState.find(r=>r.id===btn.dataset.requestId);
+      if(!req) return;
+      navigateToGamesTabForResult(req);
     };
   });
 }
@@ -3278,6 +3382,7 @@ Player C &amp; Player D"></textarea>
     addGameExpanded = !addGameExpanded;
     document.getElementById('addGameBody').style.display = addGameExpanded ? 'block' : 'none';
     document.getElementById('addGameArrow').textContent = addGameExpanded ? '▾' : '▸';
+    if(!addGameExpanded) linkedRequestId = null; // abandoning the form -- don't carry the link into an unrelated later submission
   };
 
   document.getElementById('gamesYourName').addEventListener('change', e=>{
