@@ -1259,6 +1259,15 @@ function monthLabel(ym){
 }
 function computeMonthlyStats(month){
   const filtered = month==='all' ? MATCHES : MATCHES.filter(m=>m.date.slice(0,7)===month);
+  // Judge opponent strength and upset status using each player's rating AS OF this specific
+  // month, not their season-long rating -- otherwise "avg opp." and "upset" would be judged by
+  // a different yardstick than the Month Rating headline number sitting right next to them.
+  const monthlyRatings = month==='all' ? {} : computeMonthlyRating(month);
+  function ratingFor(name){
+    if(name in monthlyRatings) return monthlyRatings[name];
+    const p = PLAYERS.find(x=>x.name===name);
+    return p ? p.rating : 1400; // fallback should never actually trigger for a match within this month
+  }
   const agg = {};
   function A(name){
     if(!agg[name]) agg[name] = {wins:0, losses:0, strengths:[], overperf:[], games_w:0, games_l:0, upset_wins:0, upset_losses:0};
@@ -1266,19 +1275,22 @@ function computeMonthlyStats(month){
   }
   const GAP_THRESHOLD = 15;
   filtered.forEach(m=>{
-    const gap = Math.abs(m.team_w_rating - m.team_l_rating);
+    const winnerTeamRating = m.winners[1] ? (ratingFor(m.winners[0]) + ratingFor(m.winners[1])) / 2 : ratingFor(m.winners[0]);
+    const loserTeamRating = m.losers[1] ? (ratingFor(m.losers[0]) + ratingFor(m.losers[1])) / 2 : ratingFor(m.losers[0]);
+    const monthMatchStrength = (winnerTeamRating + loserTeamRating) / 2;
+    const gap = Math.abs(winnerTeamRating - loserTeamRating);
     const isClose = gap < GAP_THRESHOLD;
-    const winnerFavored = m.team_w_rating > m.team_l_rating;
+    const winnerFavored = winnerTeamRating > loserTeamRating;
     const isUpset = !isClose && !winnerFavored;
     m.winners.forEach(p=>{
       const a = A(p);
-      a.wins++; a.strengths.push(m.match_strength); a.overperf.push(m.overperformance_winner);
+      a.wins++; a.strengths.push(monthMatchStrength); a.overperf.push(m.overperformance_winner);
       a.games_w += m.games_winner; a.games_l += m.games_loser;
       if(isUpset) a.upset_wins++;
     });
     m.losers.forEach(p=>{
       const a = A(p);
-      a.losses++; a.strengths.push(m.match_strength); a.overperf.push(-m.overperformance_winner);
+      a.losses++; a.strengths.push(monthMatchStrength); a.overperf.push(-m.overperformance_winner);
       a.games_w += m.games_loser; a.games_l += m.games_winner;
       if(isUpset) a.upset_losses++;
     });
@@ -1609,12 +1621,14 @@ function render(){
         ? `<div class="rating-sub" style="font-size:10px; color:var(--text-dim);">no games this month</div>`
         : '';
 
+      const wlHtml = inMonthView ? ` · <span style="color:var(--green);">${p.wins}W</span>-<span style="color:var(--red);">${p.losses}L</span>` : '';
+
       row.innerHTML = `
         <div class="rank">${i+1}</div>
         <div class="badge ${p.tier}">${p.tier}</div>
         <div class="namecol">
           <div class="nm">${p.name}</div>
-          <div class="meta">avg opp. ${Math.round(p.avg_match_strength)} · ${p.total} games</div>
+          <div class="meta">avg opp. ${Math.round(p.avg_match_strength)} · ${p.total} games${wlHtml}</div>
           <div class="upset-mini"><span class="uw upset-drill" data-player="${p.name}" data-kind="upset_wins" style="cursor:pointer; text-decoration:underline;">${p.upset_wins} upset win${p.upset_wins===1?'':'s'}</span> · <span class="ul upset-drill" data-player="${p.name}" data-kind="upset_losses" style="cursor:pointer; text-decoration:underline;">${p.upset_losses} upset loss${p.upset_losses===1?'':'es'}</span> (${p.upset_rate}% of games)</div>
         </div>
         <div class="wl">
@@ -2261,21 +2275,53 @@ function openSheet(name, matchFilter){
   let ms = MATCHES.map((m, idx)=>({...m, _idx: idx})).filter(m => m.winners.includes(name) || m.losers.includes(name));
   ms.sort((a,b)=> a.date < b.date ? 1 : -1);
 
+  // If a month is selected elsewhere in the app, keep this profile's match log scoped to it too.
+  const monthActive = selectedMonth !== 'all';
+  if(monthActive){
+    ms = ms.filter(m => m.date.slice(0,7) === selectedMonth);
+  }
+
   let filterBannerHtml = '';
-  if(matchFilter === 'upset_wins' || matchFilter === 'upset_losses'){
+  const upsetFilterActive = matchFilter === 'upset_wins' || matchFilter === 'upset_losses';
+  if(upsetFilterActive){
+    // If a month is active, judge "upset" by ratings as of that month too, so this drill-down's
+    // count always matches the upset figures already shown in the monthly list view.
+    const monthlyRatingsForFilter = monthActive ? computeMonthlyRating(selectedMonth) : null;
+    const ratingForFilter = (n) => {
+      if(monthlyRatingsForFilter && (n in monthlyRatingsForFilter)) return monthlyRatingsForFilter[n];
+      const p2 = PLAYERS.find(x=>x.name===n);
+      return p2 ? p2.rating : 1400;
+    };
     ms = ms.filter(m=>{
       const won = m.winners.includes(name);
-      const myTeamRating = won ? m.team_w_rating : m.team_l_rating;
-      const oppTeamRating = won ? m.team_l_rating : m.team_w_rating;
+      let myTeamRating, oppTeamRating;
+      if(monthActive){
+        const winnerR = m.winners[1] ? (ratingForFilter(m.winners[0])+ratingForFilter(m.winners[1]))/2 : ratingForFilter(m.winners[0]);
+        const loserR = m.losers[1] ? (ratingForFilter(m.losers[0])+ratingForFilter(m.losers[1]))/2 : ratingForFilter(m.losers[0]);
+        myTeamRating = won ? winnerR : loserR;
+        oppTeamRating = won ? loserR : winnerR;
+      } else {
+        myTeamRating = won ? m.team_w_rating : m.team_l_rating;
+        oppTeamRating = won ? m.team_l_rating : m.team_w_rating;
+      }
       const gap = Math.abs(myTeamRating - oppTeamRating);
       const favored = myTeamRating > oppTeamRating;
       if(gap < 15) return false; // must be a genuine gap on paper to count as an upset
       return matchFilter === 'upset_wins' ? (won && !favored) : (!won && favored);
     });
-    const label = matchFilter === 'upset_wins' ? 'upset wins' : 'upset losses';
-    filterBannerHtml = `<div class="section-sub" style="padding:8px 2px;">Showing only ${label} for ${name} — <span id="clearProfileFilter" style="text-decoration:underline; cursor:pointer; color:var(--gold-bright);">show all games</span></div>`;
+  }
+
+  if(monthActive || upsetFilterActive){
+    const monthPart = monthActive ? monthLabel(selectedMonth) : '';
+    const upsetPart = upsetFilterActive ? (matchFilter === 'upset_wins' ? 'upset wins' : 'upset losses') : '';
+    let label;
+    if(monthActive && upsetFilterActive) label = `${upsetPart} in ${monthPart}`;
+    else if(monthActive) label = monthPart;
+    else label = upsetPart;
+    const clearLabel = upsetFilterActive ? 'show all games' + (monthActive ? ` in ${monthPart}` : '') : '';
+    filterBannerHtml = `<div class="section-sub" style="padding:8px 2px;">Showing only ${label} for ${name}${upsetFilterActive ? ` — <span id="clearProfileFilter" style="text-decoration:underline; cursor:pointer; color:var(--gold-bright);">${clearLabel}</span>` : ''}</div>`;
     if(ms.length === 0){
-      filterBannerHtml += `<div class="section-sub">No ${label} to show.</div>`;
+      filterBannerHtml += `<div class="section-sub">No games match this.</div>`;
     }
   }
 
