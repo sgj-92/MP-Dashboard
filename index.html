@@ -2177,6 +2177,40 @@ function computePlayerJourney(name){
   return journey;
 }
 
+// Same idea as computePlayerJourney, but treats the given month as its own fresh mini-season --
+// starts from the tier baseline (not wherever they were at the end of the previous month) and
+// only walks through that month's games. This won't necessarily land exactly on the Month Rating
+// headline figure (that uses the real joint-equilibrium engine on the month's whole network);
+// this is a readable, always-sign-consistent breakdown of that same month, same trade-off as the
+// full-career journey.
+function computeMonthlyJourney(name, month){
+  const indexed = MATCHES.map((m, idx) => ({ ...m, _idx: idx }))
+    .filter(m => (m.winners.includes(name) || m.losers.includes(name)) && m.date.slice(0,7) === month);
+  if(indexed.length === 0) return null;
+
+  indexed.sort((a,b)=>{
+    if(a.date !== b.date) return a.date < b.date ? -1 : 1;
+    return a._idx - b._idx;
+  });
+
+  const tier = STARTING_TIER_MAP[name] || TIER_MAP[name] || 'B';
+  let running = TIER_SEED[tier];
+  const journey = [{ type:'start', date: null, rating: running, label: `Tier ${tier} starting point` }];
+
+  indexed.forEach(m=>{
+    const won = m.winners.includes(name);
+    const overperf = won ? m.overperformance_winner : -m.overperformance_winner;
+    const delta = displayDeltaFromOverperf(overperf);
+    running = Math.round((running + delta) * 10) / 10;
+    journey.push({
+      type: 'match', _idx: m._idx, date: m.date, rating: running, delta, won,
+      overperfPts: Math.round(overperf*1000)/10,
+    });
+  });
+
+  return journey;
+}
+
 function buildJourneyChartSvg(journey){
   const w = 320, h = 110, padX = 8, padY = 12;
   const ratings = journey.map(j=>j.rating);
@@ -3006,32 +3040,106 @@ function renderH2H(){
     <div class="fg-row"><label class="fg-label">Player B</label>
       <select id="h2hSelectB" class="fg-select"></select>
     </div>
+    <div class="fg-row"><label class="fg-label">Month</label>
+      <select id="h2hMonthSelect" class="fg-select"></select>
+    </div>
   </div>`;
 
   if(h2hPlayerA === h2hPlayerB){
     html += `<div class="section-sub">Pick two different players to compare.</div>`;
     box.innerHTML = html;
+    populateMonthSelect(document.getElementById('h2hMonthSelect'));
+    document.getElementById('h2hMonthSelect').addEventListener('change', e=>{ selectedMonth = e.target.value; renderH2H(); });
     wireH2HSelects(names);
     return;
+  }
+
+  const monthActive = selectedMonth !== 'all';
+
+  if(monthActive){
+    const monthlyRatings = computeMonthlyRating(selectedMonth);
+    const aHas = h2hPlayerA in monthlyRatings, bHas = h2hPlayerB in monthlyRatings;
+    const aOverall = PLAYERS.find(p=>p.name===h2hPlayerA).rating;
+    const bOverall = PLAYERS.find(p=>p.name===h2hPlayerB).rating;
+    const aMonth = aHas ? Math.round(monthlyRatings[h2hPlayerA]) : null;
+    const bMonth = bHas ? Math.round(monthlyRatings[h2hPlayerB]) : null;
+    const aAhead = aHas && bHas && aMonth > bMonth;
+    const bAhead = aHas && bHas && bMonth > aMonth;
+
+    html += `<div class="section-heading" style="margin-top:6px;">📊 Power Rating — ${monthLabel(selectedMonth)}</div>`;
+    html += `<div class="matchup-vs" style="padding:12px;">
+      <div style="display:flex; justify-content:space-around; text-align:center;">
+        <div>
+          <div style="font-weight:700; margin-bottom:2px;">${h2hPlayerA}</div>
+          <div style="font-size:24px; font-weight:700; color:${aAhead?'var(--gold-bright)':'var(--text)'};">${aMonth !== null ? aMonth : '–'}</div>
+          <div style="font-size:10px; color:var(--text-dim);">overall: ${Math.round(aOverall)}</div>
+        </div>
+        <div style="align-self:center; color:var(--text-dim); font-size:13px;">vs</div>
+        <div>
+          <div style="font-weight:700; margin-bottom:2px;">${h2hPlayerB}</div>
+          <div style="font-size:24px; font-weight:700; color:${bAhead?'var(--gold-bright)':'var(--text)'};">${bMonth !== null ? bMonth : '–'}</div>
+          <div style="font-size:10px; color:var(--text-dim);">overall: ${Math.round(bOverall)}</div>
+        </div>
+      </div>
+    </div>`;
+
+    const idToIdxH2H = {};
+    ALL_MATCHES.forEach((m,i)=>{ idToIdxH2H[m.id] = i; });
+
+    html += `<div class="section-sub" style="padding:4px 2px;">Each player starts the month at their tier baseline. The running total below shows how it built up game by game — this is a readable breakdown, not a precise replay of the engine above, so it won't necessarily land exactly on the Power Rating figures shown there.</div>`;
+
+    [h2hPlayerA, h2hPlayerB].forEach(pname=>{
+      const monthJourney = computeMonthlyJourney(pname, selectedMonth);
+      const startPoint = monthJourney ? Math.round(monthJourney[0].rating) : null;
+      const monthEntries = monthJourney ? monthJourney.filter(e=>e.type==='match') : [];
+      html += `<div class="section-sub" style="font-weight:700; color:var(--text); margin-top:8px;">${pname}'s games this month${startPoint!==null ? ` — started at ${startPoint}` : ''}</div>`;
+      if(monthEntries.length === 0){
+        html += `<div class="section-sub">No games for ${pname} in ${monthLabel(selectedMonth)}.</div>`;
+      } else {
+        monthEntries.forEach(e=>{
+          const m = MATCHES[e._idx];
+          const myTeam = e.won ? m.winners : m.losers;
+          const oppTeam = e.won ? m.losers : m.winners;
+          const partner = m.type==='doubles' ? myTeam.filter(n=>n!==pname)[0] : null;
+          const teamLabel = partner ? `${pname} &amp; ${partner}` : pname;
+          const deltaClass = e.delta > 0 ? 'perf-pos' : (e.delta < 0 ? 'perf-neg' : '');
+          const deltaLabel = e.delta > 0 ? `+${e.delta}` : `${e.delta}`;
+          const isExpanded = expandedGameId === m.id;
+          const detailContent = isExpanded ? buildMatchDetailBlock(m, idToIdxH2H[m.id]) : '';
+          html += `<div class="callout-card" style="padding:8px 12px;">
+            <div class="game-card-clickable h2h-month-game" data-gameid="${m.id}" style="cursor:pointer;">
+              <div style="display:flex; justify-content:space-between; font-size:11.5px;">
+                <span><b>${teamLabel}</b> vs ${oppTeam.join(' &amp; ')}</span>
+                <span style="color:${e.won?'var(--green)':'var(--red)'};">${e.won?'WIN':'LOSS'}</span>
+              </div>
+              <div style="margin-top:2px; color:var(--text-dim); font-size:11px;">${e.date} · ${m.score}</div>
+              <div style="margin-top:4px;"><span class="${deltaClass}" style="font-weight:700;">${deltaLabel} pts</span> <span style="color:var(--text-dim); font-size:11px;">→ running total: ${Math.round(e.rating)}</span></div>
+              ${detailContent}
+            </div>
+          </div>`;
+        });
+      }
+    });
   }
 
   const opponentMatches = MATCHES.filter(m=>{
     const aWon = m.winners.includes(h2hPlayerA) && m.losers.includes(h2hPlayerB);
     const bWon = m.winners.includes(h2hPlayerB) && m.losers.includes(h2hPlayerA);
-    return aWon || bWon;
+    return (aWon || bWon) && (!monthActive || m.date.slice(0,7)===selectedMonth);
   }).sort((a,b)=> a.date < b.date ? 1 : -1);
 
   const teammateMatches = MATCHES.filter(m=>{
-    return (m.winners.includes(h2hPlayerA) && m.winners.includes(h2hPlayerB)) ||
+    const together = (m.winners.includes(h2hPlayerA) && m.winners.includes(h2hPlayerB)) ||
            (m.losers.includes(h2hPlayerA) && m.losers.includes(h2hPlayerB));
+    return together && (!monthActive || m.date.slice(0,7)===selectedMonth);
   }).sort((a,b)=> a.date < b.date ? 1 : -1);
 
   const aWins = opponentMatches.filter(m=>m.winners.includes(h2hPlayerA)).length;
   const bWins = opponentMatches.filter(m=>m.winners.includes(h2hPlayerB)).length;
 
-  html += `<div class="section-heading" style="margin-top:6px;">⚔️ As opponents</div>`;
+  html += `<div class="section-heading" style="margin-top:6px;">⚔️ As opponents${monthActive ? ` (${monthLabel(selectedMonth)})` : ''}</div>`;
   if(opponentMatches.length === 0){
-    html += `<div class="section-sub">${h2hPlayerA} and ${h2hPlayerB} have never played against each other.</div>`;
+    html += `<div class="section-sub">${h2hPlayerA} and ${h2hPlayerB} ${monthActive ? `didn't play each other in ${monthLabel(selectedMonth)}` : 'have never played against each other'}.</div>`;
   } else {
     html += `<div class="matchup-vs" style="text-align:center; font-size:16px; padding:12px;">
       <b style="color:${aWins>bWins?'var(--gold-bright)':'var(--text)'};">${h2hPlayerA} ${aWins}</b>
@@ -3058,9 +3166,9 @@ function renderH2H(){
     });
   }
 
-  html += `<div class="section-heading">🤝 As teammates</div>`;
+  html += `<div class="section-heading">🤝 As teammates${monthActive ? ` (${monthLabel(selectedMonth)})` : ''}</div>`;
   if(teammateMatches.length === 0){
-    html += `<div class="section-sub">${h2hPlayerA} and ${h2hPlayerB} have never partnered together.</div>`;
+    html += `<div class="section-sub">${h2hPlayerA} and ${h2hPlayerB} ${monthActive ? `didn't play together in ${monthLabel(selectedMonth)}` : 'have never partnered together'}.</div>`;
   } else {
     const wins = teammateMatches.filter(m=>m.winners.includes(h2hPlayerA)).length;
     const losses = teammateMatches.length - wins;
@@ -3096,7 +3204,20 @@ function renderH2H(){
       else { armedDeleteId = id; renderH2H(); }
     };
   });
+  box.querySelectorAll('.h2h-month-game').forEach(el=>{
+    el.onclick = ()=>{
+      const id = el.dataset.gameid;
+      expandedGameId = (expandedGameId === id) ? null : id;
+      renderH2H();
+    };
+  });
   wireH2HSelects(names);
+
+  populateMonthSelect(document.getElementById('h2hMonthSelect'));
+  document.getElementById('h2hMonthSelect').addEventListener('change', e=>{
+    selectedMonth = e.target.value;
+    renderH2H();
+  });
 }
 
 function wireH2HSelects(names){
