@@ -425,6 +425,7 @@
     <button class="tab-btn" data-tab="h2h">Head to Head</button>
     <button class="tab-btn" data-tab="wishlist">Wishlist</button>
     <button class="tab-btn" data-tab="upcoming">Upcoming</button>
+    <button class="tab-btn" data-tab="summary">Summary</button>
     <button class="tab-btn" data-tab="manage">Manage</button>
   </div>
   <div class="minGamesRow" id="dataQualityRow" style="background:var(--bg2); border:1px solid var(--gold-dim); border-radius:10px; padding:8px 10px;">
@@ -480,6 +481,7 @@
 <div id="h2hView" style="display:none; padding:0 16px;"></div>
 <div id="wishlistView" style="display:none; padding:0 16px;"></div>
 <div id="upcomingView" style="display:none; padding:0 16px;"></div>
+<div id="summaryView" style="display:none; padding:0 16px;"></div>
 <div id="findGameView" style="display:none; padding:0 16px;">
   <div class="fg-controls">
     <div class="fg-row">
@@ -1320,6 +1322,87 @@ function computeMonthlyRating(month){
   const monthMatches = ALL_MATCHES.filter(m => m.date.slice(0,7) === month);
   return computeElo(monthMatches, TIER_MAP, STARTING_TIER_MAP);
 }
+
+// Builds the raw ingredients for a "monthly awards" style recap: games played, wins/losses/draws
+// and points (3/win, 1/draw), win% and loss% (of all games that month, draws included in the
+// denominator), doughnuts conceded (any set lost 0-6 or similar), and a "hardest games" score
+// (that player's average opponent strength that month, scaled down by 300 -- the same tier-gap
+// unit used everywhere else in the app -- into a friendlier small number).
+// Skip filtering by date when 'all' is chosen, so the same summary format also works as a
+// whole-season recap, not just a single month.
+function computeMonthlySummaryStats(month){
+  const agg = {};
+  function A(name){
+    if(!agg[name]) agg[name] = {wins:0, losses:0, draws:0, doughnuts:0, strengths:[]};
+    return agg[name];
+  }
+
+  // Rated (non-draw) matches: ALL_MATCHES carries the raw set scores; MATCHES (same index, same
+  // order) carries the computed match_strength -- combine the two rather than assuming either
+  // array alone has everything needed.
+  ALL_MATCHES.forEach((raw, idx)=>{
+    if(month !== 'all' && raw.date.slice(0,7) !== month) return;
+    const enriched = MATCHES[idx];
+    if(!enriched) return;
+    const allNames = [...new Set([...raw.winners, ...raw.losers])];
+    allNames.forEach(n => A(n).strengths.push(enriched.match_strength));
+    raw.winners.forEach(n=>A(n).wins++);
+    raw.losers.forEach(n=>A(n).losses++);
+    raw.sets.forEach(([x,y])=>{
+      if(y === 0) raw.losers.forEach(n=>A(n).doughnuts++);
+      if(x === 0) raw.winners.forEach(n=>A(n).doughnuts++);
+    });
+  });
+
+  // Draws are excluded from the rating engine entirely, so they're pulled separately here --
+  // "winners"/"losers" on a draw just mean team1/team2, not an actual result.
+  getAllApprovedMatches().filter(m => m.isDraw && (month==='all' || m.date.slice(0,7)===month)).forEach(m=>{
+    const allNames = [...new Set([...m.winners, ...m.losers])];
+    const strengthEstimate = allNames.reduce((s,n)=>{
+      const p = PLAYERS.find(x=>x.name===n);
+      return s + (p ? p.rating : 1400);
+    }, 0) / (allNames.length || 1);
+    allNames.forEach(n => A(n).strengths.push(strengthEstimate));
+    m.winners.forEach(n=>A(n).draws++);
+    m.losers.forEach(n=>A(n).draws++);
+    m.sets.forEach(([x,y])=>{
+      if(y === 0) m.losers.forEach(n=>A(n).doughnuts++);
+      if(x === 0) m.winners.forEach(n=>A(n).doughnuts++);
+    });
+  });
+
+  const out = {};
+  Object.keys(agg).forEach(name=>{
+    const a = agg[name];
+    const games = a.wins + a.losses + a.draws;
+    const avgStrength = a.strengths.length ? a.strengths.reduce((s,x)=>s+x,0)/a.strengths.length : 0;
+    out[name] = {
+      name, games, wins: a.wins, losses: a.losses, draws: a.draws,
+      points: a.wins*3 + a.draws*1,
+      winpct: games ? Math.round(1000*a.wins/games)/10 : 0,
+      losspct: games ? Math.round(1000*a.losses/games)/10 : 0,
+      doughnuts: a.doughnuts,
+      hardness: Math.round((avgStrength/300)*10)/10,
+    };
+  });
+  return out;
+}
+
+// Turns a metric into a ranked, tie-grouped top-N list: {rank, names:[...], value}. Ties share a
+// rank and are grouped together (e.g. two players tied for 3rd both show as rank 3).
+function topNTied(statsArr, key, n, descending){
+  const sorted = statsArr.slice().sort((a,b)=> descending ? b[key]-a[key] : a[key]-b[key]);
+  const groups = [];
+  sorted.forEach(s=>{
+    const last = groups[groups.length-1];
+    if(last && last.value === s[key]){
+      last.names.push(s.name);
+    } else {
+      groups.push({ value: s[key], names: [s.name] });
+    }
+  });
+  return groups.slice(0, n).map((g,i)=>({ rank: i+1, names: g.names, value: g.value }));
+}
 const ZERO_MONTH_STATS = {wins:0,losses:0,total:0,winpct:0,avg_match_strength:0,avg_overperf_pct:0,game_diff:0,upset_wins:0,upset_losses:0,upset_total:0,upset_rate:0};
 
 function populateMonthSelect(selectEl){
@@ -1395,7 +1478,8 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
     const isH2H = activeTab === 'h2h';
     const isWishlist = activeTab === 'wishlist';
     const isUpcoming = activeTab === 'upcoming';
-    const isListView = !isCallouts && !isPlayers && !isFindGame && !isManage && !isGames && !isH2H && !isWishlist && !isUpcoming;
+    const isSummary = activeTab === 'summary';
+    const isListView = !isCallouts && !isPlayers && !isFindGame && !isManage && !isGames && !isH2H && !isWishlist && !isUpcoming && !isSummary;
 
     document.getElementById('tierbar').style.display = isListView ? 'flex' : 'none';
     document.getElementById('searchWrap').style.display = (isListView || isPlayers) ? 'block' : 'none';
@@ -1414,45 +1498,37 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
     document.getElementById('h2hView').style.display = isH2H ? 'block' : 'none';
     document.getElementById('wishlistView').style.display = isWishlist ? 'block' : 'none';
     document.getElementById('upcomingView').style.display = isUpcoming ? 'block' : 'none';
+    document.getElementById('summaryView').style.display = isSummary ? 'block' : 'none';
 
-    document.getElementById('headerSub').textContent = activeTab==='wl'
-      ? 'Parsed from the group chats, June–August 2026 · tap a player for their match log'
-      : (activeTab==='power'
-        ? 'A tier-anchored power rating · scoreline counts, not just who won · tap a player for details'
-        : (activeTab==='callouts'
-          ? 'Games worth setting up next, based on what the data can\'t yet confirm'
-          : (activeTab==='findgame'
-            ? 'Pick a player, a scope, and a difficulty — generate real opponent options on demand'
-            : (activeTab==='manage'
-              ? 'Add results going forward and tag who\'s active — everything above recalculates instantly'
-              : (activeTab==='games'
-                ? 'Every game, newest first — pending ones need approval before they count'
-                : (activeTab==='h2h'
-                  ? 'Pick two players and see their full history, as opponents and as teammates'
-                  : (activeTab==='wishlist'
-                    ? 'Propose a game — once all four players confirm, it moves to Upcoming'
-                    : (activeTab==='upcoming'
-                      ? 'Games everyone has confirmed they\'re in for'
-                      : 'Every player, A–Z · tap a name for their full profile'))))))));
-    document.getElementById('explainer').innerHTML = activeTab==='wl'
-      ? 'Built from readable trophy-emoji results across the main group chat and Results Only, with names and tiers confirmed against the group. Excludes single-set/"money game" results, matches against non-members, and a couple of results with no opponent named or a disputed winner.'
-      : (activeTab==='power'
-        ? 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much. "Recent Form" sorts by average overperformance over just the last 10 games — a faster-moving signal than the overall rating, useful for spotting who\'s trending right now.'
-        : (activeTab==='callouts'
-          ? 'Suggested matchups are full 2v2s — a wingman is added to each side, chosen to keep team strength balanced, so these are games you could actually go and organize. This spans every tier, not just the ones with the least data — S/A near-ties get surfaced the same way as small-sample C-tier players. Every player also has their own Easy / Balanced / Hard opponent suggestions on their profile page. The Data filter above changes which matches feed these ratings — defaults to June onwards only.'
-          : (activeTab==='findgame'
-            ? '"Within my tier" keeps every suggested player inside your own tier — easy always means the weakest pair actually in your tier, hard the strongest, never a reach into a different tier. "Any tier" opens it up and targets a rating roughly 150 points below/above your own. Each suggested opponent pair also comes with a partner recommendation — the player who\'d make it an even match, with a proven-chemistry option flagged where one exists. Five options shown each time, ranked by fit — this is computed live, not a fixed list, so try different scopes and difficulties freely. Players who\'ve gone inactive are excluded from every suggestion here, though their history stays visible elsewhere.'
-            : (activeTab==='manage'
-              ? 'This data is shared — anyone who opens this artifact sees the same games and tags. Ratings, tiers, and every suggestion above recompute from scratch the moment you add a game or change a tag.'
-              : (activeTab==='games'
-                ? 'Editing or deleting a game recalculates every rating instantly. Your name is required for any change here so the group can see who touched what.'
-                : (activeTab==='h2h'
-                  ? 'Opponent record only counts matches where the two were on opposite teams; teammate record only counts matches where they played together.'
-                  : (activeTab==='wishlist'
-                    ? 'Anyone can propose a game. Each of the four named players confirms it themselves from their own player profile — once all four are in, it moves to the Upcoming tab automatically.'
-                    : (activeTab==='upcoming'
-                      ? 'These four have all confirmed. Once the game is actually played, add the real result from the Games tab as normal.'
-                      : ''))))))));
+    const HEADER_SUB_BY_TAB = {
+      wl: 'Parsed from the group chats, June–August 2026 · tap a player for their match log',
+      power: 'A tier-anchored power rating · scoreline counts, not just who won · tap a player for details',
+      callouts: 'Games worth setting up next, based on what the data can\'t yet confirm',
+      findgame: 'Pick a player, a scope, and a difficulty — generate real opponent options on demand',
+      manage: 'Add results going forward and tag who\'s active — everything above recalculates instantly',
+      games: 'Every game, newest first — pending ones need approval before they count',
+      h2h: 'Pick two players and see their full history, as opponents and as teammates',
+      wishlist: 'Propose a game — once all four players confirm, it moves to Upcoming',
+      upcoming: 'Games everyone has confirmed they\'re in for',
+      summary: 'A monthly awards recap, built from the same data as everywhere else — copy it straight into WhatsApp',
+      players: 'Every player, A–Z · tap a name for their full profile',
+    };
+    document.getElementById('headerSub').textContent = HEADER_SUB_BY_TAB[activeTab] || HEADER_SUB_BY_TAB.players;
+
+    const EXPLAINER_BY_TAB = {
+      wl: 'Built from readable trophy-emoji results across the main group chat and Results Only, with names and tiers confirmed against the group. Excludes single-set/"money game" results, matches against non-members, and a couple of results with no opponent named or a disputed winner.',
+      power: 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much. "Recent Form" sorts by average overperformance over just the last 10 games — a faster-moving signal than the overall rating, useful for spotting who\'s trending right now.',
+      callouts: 'Suggested matchups are full 2v2s — a wingman is added to each side, chosen to keep team strength balanced, so these are games you could actually go and organize. This spans every tier, not just the ones with the least data — S/A near-ties get surfaced the same way as small-sample C-tier players. Every player also has their own Easy / Balanced / Hard opponent suggestions on their profile page. The Data filter above changes which matches feed these ratings — defaults to June onwards only.',
+      findgame: '"Within my tier" keeps every suggested player inside your own tier — easy always means the weakest pair actually in your tier, hard the strongest, never a reach into a different tier. "Any tier" opens it up and targets a rating roughly 150 points below/above your own. Each suggested opponent pair also comes with a partner recommendation — the player who\'d make it an even match, with a proven-chemistry option flagged where one exists. Five options shown each time, ranked by fit — this is computed live, not a fixed list, so try different scopes and difficulties freely. Players who\'ve gone inactive are excluded from every suggestion here, though their history stays visible elsewhere.',
+      manage: 'This data is shared — anyone who opens this artifact sees the same games and tags. Ratings, tiers, and every suggestion above recompute from scratch the moment you add a game or change a tag.',
+      games: 'Editing or deleting a game recalculates every rating instantly. Your name is required for any change here so the group can see who touched what.',
+      h2h: 'Opponent record only counts matches where the two were on opposite teams; teammate record only counts matches where they played together.',
+      wishlist: 'Anyone can propose a game. Each of the four named players confirms it themselves from their own player profile — once all four are in, it moves to the Upcoming tab automatically.',
+      upcoming: 'These four have all confirmed. Once the game is actually played, add the real result from the Games tab as normal.',
+      summary: 'Points: 3 for a win, 1 for a draw. "Hardest games" is average opponent strength that month, scaled down by 300 for a friendlier number. "Doughnuts" are sets lost 0-6 or similar. Player of the Month is whoever tops the points table.',
+      players: '',
+    };
+    document.getElementById('explainer').innerHTML = EXPLAINER_BY_TAB[activeTab] || '';
 
     if(isCallouts) renderCallouts();
     else if(isPlayers) renderPlayersTab();
@@ -1462,6 +1538,7 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
     else if(isH2H) renderH2H();
     else if(isWishlist) renderWishlist();
     else if(isUpcoming) renderUpcoming();
+    else if(isSummary) renderSummary();
     else render();
   };
 });
@@ -2325,6 +2402,16 @@ function openSheet(name, matchFilter){
   const deltaByIdx = {};
   if(journey) journey.forEach(j=>{ if(j.type==='match') deltaByIdx[j._idx] = j.delta; });
 
+  // If a month is active, the match cards below get filtered to just that month -- so the points
+  // shown on each of those cards should come from that same month's own engine (every game counts,
+  // no neutral band), not the season-long journey's hard-cliff rule. Otherwise a real, active month
+  // with only a handful of games could show "0 pts" on most of them just because they were close to
+  // the season-long expectation, even though the month's own rating moved on every one of them.
+  if(selectedMonth !== 'all'){
+    const monthJourneyForDelta = computeMonthlyJourney(name, selectedMonth);
+    if(monthJourneyForDelta) monthJourneyForDelta.forEach(j=>{ if(j.type==='match') deltaByIdx[j._idx] = j.delta; });
+  }
+
   document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildGameRequestsForPlayerSection(name) + buildRecentFormSection(name) + buildMonthlyRatingSection(name) + buildJourneySection(name, journey) + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
   let ms = MATCHES.map((m, idx)=>({...m, _idx: idx})).filter(m => m.winners.includes(name) || m.losers.includes(name));
   ms.sort((a,b)=> a.date < b.date ? 1 : -1);
@@ -2959,16 +3046,25 @@ let armedDeleteId = null;
 let expandedGameId = null;
 let addGameExpanded = false;
 
-function computeMatchDelta(idxInAllMatches){
+function computeMatchDelta(idxInAllMatches, preferMonthIfActive){
   if(idxInAllMatches === undefined || idxInAllMatches === null) return null;
   const m = MATCHES[idxInAllMatches];
   if(!m) return null;
+  // If asked to, and a month is active, and this specific game falls within it: use that month's
+  // own engine (every game counts, no neutral band), matching the month-scoped views elsewhere.
+  if(preferMonthIfActive && selectedMonth !== 'all' && m.date.slice(0,7) === selectedMonth){
+    const monthJourney = computeMonthlyJourney(m.winners[0], selectedMonth);
+    if(monthJourney){
+      const entry = monthJourney.find(e => e.type==='match' && e._idx === idxInAllMatches);
+      if(entry) return entry.delta;
+    }
+  }
   // Same basis as the "favored/expected/actual/over-under-performed" text shown alongside this,
   // so the two can never contradict each other the way two different calculations could.
   return displayDeltaFromOverperf(m.overperformance_winner);
 }
 
-function buildMatchDetailBlock(m, idxInAllMatches, contextHasMonthFigure){
+function buildMatchDetailBlock(m, idxInAllMatches, contextHasMonthFigure, preferMonthIfActive){
   const gap = Math.abs(m.team_w_rating - m.team_l_rating);
   const isClose = gap < 15;
   const winnerFavored = m.team_w_rating > m.team_l_rating;
@@ -2987,7 +3083,8 @@ function buildMatchDetailBlock(m, idxInAllMatches, contextHasMonthFigure){
                    : (perf <= -neutralPts ? `<span class="perf-neg">winners underperformed ${perf}pts on games</span>`
                    : `<span style="color:var(--text-dim);">games roughly as expected</span>`);
 
-  const delta = computeMatchDelta(idxInAllMatches);
+  const delta = computeMatchDelta(idxInAllMatches, preferMonthIfActive);
+  const usedMonthEngine = preferMonthIfActive && selectedMonth !== 'all' && m.date.slice(0,7) === selectedMonth;
   let deltaHtml = '';
   if(delta !== null){
     const winnerLabel = delta >= 0 ? `+${delta}` : `${delta}`;
@@ -2996,7 +3093,7 @@ function buildMatchDetailBlock(m, idxInAllMatches, contextHasMonthFigure){
     const winnerClass = delta >= 0 ? 'perf-pos' : 'perf-neg';
     const loserClass = loserVal >= 0 ? 'perf-pos' : 'perf-neg';
     deltaHtml = `<div style="margin-top:6px;">
-      <div style="font-size:10px; color:var(--gold-dim); text-transform:uppercase; letter-spacing:.03em; margin-bottom:2px;">Overall (season) rating impact${contextHasMonthFigure ? ' — a different figure from the month total above' : ''}</div>
+      <div style="font-size:10px; color:var(--gold-dim); text-transform:uppercase; letter-spacing:.03em; margin-bottom:2px;">${usedMonthEngine ? `${monthLabel(selectedMonth)} rating impact` : `Overall (season) rating impact${contextHasMonthFigure ? ' — a different figure from the month total above' : ''}`}</div>
       <span class="${winnerClass}" style="font-weight:700;">${winnerLabel} pts</span> <span style="color:var(--text-dim); font-size:11px;">for winners</span>
       &nbsp;·&nbsp;
       <span class="${loserClass}" style="font-weight:700;">${loserLabel} pts</span> <span style="color:var(--text-dim); font-size:11px;">for losers</span>
@@ -3460,6 +3557,174 @@ function renderUpcoming(){
   });
 }
 
+let summaryMonth = null;
+
+function renderSummary(){
+  const box = document.getElementById('summaryView');
+  const months = getAvailableMonths();
+  if(!summaryMonth) summaryMonth = months.length ? months[months.length-1] : 'all';
+
+  let html = `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Month</label>
+      <select id="summaryMonthSelect" class="fg-select"></select>
+    </div>
+  </div>`;
+
+  const stats = computeMonthlySummaryStats(summaryMonth);
+  const statsArr = Object.values(stats);
+  const label = summaryMonth === 'all' ? 'All Time' : monthLabel(summaryMonth);
+
+  if(statsArr.length === 0){
+    html += `<div class="section-sub">No games recorded for ${label}.</div>`;
+    box.innerHTML = html;
+    populateSummaryMonthSelect();
+    return;
+  }
+
+  html += `<div class="section-heading" style="margin-top:6px;">📊 ${label} Stats Review</div>`;
+
+  const minGamesForRanked = 3;
+  const eligible = statsArr.filter(s=>s.games >= minGamesForRanked);
+
+  const mostGames = topNTied(statsArr, 'games', 3, true);
+  const mostWins = topNTied(statsArr.filter(s=>s.games>0), 'points', 3, true);
+  const mostLosses = topNTied(statsArr, 'losses', 3, true);
+  const lowestWinPct = topNTied(eligible, 'winpct', 3, false);
+  const highestWinPct = topNTied(eligible, 'winpct', 3, true);
+  const doughnutMax = Math.max(0, ...statsArr.map(s=>s.doughnuts));
+  const mostDoughnuts = doughnutMax > 0 ? statsArr.filter(s=>s.doughnuts===doughnutMax).map(s=>s.name) : [];
+  const hardestGames = topNTied(eligible, 'hardness', 3, true);
+  const playerOfMonth = mostWins.length ? mostWins[0] : null;
+
+  function nameLinks(names){
+    return names.map(n=>`<span class="request-player-link" data-player="${n}" style="text-decoration:underline; cursor:pointer;">${n}</span>`).join(' / ');
+  }
+  function renderGroupList(title, groups, formatFn){
+    let h = `<div class="section-heading">${title}</div>`;
+    if(groups.length === 0){ h += `<div class="section-sub">Not enough data.</div>`; return h; }
+    groups.forEach(g=>{
+      h += `<div class="matchup-vs" style="margin-bottom:6px; padding:8px 12px;">${g.rank}. ${nameLinks(g.names)} — ${formatFn(g)}</div>`;
+    });
+    return h;
+  }
+
+  html += renderGroupList('🎾 Most games played', mostGames, g=>`${g.value} game${g.value===1?'':'s'}`);
+  html += renderGroupList('🏆 Most wins &amp; highest points', mostWins, g=>{
+    const s = stats[g.names[0]];
+    return `${s.wins} win${s.wins===1?'':'s'}${s.draws?` · ${s.draws} draw${s.draws===1?'':'s'}`:''} — ${g.value} pts`;
+  });
+  html += renderGroupList('😬 Most losses', mostLosses, g=>`${g.value} loss${g.value===1?'':'es'}`);
+  html += renderGroupList('📉 Lowest win % (highest loss %)', lowestWinPct, g=>`${stats[g.names[0]].losspct}% loser`);
+  html += renderGroupList('📈 Highest win %', highestWinPct, g=>`${g.value}% wins`);
+
+  html += `<div class="section-heading">🍩 Most doughnuts received</div>`;
+  if(mostDoughnuts.length === 0){
+    html += `<div class="section-sub">Nobody got doughnut'd this ${summaryMonth==='all'?'season':'month'}.</div>`;
+  } else {
+    html += `<div class="matchup-vs" style="padding:8px 12px;">${nameLinks(mostDoughnuts)} — x${doughnutMax}</div>`;
+  }
+
+  html += renderGroupList('💪 Hardest games played (avg opponent strength)', hardestGames, g=>`${g.value}`);
+
+  html += `<div class="section-heading">👑 Player of the Month</div>`;
+  if(playerOfMonth){
+    html += `<div class="matchup-vs" style="text-align:center; padding:16px; font-size:16px;">${nameLinks(playerOfMonth.names)} 🏆</div>`;
+  } else {
+    html += `<div class="section-sub">Not enough data.</div>`;
+  }
+
+  html += `<div class="section-sub" style="padding:8px 2px;">Assumptions: points are 3/win, 1/draw. "Hardest games" is avg opponent strength ÷ 300. Win%/loss% include draws in the denominator. Rankings for win%/loss%/hardest require at least ${minGamesForRanked} games played.</div>`;
+
+  html += `<div class="fg-row" style="margin-top:12px;"><button class="tab-btn active" id="copySummaryBtn" style="width:100%;">📋 Copy as WhatsApp text</button></div>
+  <div id="copySummaryMessage" class="section-sub"></div>`;
+
+  box.innerHTML = html;
+  wireRequestPlayerLinks(box);
+  populateSummaryMonthSelect();
+
+  document.getElementById('copySummaryBtn').onclick = ()=>{
+    const text = buildWhatsAppSummaryText(summaryMonth, stats, {mostGames, mostWins, mostLosses, lowestWinPct, highestWinPct, mostDoughnuts, doughnutMax, hardestGames, playerOfMonth});
+    const msg = document.getElementById('copySummaryMessage');
+    const showFallback = ()=>{
+      let ta = document.getElementById('summaryFallbackText');
+      if(!ta){
+        ta = document.createElement('textarea');
+        ta.id = 'summaryFallbackText';
+        ta.className = 'fg-select';
+        ta.style.width = '100%';
+        ta.style.marginTop = '8px';
+        ta.rows = 16;
+        msg.after(ta);
+      }
+      ta.value = text;
+      msg.textContent = 'Could not copy automatically — tap the text box below, select all, and copy manually.';
+    };
+    try {
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(()=>{ msg.textContent = 'Copied! Paste it into WhatsApp.'; }).catch(showFallback);
+      } else {
+        showFallback();
+      }
+    } catch(e){
+      showFallback();
+    }
+  };
+}
+
+function populateSummaryMonthSelect(){
+  const sel = document.getElementById('summaryMonthSelect');
+  if(!sel) return;
+  const months = getAvailableMonths();
+  sel.innerHTML = `<option value="all">All time</option>` + months.map(m=>`<option value="${m}" ${m===summaryMonth?'selected':''}>${monthLabel(m)}</option>`).join('');
+  sel.value = summaryMonth;
+  sel.onchange = (e)=>{ summaryMonth = e.target.value; renderSummary(); };
+}
+
+function buildWhatsAppSummaryText(month, stats, groups){
+  const label = month === 'all' ? 'All Time' : monthLabel(month);
+  const lines = [];
+  lines.push('Anyways all!');
+  lines.push('');
+  lines.push(`Please see the ${label} stats review`);
+  lines.push('');
+  lines.push('*Most games played:*');
+  groups.mostGames.forEach(g=> lines.push(`${g.rank}. ${g.names.join(' / ')} ${g.value} games`));
+  lines.push('');
+  lines.push('*Most wins & highest points*');
+  groups.mostWins.forEach(g=>{
+    const s = stats[g.names[0]];
+    const drawPart = s.draws ? ` ${s.draws} draw${s.draws===1?'':'s'}` : '';
+    lines.push(`${g.rank} ${g.names.join(' / ')} ${s.wins} win${s.wins===1?'':'s'}${drawPart} - ${g.value} points`);
+  });
+  lines.push('');
+  lines.push('Most losses');
+  groups.mostLosses.forEach(g=> lines.push(`${g.rank}. ${g.names.join(' / ')} ${g.value} losses`));
+  lines.push('');
+  lines.push('Lowest win %');
+  groups.lowestWinPct.forEach(g=>{
+    const s = stats[g.names[0]];
+    lines.push(`${g.rank}. ${s.losspct}% loser ${g.names.join(' / ')}`);
+  });
+  lines.push('');
+  lines.push('Highest win %');
+  groups.highestWinPct.forEach(g=> lines.push(`${g.rank}. ${g.names.join(' / ')} ${g.value}% wins`));
+  lines.push('');
+  lines.push('Most doughnuts received');
+  if(groups.mostDoughnuts.length){
+    lines.push(`${groups.mostDoughnuts.join(' / ')}  x${groups.doughnutMax}`);
+  } else {
+    lines.push('None this time!');
+  }
+  lines.push('');
+  lines.push('Hardest games played');
+  groups.hardestGames.forEach(g=> lines.push(`${g.rank}. ${g.names.join(' / ')} ${g.value}`));
+  lines.push('');
+  lines.push('Player of the month….');
+  lines.push(groups.playerOfMonth ? `${groups.playerOfMonth.names.join(' / ')} 🏆🏆🏆` : 'Not enough data');
+  return lines.join('\n');
+}
+
+
 function buildGameRequestsForPlayerSection(name){
   const relevant = gameRequestsState.filter(r=> r.status==='pending' && r.players.includes(name) && !r.confirmations[name]);
   if(relevant.length === 0) return '';
@@ -3618,7 +3883,7 @@ Player C &amp; Player D"></textarea>
     const detailContent = isExpanded
       ? (m.isDraw
           ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--line); font-size:11.5px; color:var(--text-dim);">Recorded as unfinished / a draw — doesn't count as a win or loss for anyone, and doesn't affect any rating.</div>`
-          : (enriched ? buildMatchDetailBlock(enriched, idToIdx[m.id]) : ''))
+          : (enriched ? buildMatchDetailBlock(enriched, idToIdx[m.id], false, true) : ''))
       : '';
     let cardStyle = '';
     if(selectedGamesPlayer !== 'all' && !m.isDraw){
