@@ -595,6 +595,7 @@ const STORAGE_KEY_DELETED = 'moneypadel_deleted_ids';      // array of ids, soft
 const STORAGE_KEY_VISIBILITY = 'moneypadel_visibility';    // shared: which sections non-admins can see
 const STORAGE_KEY_MY_NAME = 'moneypadel_my_name';          // personal — localStorage, this device only
 const STORAGE_KEY_GAME_REQUESTS = 'moneypadel_game_requests'; // shared: wishlist + upcoming games
+const STORAGE_KEY_DEV_AREAS = 'moneypadel_dev_areas'; // shared: freeform per-player development notes
 
 // Sections an admin can hide from non-admin viewers. Admins always see everything.
 const VISIBILITY_DEFAULTS = {
@@ -649,6 +650,19 @@ async function saveGameRequests(requests){
     await fsSet(STORAGE_KEY_GAME_REQUESTS, JSON.stringify(requests));
     return true;
   } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save game requests failed', e); return false; }
+}
+
+let devAreasState = []; // [{id, player, text, addedBy, addedAt}]
+
+async function loadDevAreas(){
+  try { const v = await fsGet(STORAGE_KEY_DEV_AREAS); if(v) return JSON.parse(v); } catch(e){ console.error('load dev areas failed', e); }
+  return [];
+}
+async function saveDevAreas(areas){
+  try {
+    await fsSet(STORAGE_KEY_DEV_AREAS, JSON.stringify(areas));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save dev areas failed', e); return false; }
 }
 
 async function loadStoredData(){
@@ -1222,6 +1236,8 @@ function recomputeAll(){
     const form = computeRecentForm(p.name, 10);
     p.recent_form = form ? form.avgPct : null;
     p.recent_form_games = form ? form.games : 0;
+    p.recent_form_wins = form ? form.wins : 0;
+    p.recent_form_losses = form ? form.losses : 0;
   });
   H2H = buildH2H(MATCHES);
   PARTNERSHIPS = buildPartnerships(MATCHES, TIER_MAP);
@@ -1680,7 +1696,7 @@ function render(){
         ? (()=>{
             const fClass = p.recent_form > 3 ? 'perf-pos' : (p.recent_form < -3 ? 'perf-neg' : '');
             const fSign = p.recent_form >= 0 ? '+' : '';
-            return `<div class="rating-sub ${fClass}" style="font-size:10px;">form (${p.recent_form_games}g): ${fSign}${p.recent_form}%</div>`;
+            return `<div class="rating-sub ${fClass}" style="font-size:10px;">form (${p.recent_form_games}g): ${fSign}${p.recent_form}% <span style="color:var(--green);">${p.recent_form_wins}W</span>-<span style="color:var(--red);">${p.recent_form_losses}L</span></div>`;
           })()
         : '';
 
@@ -1747,7 +1763,9 @@ function computeRecentForm(name, windowSize){
     return won ? m.overperformance_winner : -m.overperformance_winner;
   });
   const avg = vals.reduce((s,x)=>s+x,0) / vals.length;
-  return { avgPct: Math.round(avg*1000)/10, games: own.length };
+  const wins = own.filter(m=>m.winners.includes(name)).length;
+  const losses = own.length - wins;
+  return { avgPct: Math.round(avg*1000)/10, games: own.length, wins, losses };
 }
 
 function buildProfileText(p){
@@ -2049,8 +2067,9 @@ function generateCandidatePartners(player, scope, topN){
   return { history: history.slice(0, 2), fresh: fresh.slice(0, topN) };
 }
 
-function suggestPartnerForTarget(player, targetTeamAvg, scope){
-  const pool = PLAYERS.filter(p => p.name !== player.name && !INACTIVE_PLAYERS.has(p.name) && (scope==='any' || p.tier === player.tier));
+function suggestPartnerForTarget(player, targetTeamAvg, scope, excludeNames){
+  const excluded = new Set([player.name, ...(excludeNames || [])]);
+  const pool = PLAYERS.filter(p => !excluded.has(p.name) && !INACTIVE_PLAYERS.has(p.name) && (scope==='any' || p.tier === player.tier));
   const idealPartnerRating = 2*targetTeamAvg - player.rating;
 
   let closest = null;
@@ -2108,7 +2127,7 @@ function renderFindGameResults(){
   } else {
     candidates.forEach((c, i)=>{
       const tierNote = c.tiers[0]===c.tiers[1] ? `Tier ${c.tiers[0]}` : `Tier ${c.tiers[0]} &amp; Tier ${c.tiers[1]}`;
-      const ps = suggestPartnerForTarget(player, c.avg, fgScope);
+      const ps = suggestPartnerForTarget(player, c.avg, fgScope, c.pair);
       let partnerLine = '';
       if(ps.chemistryPartner && ps.chemistryPartner !== ps.closest?.name){
         partnerLine = `<div style="margin-top:5px; font-size:11px; color:var(--gold-bright);">Bring: ${ps.chemistryPartner} (proven chemistry) — or ${ps.closest ? ps.closest.name+' ('+Math.round(ps.closest.rating)+') for the closest even match' : 'no rating-matched option in this scope'}</div>`;
@@ -2369,7 +2388,31 @@ function buildRecentFormSection(name){
   else if(pct < -3) note = 'trending down modestly';
   else note = 'holding roughly steady';
   return `<div class="section-heading" style="margin-top:14px;">📊 Recent form (last ${form.games} games)</div>
-    <div class="matchup-vs"><span class="${cls}" style="font-weight:700; font-size:15px;">${sign}${pct}%</span> <span style="color:var(--text-dim); font-size:11.5px;">average overperformance vs. expectation — ${note}. This is separate from the overall rating above and moves faster, since it's a short window.</span></div>`;
+    <div class="matchup-vs"><span class="${cls}" style="font-weight:700; font-size:15px;">${sign}${pct}%</span> <span style="color:var(--green); font-weight:700;">${form.wins}W</span>-<span style="color:var(--red); font-weight:700;">${form.losses}L</span> <span style="color:var(--text-dim); font-size:11.5px;">average overperformance vs. expectation — ${note}. This is separate from the overall rating above and moves faster, since it's a short window.</span></div>`;
+}
+
+function buildDevAreasSection(name){
+  const notes = devAreasState.filter(a => a.player === name);
+  let html = `<div class="section-heading" style="margin-top:14px;">🎯 Development Areas</div>`;
+  html += `<div class="section-sub">Freeform notes on what ${name} is working on — anyone can add one.</div>`;
+  if(notes.length === 0){
+    html += `<div class="section-sub">Nothing added yet.</div>`;
+  } else {
+    notes.slice().sort((a,b)=> a.addedAt < b.addedAt ? 1 : -1).forEach(note=>{
+      const isArmed = armedDeleteId === ('dev_'+note.id);
+      html += `<div class="callout-card" style="padding:10px 12px;">
+        <div style="font-size:12.5px;">${note.text}</div>
+        <div style="margin-top:4px; font-size:10.5px; color:var(--text-dim);">added by ${note.addedBy} (${fmtRelative(note.addedAt)})</div>
+        ${isUnlocked ? `<div class="difficulty-row" style="margin-top:6px;"><button class="preset-btn dev-area-delete-btn" data-note-id="${note.id}" style="flex:1; font-size:11px; padding:6px; ${isArmed?'color:#e8a5a1; border-color:var(--red);':''}">${isArmed?'Confirm delete?':'Delete'}</button></div>` : ''}
+      </div>`;
+    });
+  }
+  html += `<div class="fg-controls" style="margin-top:6px;">
+    <div class="fg-row"><textarea id="devAreaInput" class="fg-select" rows="2" placeholder="e.g. Second serve consistency, moving forward to the net sooner..." style="width:100%; resize:vertical;"></textarea></div>
+    <div class="fg-row"><button class="preset-btn" id="devAreaSubmit" style="width:100%;">Add development area</button></div>
+    <div id="devAreaMessage" class="section-sub"></div>
+  </div>`;
+  return html;
 }
 
 function buildMonthlyRatingSection(name){
@@ -2412,7 +2455,7 @@ function openSheet(name, matchFilter){
     if(monthJourneyForDelta) monthJourneyForDelta.forEach(j=>{ if(j.type==='match') deltaByIdx[j._idx] = j.delta; });
   }
 
-  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildGameRequestsForPlayerSection(name) + buildRecentFormSection(name) + buildMonthlyRatingSection(name) + buildJourneySection(name, journey) + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
+  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildDevAreasSection(name) + buildGameRequestsForPlayerSection(name) + buildRecentFormSection(name) + buildMonthlyRatingSection(name) + buildJourneySection(name, journey) + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
   let ms = MATCHES.map((m, idx)=>({...m, _idx: idx})).filter(m => m.winners.includes(name) || m.losers.includes(name));
   ms.sort((a,b)=> a.date < b.date ? 1 : -1);
 
@@ -2571,6 +2614,40 @@ function openSheet(name, matchFilter){
 
   const clearFilterEl = document.getElementById('clearProfileFilter');
   if(clearFilterEl) clearFilterEl.onclick = ()=> openSheet(name);
+
+  const devSubmitBtn = document.getElementById('devAreaSubmit');
+  if(devSubmitBtn){
+    devSubmitBtn.onclick = async ()=>{
+      const msg = document.getElementById('devAreaMessage');
+      const text = document.getElementById('devAreaInput').value.trim();
+      if(!text){ msg.textContent = 'Write something first.'; return; }
+      const addedBy = requireName();
+      if(!addedBy) return;
+      const note = { id: 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2,8), player: name, text, addedBy, addedAt: new Date().toISOString() };
+      devAreasState.push(note);
+      const ok = await saveDevAreas(devAreasState);
+      if(!ok){
+        devAreasState.pop();
+        msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage.`;
+        return;
+      }
+      openSheet(name);
+    };
+  }
+  document.querySelectorAll('.dev-area-delete-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const noteId = btn.dataset.noteId;
+      const armKey = 'dev_' + noteId;
+      if(armedDeleteId === armKey){
+        devAreasState = devAreasState.filter(a=>a.id!==noteId);
+        await saveDevAreas(devAreasState);
+        armedDeleteId = null;
+      } else {
+        armedDeleteId = armKey;
+      }
+      openSheet(name);
+    };
+  });
 }
 
 function navigateToGamesTabForEdit(matchId){
@@ -3683,8 +3760,6 @@ function populateSummaryMonthSelect(){
 function buildWhatsAppSummaryText(month, stats, groups){
   const label = month === 'all' ? 'All Time' : monthLabel(month);
   const lines = [];
-  lines.push('Anyways all!');
-  lines.push('');
   lines.push(`Please see the ${label} stats review`);
   lines.push('');
   lines.push('*Most games played:*');
@@ -4258,6 +4333,7 @@ async function init(){
   isUnlocked = await loadMyUnlocked();
   visibilityState = await loadVisibility();
   gameRequestsState = await loadGameRequests();
+  devAreasState = await loadDevAreas();
   recomputeAll();
   applyTabVisibility();
   render();
