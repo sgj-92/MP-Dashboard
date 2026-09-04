@@ -418,14 +418,14 @@
   <div class="tab-row" id="tabrow">
     <button class="tab-btn active" data-tab="power">Power Rating</button>
     <button class="tab-btn" data-tab="wl">Win / Loss</button>
-    <button class="tab-btn" data-tab="callouts">Call-Outs</button>
-    <button class="tab-btn" data-tab="findgame">Find a Game</button>
     <button class="tab-btn" data-tab="players">Players</button>
     <button class="tab-btn" data-tab="games">Games</button>
     <button class="tab-btn" data-tab="h2h">Head to Head</button>
+    <button class="tab-btn" data-tab="summary">Summary</button>
+    <button class="tab-btn" data-tab="callouts">Call-Outs</button>
+    <button class="tab-btn" data-tab="findgame">Find a Game</button>
     <button class="tab-btn" data-tab="wishlist">Wishlist</button>
     <button class="tab-btn" data-tab="upcoming">Upcoming</button>
-    <button class="tab-btn" data-tab="summary">Summary</button>
     <button class="tab-btn" data-tab="manage">Manage</button>
   </div>
   <div class="minGamesRow" id="dataQualityRow" style="background:var(--bg2); border:1px solid var(--gold-dim); border-radius:10px; padding:8px 10px;">
@@ -1349,7 +1349,7 @@ function computeMonthlyRating(month){
 function computeMonthlySummaryStats(month){
   const agg = {};
   function A(name){
-    if(!agg[name]) agg[name] = {wins:0, losses:0, draws:0, doughnuts:0, strengths:[]};
+    if(!agg[name]) agg[name] = {wins:0, losses:0, draws:0, doughnuts:0, strengths:[], games_w:0, games_l:0};
     return agg[name];
   }
 
@@ -1362,8 +1362,8 @@ function computeMonthlySummaryStats(month){
     if(!enriched) return;
     const allNames = [...new Set([...raw.winners, ...raw.losers])];
     allNames.forEach(n => A(n).strengths.push(enriched.match_strength));
-    raw.winners.forEach(n=>A(n).wins++);
-    raw.losers.forEach(n=>A(n).losses++);
+    raw.winners.forEach(n=>{ A(n).wins++; A(n).games_w += enriched.games_winner; A(n).games_l += enriched.games_loser; });
+    raw.losers.forEach(n=>{ A(n).losses++; A(n).games_w += enriched.games_loser; A(n).games_l += enriched.games_winner; });
     raw.sets.forEach(([x,y])=>{
       if(y === 0) raw.losers.forEach(n=>A(n).doughnuts++);
       if(x === 0) raw.winners.forEach(n=>A(n).doughnuts++);
@@ -1379,8 +1379,10 @@ function computeMonthlySummaryStats(month){
       return s + (p ? p.rating : 1400);
     }, 0) / (allNames.length || 1);
     allNames.forEach(n => A(n).strengths.push(strengthEstimate));
-    m.winners.forEach(n=>A(n).draws++);
-    m.losers.forEach(n=>A(n).draws++);
+    const team1Games = m.sets.reduce((s,[x,y])=>s+x,0);
+    const team2Games = m.sets.reduce((s,[x,y])=>s+y,0);
+    m.winners.forEach(n=>{ A(n).draws++; A(n).games_w += team1Games; A(n).games_l += team2Games; });
+    m.losers.forEach(n=>{ A(n).draws++; A(n).games_w += team2Games; A(n).games_l += team1Games; });
     m.sets.forEach(([x,y])=>{
       if(y === 0) m.losers.forEach(n=>A(n).doughnuts++);
       if(x === 0) m.winners.forEach(n=>A(n).doughnuts++);
@@ -1397,8 +1399,10 @@ function computeMonthlySummaryStats(month){
       points: a.wins*3 + a.draws*1,
       winpct: games ? Math.round(1000*a.wins/games)/10 : 0,
       losspct: games ? Math.round(1000*a.losses/games)/10 : 0,
+      gd: a.games_w - a.games_l,
       doughnuts: a.doughnuts,
       hardness: Math.round((avgStrength/300)*10)/10,
+      avg_opp: Math.round(avgStrength),
     };
   });
   return out;
@@ -1533,7 +1537,7 @@ document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
 
     const EXPLAINER_BY_TAB = {
       wl: 'Built from readable trophy-emoji results across the main group chat and Results Only, with names and tiers confirmed against the group. Excludes single-set/"money game" results, matches against non-members, and a couple of results with no opponent named or a disputed winner.',
-      power: 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much. "Recent Form" sorts by average overperformance over just the last 10 games — a faster-moving signal than the overall rating, useful for spotting who\'s trending right now.',
+      power: 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much. "Recent Form" sorts by wins over the last 10 games first, then by average overperformance as a tiebreaker — a faster-moving signal than the overall rating, useful for spotting who\'s trending right now.',
       callouts: 'Suggested matchups are full 2v2s — a wingman is added to each side, chosen to keep team strength balanced, so these are games you could actually go and organize. This spans every tier, not just the ones with the least data — S/A near-ties get surfaced the same way as small-sample C-tier players. Every player also has their own Easy / Balanced / Hard opponent suggestions on their profile page. The Data filter above changes which matches feed these ratings — defaults to June onwards only.',
       findgame: '"Within my tier" keeps every suggested player inside your own tier — easy always means the weakest pair actually in your tier, hard the strongest, never a reach into a different tier. "Any tier" opens it up and targets a rating roughly 150 points below/above your own. Each suggested opponent pair also comes with a partner recommendation — the player who\'d make it an even match, with a proven-chemistry option flagged where one exists. Five options shown each time, ranked by fit — this is computed live, not a fixed list, so try different scopes and difficulties freely. Players who\'ve gone inactive are excluded from every suggestion here, though their history stays visible elsewhere.',
       manage: 'This data is shared — anyone who opens this artifact sees the same games and tags. Ratings, tiers, and every suggestion above recompute from scratch the moment you add a game or change a tag.',
@@ -1624,7 +1628,7 @@ function sortRows(rows){
   } else {
     if(activeSortP==='rating') arr.sort((a,b)=> b.rating - a.rating);
     else if(activeSortP==='month_rating') arr.sort((a,b)=> (b.month_rating ?? -Infinity) - (a.month_rating ?? -Infinity));
-    else if(activeSortP==='recent_form') arr.sort((a,b)=> (b.recent_form ?? -999) - (a.recent_form ?? -999));
+    else if(activeSortP==='recent_form') arr.sort((a,b)=> (b.recent_form_wins ?? -999) - (a.recent_form_wins ?? -999) || (b.recent_form ?? -999) - (a.recent_form ?? -999));
     else if(activeSortP==='avg_match_strength') arr.sort((a,b)=> b.avg_match_strength - a.avg_match_strength);
     else if(activeSortP==='avg_overperf_pct') arr.sort((a,b)=> b.avg_overperf_pct - a.avg_overperf_pct);
     else if(activeSortP==='upset_total') arr.sort((a,b)=> b.upset_rate - a.upset_rate || b.upset_total - a.upset_total);
@@ -2758,6 +2762,14 @@ function renderManage(){
     <div id="cpBoardMessage" class="section-sub"></div>
   </div>`;
 
+  html += `<div class="section-heading">📤 Export data</div>`;
+  html += `<div class="section-sub">Downloads a .csv file to your device — opens straight in Excel, Google Sheets, or Numbers.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><button class="preset-btn" id="exportMatchesBtn" style="width:100%;">Export all matches</button></div>
+    <div class="fg-row"><button class="preset-btn" id="exportPlayersBtn" style="width:100%;">Export player stats</button></div>
+    <div id="exportMessage" class="section-sub"></div>
+  </div>`;
+
   box.innerHTML = html;
 
   const today = new Date().toISOString().slice(0,10);
@@ -2876,8 +2888,82 @@ function renderManage(){
     document.getElementById('cpBoardCurrent').value=''; document.getElementById('cpBoardNew').value='';
   };
 
+  document.getElementById('exportMatchesBtn').onclick = ()=>{
+    try { exportMatchesCsv(); document.getElementById('exportMessage').textContent = 'Downloaded.'; }
+    catch(e){ document.getElementById('exportMessage').textContent = 'Export failed: ' + (e.message||e); }
+  };
+  document.getElementById('exportPlayersBtn').onclick = ()=>{
+    try { exportPlayersCsv(); document.getElementById('exportMessage').textContent = 'Downloaded.'; }
+    catch(e){ document.getElementById('exportMessage').textContent = 'Export failed: ' + (e.message||e); }
+  };
+
   renderPlayerTagsList();
 }
+
+function csvEscape(val){
+  const s = (val === null || val === undefined) ? '' : String(val);
+  if(/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
+  return s;
+}
+function downloadCsv(filename, headers, rows){
+  const lines = [headers.map(csvEscape).join(',')];
+  rows.forEach(r => lines.push(r.map(csvEscape).join(',')));
+  const csvContent = lines.join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+function exportMatchesCsv(){
+  const headers = ['Date','Type','Team A','Team B','Score','Winner','Draw','Team A Rating','Team B Rating','Expected Win % (A/B whichever won)','Actual Win %','Overperformance %','Verified','Status','Submitted By'];
+  const displayMatches = getDisplayMatches();
+  const rows = displayMatches.map(m=>{
+    const enrichedIdx = m.isDraw ? -1 : idToIdxGlobalForExport(m.id);
+    const enriched = enrichedIdx >= 0 ? MATCHES[enrichedIdx] : null;
+    return [
+      m.date, m.type || 'doubles',
+      m.winners.join(' & '), m.losers.join(' & '),
+      m.sets.map(s=>s.join('-')).join(', '),
+      m.isDraw ? '' : m.winners.join(' & '),
+      m.isDraw ? 'Yes' : 'No',
+      enriched ? enriched.team_w_rating : '',
+      enriched ? enriched.team_l_rating : '',
+      enriched ? Math.round(enriched.expected_winshare*1000)/10 : '',
+      enriched ? Math.round(enriched.game_share_winner*1000)/10 : '',
+      enriched ? Math.round(enriched.overperformance_winner*1000)/10 : '',
+      m.verified === false ? 'No (pre-June, single-sourced)' : 'Yes',
+      m._status || 'approved',
+      m.submittedBy || (m.id.startsWith('base_') ? 'Historical record' : ''),
+    ];
+  });
+  downloadCsv(`money_padel_matches_${new Date().toISOString().slice(0,10)}.csv`, headers, rows);
+}
+
+function idToIdxGlobalForExport(id){
+  for(let i=0;i<ALL_MATCHES.length;i++){ if(ALL_MATCHES[i].id === id) return i; }
+  return -1;
+}
+
+function exportPlayersCsv(){
+  const headers = ['Name','Tier','Active','Rating','Games','Wins','Losses','Win %','Avg Opponent','Clutch %','Upset Wins','Upset Losses','Recent Form % (last 10)','Recent Form W-L'];
+  const rows = PLAYERS.map(p=>[
+    p.name, p.tier, INACTIVE_PLAYERS.has(p.name) ? 'No' : 'Yes',
+    Math.round(p.rating*10)/10, p.total, p.wins, p.losses,
+    p.total ? Math.round(1000*p.wins/p.total)/10 : 0,
+    Math.round(p.avg_match_strength), p.avg_overperf_pct,
+    p.upset_wins, p.upset_losses,
+    p.recent_form !== null && p.recent_form !== undefined ? p.recent_form : '',
+    (p.recent_form_wins !== undefined) ? `${p.recent_form_wins}-${p.recent_form_losses}` : '',
+  ]);
+  downloadCsv(`money_padel_players_${new Date().toISOString().slice(0,10)}.csv`, headers, rows);
+}
+
 
 function parseQuickEntryText(text){
   const rawLines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
@@ -3636,6 +3722,8 @@ function renderUpcoming(){
 
 let summaryMonth = null;
 
+let summaryMode = 'information'; // 'information' | 'league'
+
 function renderSummary(){
   const box = document.getElementById('summaryView');
   const months = getAvailableMonths();
@@ -3645,7 +3733,154 @@ function renderSummary(){
     <div class="fg-row"><label class="fg-label">Month</label>
       <select id="summaryMonthSelect" class="fg-select"></select>
     </div>
+    <div class="fg-row"><label class="fg-label">View</label>
+      <select id="summaryModeSelect" class="fg-select">
+        <option value="information">Information</option>
+        <option value="league">League Table</option>
+      </select>
+    </div>
+  </div>
+  <div id="summaryContent"></div>`;
+
+  box.innerHTML = html;
+  populateSummaryMonthSelect();
+  const modeSel = document.getElementById('summaryModeSelect');
+  modeSel.value = summaryMode;
+  modeSel.onchange = (e)=>{ summaryMode = e.target.value; renderSummary(); };
+
+  if(summaryMode === 'league') renderSummaryLeagueTable();
+  else renderSummaryInformation();
+}
+
+let leagueGrouped = true;
+let leagueSortKey = 'points';
+let leagueSortDesc = true;
+
+const LEAGUE_COLUMNS = [
+  { key: null, label: '#', align: 'left' },
+  { key: 'name', label: 'Player', align: 'left' },
+  { key: 'games', label: 'P', align: 'center' },
+  { key: 'wins', label: 'W', align: 'center' },
+  { key: 'losses', label: 'L', align: 'center' },
+  { key: 'draws', label: 'D', align: 'center' },
+  { key: 'gd', label: 'GD', align: 'center' },
+  { key: 'avg_opp', label: 'Avg Opp', align: 'center' },
+  { key: 'recent_form', label: 'Form (10g)', align: 'center' },
+  { key: 'points', label: 'Pts', align: 'right' },
+];
+
+function sortLeagueRows(rows){
+  const key = leagueSortKey;
+  const dir = leagueSortDesc ? -1 : 1;
+  return rows.slice().sort((a,b)=>{
+    let av = a[key], bv = b[key];
+    if(key === 'name') return dir * a.name.localeCompare(b.name);
+    if(av === undefined || av === null) av = -Infinity;
+    if(bv === undefined || bv === null) bv = -Infinity;
+    if(av !== bv) return dir * (av - bv);
+    // Stable tiebreak so ties don't jump around between renders.
+    return b.points - a.points || b.gd - a.gd || a.name.localeCompare(b.name);
+  });
+}
+
+function buildLeagueTableHtml(rows, showTierColumn){
+  const sorted = sortLeagueRows(rows);
+  let html = `<div class="callout-card" style="padding:0; overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:11px; white-space:nowrap;">
+      <thead><tr style="background:var(--bg2); text-align:left;">`;
+  html += `<th style="padding:7px 4px 7px 8px;">#</th>`;
+  html += `<th class="league-sort-th" data-key="name" style="padding:7px 4px; cursor:pointer;">Player${leagueSortKey==='name'?(leagueSortDesc?' ▾':' ▴'):''}</th>`;
+  if(showTierColumn) html += `<th style="padding:7px 4px; text-align:center;">Tier</th>`;
+  ['games','wins','losses','draws','gd','avg_opp','recent_form','points'].forEach(key=>{
+    const col = LEAGUE_COLUMNS.find(c=>c.key===key);
+    const arrow = leagueSortKey===key ? (leagueSortDesc?' ▾':' ▴') : '';
+    html += `<th class="league-sort-th" data-key="${key}" style="padding:7px 4px; text-align:${col.align}; cursor:pointer;">${col.label}${arrow}</th>`;
+  });
+  html += `</tr></thead><tbody>`;
+  sorted.forEach((r,i)=>{
+    const formHtml = (r.recent_form !== null && r.recent_form !== undefined)
+      ? `<span style="color:${r.recent_form>3?'var(--green)':(r.recent_form<-3?'var(--red)':'var(--text-dim)')};">${r.recent_form>=0?'+':''}${r.recent_form}%</span> <span style="color:var(--text-dim); font-size:10px;">(${r.recent_form_wins}W-${r.recent_form_losses}L)</span>`
+      : `<span style="color:var(--text-dim);">–</span>`;
+    html += `<tr style="border-top:1px solid var(--line);">
+      <td style="padding:7px 4px 7px 8px; color:var(--text-dim);">${i+1}</td>
+      <td style="padding:7px 4px;"><span class="request-player-link" data-player="${r.name}" style="text-decoration:underline; cursor:pointer; font-weight:700;">${r.name}</span></td>
+      ${showTierColumn ? `<td style="padding:7px 4px; text-align:center;"><span class="badge ${r.tier}" style="display:inline-flex; width:20px; height:20px; font-size:10px;">${r.tier}</span></td>` : ''}
+      <td style="padding:7px 4px; text-align:center;">${r.games}</td>
+      <td style="padding:7px 4px; text-align:center; color:var(--green);">${r.wins}</td>
+      <td style="padding:7px 4px; text-align:center; color:var(--red);">${r.losses}</td>
+      <td style="padding:7px 4px; text-align:center; color:var(--text-dim);">${r.draws}</td>
+      <td style="padding:7px 4px; text-align:center;">${r.gd>=0?'+':''}${r.gd}</td>
+      <td style="padding:7px 4px; text-align:center;">${r.avg_opp}</td>
+      <td style="padding:7px 4px; text-align:center;">${formHtml}</td>
+      <td style="padding:7px 8px 7px 4px; text-align:right; font-weight:700; color:var(--gold-bright);">${r.points}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+  return html;
+}
+
+function renderSummaryLeagueTable(){
+  const content = document.getElementById('summaryContent');
+  const stats = computeMonthlySummaryStats(summaryMonth);
+  const label = summaryMonth === 'all' ? 'All Time' : monthLabel(summaryMonth);
+
+  // Recent Form is always the last-10-games figure (not scoped to the selected month) --
+  // the same established meaning it has everywhere else in the app.
+  const rowsByName = {};
+  Object.values(stats).forEach(s=>{
+    const p = PLAYERS.find(x=>x.name===s.name);
+    const form = computeRecentForm(s.name, 10);
+    rowsByName[s.name] = {
+      ...s, tier: p ? p.tier : '?',
+      recent_form: form ? form.avgPct : null,
+      recent_form_wins: form ? form.wins : 0,
+      recent_form_losses: form ? form.losses : 0,
+    };
+  });
+
+  let html = `<div class="section-heading" style="margin-top:6px;">🏆 ${label} League Table</div>`;
+  html += `<div class="section-sub">Updates live as the month's games are added — 3 points for a win, 1 for a draw, tiebreak on game difference. Tap a column header to sort by it. "Form" is each player's last 10 games overall, not scoped to this month. Tier S isn't shown — one player can't have a table.</div>`;
+
+  html += `<div class="fg-toggle" style="margin:8px 0 14px;">
+    <button class="fg-toggle-btn ${leagueGrouped?'active':''}" id="leagueGroupedBtn">By tier</button>
+    <button class="fg-toggle-btn ${!leagueGrouped?'active':''}" id="leagueAllBtn">All together</button>
   </div>`;
+
+  if(leagueGrouped){
+    const tiers = ['A','B','C'];
+    let anyTierShown = false;
+    tiers.forEach(tier=>{
+      const rows = Object.values(rowsByName).filter(s => s.tier === tier && s.games > 0);
+      if(rows.length === 0) return;
+      anyTierShown = true;
+      html += `<div class="section-heading">Tier ${tier}</div>`;
+      html += buildLeagueTableHtml(rows, false);
+    });
+    if(!anyTierShown) html += `<div class="section-sub">No games recorded for ${label}.</div>`;
+  } else {
+    const rows = Object.values(rowsByName).filter(s => s.tier !== 'S' && s.games > 0);
+    if(rows.length === 0) html += `<div class="section-sub">No games recorded for ${label}.</div>`;
+    else html += buildLeagueTableHtml(rows, true);
+  }
+
+  content.innerHTML = html;
+  wireRequestPlayerLinks(content);
+
+  document.getElementById('leagueGroupedBtn').onclick = ()=>{ leagueGrouped = true; renderSummaryLeagueTable(); };
+  document.getElementById('leagueAllBtn').onclick = ()=>{ leagueGrouped = false; renderSummaryLeagueTable(); };
+  content.querySelectorAll('.league-sort-th').forEach(th=>{
+    th.onclick = ()=>{
+      const key = th.dataset.key;
+      if(leagueSortKey === key) leagueSortDesc = !leagueSortDesc;
+      else { leagueSortKey = key; leagueSortDesc = true; }
+      renderSummaryLeagueTable();
+    };
+  });
+}
+
+function renderSummaryInformation(){
+  const box = document.getElementById('summaryContent');
+  let html = '';
 
   const stats = computeMonthlySummaryStats(summaryMonth);
   const statsArr = Object.values(stats);
@@ -3654,7 +3889,6 @@ function renderSummary(){
   if(statsArr.length === 0){
     html += `<div class="section-sub">No games recorded for ${label}.</div>`;
     box.innerHTML = html;
-    populateSummaryMonthSelect();
     return;
   }
 
@@ -3717,7 +3951,6 @@ function renderSummary(){
 
   box.innerHTML = html;
   wireRequestPlayerLinks(box);
-  populateSummaryMonthSelect();
 
   document.getElementById('copySummaryBtn').onclick = ()=>{
     const text = buildWhatsAppSummaryText(summaryMonth, stats, {mostGames, mostWins, mostLosses, lowestWinPct, highestWinPct, mostDoughnuts, doughnutMax, hardestGames, playerOfMonth});
