@@ -368,7 +368,10 @@ function renderRankingsPodium(){
     </div>
     <div class="podium-caption">Money Padel · ${scopeLabel}</div>
   `;
-  list.parentNode.insertBefore(podium, list);
+  // Insert before the column header (if built) rather than before #list directly,
+  // so the order is always: podium, then "# Player Rating Δ", then the rows.
+  const colHeader = document.getElementById('rankingsColumnHeader');
+  (colHeader || list).parentNode.insertBefore(podium, colHeader || list);
   podium.querySelectorAll('.podium-slot').forEach(el=>{
     el.onclick = ()=> openSheet(el.dataset.player);
   });
@@ -382,7 +385,7 @@ function renderRankingsPodium(){
 function buildRankingsHero(){
   const hero = document.createElement('div');
   hero.id = 'rankingsHero';
-  hero.style.cssText = 'display:none; padding: var(--space-4) var(--space-4) var(--space-2);';
+  hero.style.cssText = 'display:none; padding: var(--space-4) var(--space-4) 0;';
   hero.innerHTML = `
     <div class="mp-section-label">Money Padel · Results Only</div>
     <div class="mp-display-title" style="font-size:28px; margin-top:4px;">Power Rankings</div>

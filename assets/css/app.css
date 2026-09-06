@@ -495,8 +495,8 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
   position: relative; border-radius: var(--radius-lg);
   background: var(--surface-1); background-image: var(--gold-illumination);
   border: 1px solid var(--surface-border); box-shadow: var(--shadow-podium);
-  padding: var(--space-5) var(--space-3) var(--space-4);
-  margin: var(--space-2) var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  margin: var(--space-2) var(--space-4) var(--space-3);
   overflow: hidden;
 }
 .rankings-podium .podium-row{
@@ -532,8 +532,8 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
   background: var(--surface-2); border: 1px solid var(--surface-border); border-bottom: none;
 }
 /* Second/third stay visually subordinate: quieter surface, no illumination. */
-.podium-slot.second .p-pedestal{ height: 30px; }
-.podium-slot.third .p-pedestal{ height: 20px; opacity: 0.85; }
+.podium-slot.second .p-pedestal{ height: 20px; }
+.podium-slot.third .p-pedestal{ height: 13px; opacity: 0.85; }
 /* First place gets real authority: soft elevation glow, warmer surface,
    larger serif name, and the only gold-toned rating figure on the podium. */
 .podium-slot.first{
@@ -546,7 +546,7 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
   pointer-events: none;
 }
 .podium-slot.first .p-pedestal{
-  height: 46px; background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  height: 32px; background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
   border-color: var(--gold-hairline); box-shadow: var(--shadow-podium-first);
 }
 .podium-slot.first .p-name{ font-size: 16.5px; font-style: normal; }
@@ -576,7 +576,8 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
    borders by default, gold reserved for the filter button's active state. */
 .rankings-toolbar{
   display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: stretch;
-  padding: var(--space-3) var(--space-4) var(--space-2);
+  padding: var(--space-2) var(--space-4) var(--space-2);
+  margin-top: 6px;
 }
 .toolbar-control{
   display: flex; align-items: center; gap: 8px; height: 40px; box-sizing: border-box;
@@ -627,8 +628,18 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
   font-weight: 700;
 }
 
-/* Rankings hero */
-#rankingsHero { background-image: var(--gold-illumination); }
+/* Rankings hero -- atmospheric background only, never the first thing
+   noticed. Racket lives top-right per the approved concept; the gradient
+   ensures the title/subtitle stay perfectly readable and the image fades to
+   pure black before the toolbar begins. Never repeated/tiled or stretched --
+   cover + no-repeat handles both, responsively, mobile-portrait first. */
+#rankingsHero {
+  position: relative;
+  background:
+    var(--gold-illumination),
+    linear-gradient(180deg, rgba(10,10,9,0.20) 0%, rgba(10,10,9,0.58) 55%, var(--surface-0) 100%),
+    url("../rankings/rankings-hero-racket.webp") top right / cover no-repeat;
+}
 
 /* Collapsible "how this works" */
 .explainer-toggle{
