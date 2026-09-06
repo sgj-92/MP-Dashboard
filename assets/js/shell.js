@@ -38,6 +38,7 @@ Object.keys(SECTION_SUBNAV).forEach(sec=>{
 // (Games, Upcoming, Requests, Compare/H2H, Win/Loss) has been moved out.
 const MORE_ITEMS = [
   { tab: 'callouts', label: 'Insights / Call-Outs' },
+  { special: 'about', label: 'About Power Rankings' },
 ];
 const MORE_ADMIN_ITEM = { tab: 'manage', label: 'Admin / Manage' };
 
@@ -139,18 +140,45 @@ function buildShellDom(){
   sheet.id = 'shellMoreSheet';
   sheet.innerHTML = `<div class="shell-more-panel">
     <h3>More</h3>
-    ${MORE_ITEMS.map(it => `<button class="shell-more-item" data-tab="${it.tab}">${it.label}<span class="chev">›</span></button>`).join('')}
+    ${MORE_ITEMS.map(it => `<button class="shell-more-item" data-tab="${it.tab||''}" data-special="${it.special||''}">${it.label}<span class="chev">›</span></button>`).join('')}
     <button class="shell-more-item admin-item" data-tab="${MORE_ADMIN_ITEM.tab}">${MORE_ADMIN_ITEM.label}<span class="chev">›</span></button>
   </div>`;
   document.body.appendChild(sheet);
   sheet.addEventListener('click', (e)=>{ if(e.target === sheet) closeMoreSheet(); });
   sheet.querySelectorAll('.shell-more-item').forEach(btn=>{
     btn.onclick = ()=>{
+      if(btn.dataset.special === 'about'){
+        closeMoreSheet();
+        openAboutPowerRankings();
+        return;
+      }
       const b = legacyTabBtn(btn.dataset.tab);
       if(b) b.click(); // the #tabrow capture listener already updates activeSection/subnav correctly
       closeMoreSheet();
     };
   });
+
+  // "About Power Rankings" -- reuses the exact methodology text already
+  // written for the Rankings "How this works" disclosure (copied once as a
+  // static string here, since it's a fixed piece of UI copy, not business
+  // logic -- reading the live #explainer element wouldn't be safe, since its
+  // content changes to whichever tab was last active).
+  const ABOUT_POWER_RANKINGS_TEXT = 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much. "Recent Form" sorts by wins over the last 10 games first, then by average overperformance as a tiebreaker — a faster-moving signal than the overall rating, useful for spotting who\'s trending right now.';
+  function openAboutPowerRankings(){
+    let modal = document.getElementById('aboutModal');
+    if(!modal){
+      modal = document.createElement('div');
+      modal.className = 'shell-more-sheet';
+      modal.id = 'aboutModal';
+      modal.innerHTML = `<div class="shell-more-panel">
+        <h3>About Power Rankings</h3>
+        <div id="aboutModalBody" class="section-sub" style="font-size:12.5px; line-height:1.6;">${ABOUT_POWER_RANKINGS_TEXT}</div>
+      </div>`;
+      document.body.appendChild(modal);
+      modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.classList.remove('show'); });
+    }
+    modal.classList.add('show');
+  }
 
   // Keep bottom-nav highlight (and section subnav) in sync no matter how the
   // legacy tab changes (new nav, subnav, More sheet, or internal app.js
@@ -261,21 +289,59 @@ function buildCompactFiltersBar(){
   const minGamesRow = document.getElementById('minGamesRow');
   const sortbarPower = document.getElementById('sortbarPower');
 
-  // Compact primary bar: Month + Tier stay visible and get restyled smaller;
-  // Min games becomes a single pill; Filters opens the secondary sheet.
+  // Tier and Min Games become real compact dropdowns in the primary bar --
+  // built fresh, but every option's onchange just triggers a .click() on the
+  // real, already-wired legacy button for that value. No logic duplicated.
+  const tierSelect = document.createElement('select');
+  tierSelect.id = 'tierSelectCompact';
+  tierSelect.className = 'fg-select compact-select';
+  [...tierbar.querySelectorAll('.tierbtn')].forEach(btn=>{
+    const opt = document.createElement('option');
+    opt.value = btn.dataset.tier;
+    opt.textContent = btn.textContent;
+    tierSelect.appendChild(opt);
+  });
+  tierSelect.value = activeTier;
+  tierSelect.onchange = ()=>{
+    const btn = tierbar.querySelector(`.tierbtn[data-tier="${tierSelect.value}"]`);
+    if(btn) btn.click();
+  };
+  tierbar.style.display = 'none'; // real buttons stay in the DOM, just hidden -- logic untouched
+
+  const minGamesSelect = document.createElement('select');
+  minGamesSelect.id = 'minGamesSelectCompact';
+  minGamesSelect.className = 'fg-select compact-select';
+  [...minGamesRow.querySelectorAll('.preset-btn')].forEach(btn=>{
+    const opt = document.createElement('option');
+    opt.value = btn.dataset.n;
+    opt.textContent = btn.textContent === 'All' ? 'All games' : `${btn.textContent} games`;
+    minGamesSelect.appendChild(opt);
+  });
+  minGamesSelect.value = String(minGames);
+  minGamesSelect.onchange = ()=>{
+    const btn = minGamesRow.querySelector(`.preset-btn[data-n="${minGamesSelect.value}"]`);
+    if(btn) btn.click();
+  };
+
+  // 2x2 grid per the approved layout: Month + Tier on row one, Min Games +
+  // Filters on row two -- all four visible together, no horizontal scrolling.
   const compactBar = document.createElement('div');
   compactBar.id = 'compactFiltersBar';
-  compactBar.className = 'compact-filters-bar';
-  compactBar.innerHTML = `<button class="filter-pill" id="minGamesPill">10+ games</button>
-    <button class="filter-pill" id="openFiltersBtn">Filters ⚲</button>`;
+  compactBar.className = 'compact-filters-grid';
   monthFilterRow.classList.add('compact-month');
-  tierbar.classList.add('compact-tierbar');
-  compactBar.insertBefore(monthFilterRow, compactBar.firstChild);
-  compactBar.insertBefore(tierbar, compactBar.children[1]);
+  compactBar.appendChild(monthFilterRow);
+  compactBar.appendChild(tierSelect);
+  compactBar.appendChild(minGamesSelect);
+  const filtersBtn = document.createElement('button');
+  filtersBtn.className = 'filter-pill';
+  filtersBtn.id = 'openFiltersBtn';
+  filtersBtn.textContent = 'Filters';
+  compactBar.appendChild(filtersBtn);
   document.querySelector('.controls').insertBefore(compactBar, document.getElementById('tabrow').nextSibling);
+  compactBar.appendChild(tierbar); // hidden home for the real buttons, kept functional
 
-  // Secondary sheet: Data quality, full min-games control, search, and the
-  // three less-frequently-used sort modes -- nothing removed, just relocated.
+  // Secondary sheet: Data quality, search, tier buttons (as a backup control
+  // surface), and the three less-frequently-used sort modes.
   const secondarySortWrap = document.createElement('div');
   secondarySortWrap.id = 'secondarySortWrap';
   secondarySortWrap.className = 'fg-row';
@@ -303,14 +369,14 @@ function buildCompactFiltersBar(){
   document.body.appendChild(sheet);
   sheet.addEventListener('click', (e)=>{ if(e.target === sheet) sheet.classList.remove('show'); });
 
-  document.getElementById('openFiltersBtn').onclick = ()=> sheet.classList.add('show');
-  document.getElementById('minGamesPill').onclick = ()=> sheet.classList.add('show');
+  filtersBtn.onclick = ()=> sheet.classList.add('show');
 
-  // Keep the pill's label in sync with the actual (still fully functional) min-games control.
+  // Two-way sync: if min-games changes via the full control inside Filters
+  // (input or presets), reflect it in the compact dropdown too.
   const minGamesInputEl = document.getElementById('minGamesInput');
-  const syncPillLabel = ()=>{ document.getElementById('minGamesPill').textContent = `${minGamesInputEl.value}+ games`; };
-  minGamesInputEl.addEventListener('input', syncPillLabel);
-  document.querySelectorAll('.minGamesPresets .preset-btn').forEach(b=> b.addEventListener('click', ()=> setTimeout(syncPillLabel, 0)));
+  const syncMinGamesSelect = ()=>{ minGamesSelect.value = String(minGames); };
+  minGamesInputEl.addEventListener('input', ()=> setTimeout(syncMinGamesSelect, 0));
+  document.querySelectorAll('.minGamesPresets .preset-btn').forEach(b=> b.addEventListener('click', ()=> setTimeout(syncMinGamesSelect, 0)));
 }
 
 function buildCollapsibleExplainer(){
