@@ -14,8 +14,8 @@ const SECTION_TAB_MAP = { home: 'summary' };
 // correction. First entry in each list is that section's default landing tab.
 const SECTION_SUBNAV = {
   rankings: [
-    { tab: 'power', label: 'Power Rankings' },
-    { tab: 'wl', label: 'Win / Loss' },
+    { tab: 'power', label: 'Power Rankings', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 20v-6"/><path d="M12 20V8"/><path d="M18 20v-10"/><path d="M4 20h16"/></svg>' },
+    { tab: 'wl', label: 'Win / Loss', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12l6 3.2"/></svg>' },
   ],
   play: [
     { tab: 'findgame', label: 'Find Game' },
@@ -90,7 +90,7 @@ function renderSectionSubnav(){
   container.style.display = 'grid';
   container.style.gridTemplateColumns = `repeat(${items.length}, 1fr)`;
   container.innerHTML = items.map(it=>
-    `<button class="section-subnav-item ${it.tab===activeTab?'active':''}" data-tab="${it.tab}">${it.label}</button>`
+    `<button class="section-subnav-item ${it.tab===activeTab?'active':''}" data-tab="${it.tab}">${it.icon||''}<span>${it.label}</span></button>`
   ).join('');
   container.querySelectorAll('.section-subnav-item').forEach(btn=>{
     btn.onclick = ()=>{ const b = legacyTabBtn(btn.dataset.tab); if(b) b.click(); };
@@ -350,7 +350,16 @@ function renderRankingsPodium(){
     <div class="podium-row">
       ${order.map((p,i)=> `
         <div class="podium-slot ${slotClass[i]}" data-player="${p.name}">
-          ${slotClass[i]==='first' ? `<div class="crown"><img src="assets/rankings/crown.svg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'nav-icon-fallback',textContent:'1'}))"></div>` : `<div class="rank-num">${slotClass[i]==='second'?'2':'3'}</div>`}
+          ${slotClass[i]==='first' ? `
+            <div class="laurel-wrap">
+              <svg class="laurel" viewBox="0 0 160 56" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
+                <path d="M78 50C60 44 46 30 44 12"/><path d="M46 16c-4 1-8 0-10-3"/><path d="M50 24c-4 1-8 0-10-3"/><path d="M55 32c-4 1-8 0-10-3"/><path d="M61 39c-4 1-8 1-10-2"/>
+                <path d="M82 50C100 44 114 30 116 12"/><path d="M114 16c4 1 8 0 10-3"/><path d="M110 24c4 1 8 0 10-3"/><path d="M105 32c4 1 8 0 10-3"/><path d="M99 39c4 1 8 1 10-2"/>
+              </svg>
+              <div class="crown"><img src="assets/rankings/crown.svg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'nav-icon-fallback',textContent:'1'}))"></div>
+              <div class="rank-num gold">1</div>
+            </div>
+          ` : `<div class="rank-num">${slotClass[i]==='second'?'2':'3'}</div>`}
           <div class="p-name">${p.name}</div>
           <div class="p-rating">${Math.round(p.rating)}</div>
           <div class="p-pedestal"></div>
@@ -373,11 +382,11 @@ function renderRankingsPodium(){
 function buildRankingsHero(){
   const hero = document.createElement('div');
   hero.id = 'rankingsHero';
-  hero.style.cssText = 'display:none; padding: var(--space-6) var(--space-4) var(--space-3);';
+  hero.style.cssText = 'display:none; padding: var(--space-4) var(--space-4) var(--space-2);';
   hero.innerHTML = `
     <div class="mp-section-label">Money Padel · Results Only</div>
-    <div class="mp-display-title" style="font-size:30px; margin-top:6px;">Power Rankings</div>
-    <div style="font-family:var(--font-interface); font-size:12.5px; color:var(--text-dim); margin-top:6px; line-height:1.5; max-width:32ch;">A tier-anchored rating. Scoreline counts, not just who won.</div>
+    <div class="mp-display-title" style="font-size:28px; margin-top:4px;">Power Rankings</div>
+    <div style="font-family:var(--font-interface); font-size:12px; color:var(--text-dim); margin-top:4px; line-height:1.4; max-width:32ch;">A tier-anchored rating. Scoreline counts, not just who won.</div>
   `;
   const controls = document.querySelector('.controls');
   controls.parentNode.insertBefore(hero, controls);
@@ -412,13 +421,25 @@ function buildCompactFiltersBar(){
     if(btn) btn.click();
   };
 
-  // One clean row: Month | Tier | Filter icon. Month's own "Month:" label
-  // wrapper is left behind -- only the raw select moves into the toolbar.
+  // One clean row: Month | Tier | Filter icon, each an icon+bordered control
+  // per the approved reference. Month's own "Month:" label wrapper is left
+  // behind -- only the raw select moves into the toolbar.
   const toolbar = document.createElement('div');
   toolbar.id = 'rankingsToolbar';
   toolbar.className = 'rankings-toolbar';
-  toolbar.appendChild(monthSelectEl);
-  toolbar.appendChild(tierSelect);
+
+  const monthWrap = document.createElement('div');
+  monthWrap.className = 'toolbar-control';
+  monthWrap.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><line x1="3.5" y1="9.5" x2="20.5" y2="9.5"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>';
+  monthWrap.appendChild(monthSelectEl);
+
+  const tierWrap = document.createElement('div');
+  tierWrap.className = 'toolbar-control';
+  tierWrap.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 3.5 8 12 12.5 20.5 8Z"/><path d="M3.5 12.5 12 17 20.5 12.5"/><path d="M3.5 17 12 21.5 20.5 17"/></svg>';
+  tierWrap.appendChild(tierSelect);
+
+  toolbar.appendChild(monthWrap);
+  toolbar.appendChild(tierWrap);
   const filtersBtn = document.createElement('button');
   filtersBtn.className = 'filter-btn';
   filtersBtn.id = 'openFiltersBtn';
@@ -487,6 +508,21 @@ function buildCompactFiltersBar(){
   syncToolbarVisibility();
 }
 
+// Static column-header row for the ranking table ("# PLAYER  RATING  Δ"),
+// per the approved reference. Visibility follows the same rule as the
+// toolbar/segmented switcher -- Power Rankings only.
+function buildRankingsColumnHeader(){
+  const header = document.createElement('div');
+  header.id = 'rankingsColumnHeader';
+  header.className = 'rankings-col-header';
+  header.innerHTML = `<span>#</span><span>Player</span><span class="col-right">Rating</span><span class="col-right">Δ</span>`;
+  const list = document.getElementById('list');
+  list.parentNode.insertBefore(header, list);
+  function sync(){ header.style.display = (activeTab === 'power') ? 'grid' : 'none'; }
+  document.getElementById('tabrow').addEventListener('click', ()=> setTimeout(sync, 0));
+  sync();
+}
+
 function buildCollapsibleExplainer(){
   const explainer = document.getElementById('explainer');
   const wrapper = document.createElement('div');
@@ -510,6 +546,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   buildShellDom();
   const hero = buildRankingsHero();
   buildCompactFiltersBar();
+  buildRankingsColumnHeader();
   buildCollapsibleExplainer();
 
   // Wrap the legacy render() so the podium (and ranking eligibility split)
