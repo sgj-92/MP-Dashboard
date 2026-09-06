@@ -587,3 +587,23 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
 .shell-more-panel{ padding-top: var(--space-4); }
 .shell-more-item{ padding: 12px 2px; }
 .shell-more-item.admin-item{ border-top: 1px solid var(--line); padding-top: 16px; margin-top: 10px; }
+
+/* ==========================================================================
+   PRESTIGE V1B — IA correction: visible section sub-navigation
+   Always on-screen for sections with more than one destination (Rankings,
+   Play, Players) -- a segmented control, never a hidden menu, and never
+   horizontally scrolling regardless of item count (grid divides evenly).
+   ========================================================================== */
+.section-subnav{
+  display: none; /* JS sets to 'grid' and sets column count when active */
+  gap: 6px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.section-subnav-item{
+  background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  color: var(--text-dim); font-family: var(--font-interface); font-size: 11.5px; font-weight: 600;
+  padding: 9px 4px; text-align: center; cursor: pointer; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.section-subnav-item.active{ color: var(--gold-bright); border-color: var(--gold-dim); background: var(--bg1); }

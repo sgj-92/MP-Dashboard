@@ -7,17 +7,37 @@
 // only, per the agreed Phase 1 contract. Load this file after app.js.
 // ==========================================================================
 
-const SECTION_TAB_MAP = { home: 'summary', rankings: 'power', play: 'findgame', players: 'players' };
-const TAB_TO_SECTION = {};
-Object.keys(SECTION_TAB_MAP).forEach(sec => { TAB_TO_SECTION[SECTION_TAB_MAP[sec]] = sec; });
+// SINGLE-TAB sections (no subnav): Home only.
+const SECTION_TAB_MAP = { home: 'summary' };
 
+// MULTI-TAB sections: a visible segmented subnav under the header, per the IA
+// correction. First entry in each list is that section's default landing tab.
+const SECTION_SUBNAV = {
+  rankings: [
+    { tab: 'power', label: 'Power Rankings' },
+    { tab: 'wl', label: 'Win / Loss' },
+  ],
+  play: [
+    { tab: 'findgame', label: 'Find Game' },
+    { tab: 'games', label: 'Games' },
+    { tab: 'upcoming', label: 'Upcoming' },
+    { tab: 'wishlist', label: 'Requests' },
+  ],
+  players: [
+    { tab: 'players', label: 'Directory' },
+    { tab: 'h2h', label: 'Compare' },
+  ],
+};
+
+const TAB_TO_SECTION = { summary: 'home' };
+Object.keys(SECTION_SUBNAV).forEach(sec=>{
+  SECTION_SUBNAV[sec].forEach(item=>{ TAB_TO_SECTION[item.tab] = sec; });
+});
+
+// More is now genuinely secondary only -- everything with a real home above
+// (Games, Upcoming, Requests, Compare/H2H, Win/Loss) has been moved out.
 const MORE_ITEMS = [
   { tab: 'callouts', label: 'Insights / Call-Outs' },
-  { tab: 'h2h', label: 'Head to Head' },
-  { tab: 'games', label: 'Games' },
-  { tab: 'wishlist', label: 'Wishlist' },
-  { tab: 'upcoming', label: 'Upcoming' },
-  { tab: 'wl', label: 'Win / Loss' },
 ];
 const MORE_ADMIN_ITEM = { tab: 'manage', label: 'Admin / Manage' };
 
@@ -28,21 +48,42 @@ function legacyTabBtn(tab){
 }
 
 function goToSection(section){
-  const tab = SECTION_TAB_MAP[section];
-  if(tab){
-    const btn = legacyTabBtn(tab);
-    if(btn) btn.click(); // reuses 100% of existing tab-switch logic untouched
-  } else if(section === 'more'){
+  if(section === 'more'){
     openMoreSheet();
     return; // don't change activeSection until a specific destination is chosen
   }
+  const singleTab = SECTION_TAB_MAP[section];
+  const subnav = SECTION_SUBNAV[section];
+  const targetTab = singleTab || (subnav && subnav[0].tab); // default to first subnav item
+  if(targetTab){
+    const btn = legacyTabBtn(targetTab);
+    if(btn) btn.click(); // reuses 100% of existing tab-switch logic untouched
+  }
   activeSection = section;
   updateBottomNavHighlight();
+  renderSectionSubnav();
 }
 
 function updateBottomNavHighlight(){
   document.querySelectorAll('.shell-nav-item').forEach(el=>{
     el.classList.toggle('active', el.dataset.section === activeSection);
+  });
+}
+
+// Renders (or hides) the visible segmented subnav for the current section.
+// Not a menu -- always on-screen for sections that have one, per the "must
+// be discoverable, not hidden behind another tap" requirement.
+function renderSectionSubnav(){
+  const container = document.getElementById('sectionSubnav');
+  const items = SECTION_SUBNAV[activeSection];
+  if(!items){ container.style.display = 'none'; container.innerHTML = ''; return; }
+  container.style.display = 'grid';
+  container.style.gridTemplateColumns = `repeat(${items.length}, 1fr)`;
+  container.innerHTML = items.map(it=>
+    `<button class="section-subnav-item ${it.tab===activeTab?'active':''}" data-tab="${it.tab}">${it.label}</button>`
+  ).join('');
+  container.querySelectorAll('.section-subnav-item').forEach(btn=>{
+    btn.onclick = ()=>{ const b = legacyTabBtn(btn.dataset.tab); if(b) b.click(); };
   });
 }
 
@@ -63,6 +104,13 @@ function buildShellDom(){
     <div class="shell-section-title" id="shellSectionTitle">Rankings</div>
   `;
   document.body.insertBefore(header, document.body.firstChild);
+
+  // Visible section subnav mount point, right under the header.
+  const subnav = document.createElement('div');
+  subnav.id = 'sectionSubnav';
+  subnav.className = 'section-subnav';
+  subnav.style.display = 'none';
+  header.parentNode.insertBefore(subnav, header.nextSibling);
 
   // Bottom nav
   const nav = document.createElement('div');
@@ -99,15 +147,14 @@ function buildShellDom(){
   sheet.querySelectorAll('.shell-more-item').forEach(btn=>{
     btn.onclick = ()=>{
       const b = legacyTabBtn(btn.dataset.tab);
-      if(b) b.click();
-      activeSection = 'more';
-      updateBottomNavHighlight();
+      if(b) b.click(); // the #tabrow capture listener already updates activeSection/subnav correctly
       closeMoreSheet();
     };
   });
 
-  // Keep bottom-nav highlight in sync no matter how the legacy tab changes
-  // (new nav, More sheet, or internal app.js navigation like "Edit this game").
+  // Keep bottom-nav highlight (and section subnav) in sync no matter how the
+  // legacy tab changes (new nav, subnav, More sheet, or internal app.js
+  // navigation like "Edit this game").
   document.getElementById('tabrow').addEventListener('click', (e)=>{
     const btn = e.target.closest('.tab-btn');
     if(!btn) return;
@@ -122,14 +169,17 @@ function buildShellDom(){
   }, true);
 
   // Separate, non-capturing listener: fires AFTER the legacy tab handler has
-  // already run and updated activeTab/rendered its view, so the podium check
-  // (which reads the now-current activeTab) is always accurate -- this is
-  // what actually removes a stale podium when navigating to a tab that has
-  // its own render function (Players, Games, etc.) rather than calling the
-  // shared render() the podium hook is attached to.
+  // already run and updated activeTab/rendered its view, so both the podium
+  // check and the subnav highlight (which reads the now-current activeTab)
+  // are accurate -- this is what actually removes a stale podium when
+  // navigating to a tab with its own render function (Players, Games, etc.)
+  // rather than the shared render() the podium hook is attached to, and what
+  // correctly highlights the just-clicked subnav item rather than the
+  // previous one.
   document.getElementById('tabrow').addEventListener('click', (e)=>{
     if(!e.target.closest('.tab-btn')) return;
     renderRankingsPodium();
+    renderSectionSubnav();
   });
 }
 
@@ -303,4 +353,5 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 
   updateBottomNavHighlight();
+  renderSectionSubnav();
 });
