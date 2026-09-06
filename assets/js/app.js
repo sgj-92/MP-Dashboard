@@ -1162,13 +1162,24 @@ function render(){
   empty.style.display = rows.length ? 'none' : 'block';
 
   if(selectedMonth !== 'all'){
+    const noteWrapper = document.createElement('div');
+    const noteToggle = document.createElement('button');
+    noteToggle.className = 'month-note-toggle';
+    noteToggle.textContent = `${monthLabel(selectedMonth)} ranking methodology  ⓘ`;
     const note = document.createElement('div');
     note.className = 'section-sub';
-    note.style.padding = '8px 2px';
+    note.style.cssText = 'padding:8px 2px; display:none;';
     note.innerHTML = activeTab==='power'
       ? `Showing <b style="color:var(--text);">${monthLabel(selectedMonth)}</b> only — record, avg opp., clutch and upsets are for this month. "This month" is a genuine tier-seeded rating using only ${monthLabel(selectedMonth)}'s matches, as if it were its own mini-season — separate from the overall rating, which stays as-is.`
       : `Showing <b style="color:var(--text);">${monthLabel(selectedMonth)}</b> only.`;
-    list.appendChild(note);
+    noteToggle.onclick = ()=>{
+      const isOpen = note.style.display !== 'none';
+      note.style.display = isOpen ? 'none' : 'block';
+      noteToggle.classList.toggle('open', !isOpen);
+    };
+    noteWrapper.appendChild(noteToggle);
+    noteWrapper.appendChild(note);
+    list.appendChild(noteWrapper);
   }
 
   rows.forEach((p, i)=>{

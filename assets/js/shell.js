@@ -71,6 +71,15 @@ function updateBottomNavHighlight(){
   });
 }
 
+// The header's small section label is redundant once a screen has its own
+// editorial hero (Rankings does) -- hidden there, kept as a quiet wayfinding
+// cue on screens that don't have one yet (Play/Players, still legacy views).
+function syncHeaderSectionTitle(){
+  const titleEl = document.getElementById('shellSectionTitle');
+  if(!titleEl) return;
+  titleEl.style.display = (activeTab === 'power') ? 'none' : '';
+}
+
 // Renders (or hides) the visible segmented subnav for the current section.
 // Not a menu -- always on-screen for sections that have one, per the "must
 // be discoverable, not hidden behind another tap" requirement.
@@ -364,11 +373,11 @@ function renderRankingsPodium(){
 function buildRankingsHero(){
   const hero = document.createElement('div');
   hero.id = 'rankingsHero';
-  hero.style.cssText = 'display:none; padding: var(--space-4) var(--space-4) 0;';
+  hero.style.cssText = 'display:none; padding: var(--space-6) var(--space-4) var(--space-3);';
   hero.innerHTML = `
-    <div style="font-family:var(--font-interface); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim);">Money Padel · Results Only</div>
-    <div style="font-family:var(--font-prestige); font-size:26px; color:var(--gold-bright); margin-top:2px;">Power Rankings</div>
-    <div style="font-family:var(--font-interface); font-size:12px; color:var(--text-dim); margin-top:2px;">A tier-anchored rating. Scoreline counts, not just who won.</div>
+    <div class="mp-section-label">Money Padel · Results Only</div>
+    <div class="mp-display-title" style="font-size:30px; margin-top:6px;">Power Rankings</div>
+    <div style="font-family:var(--font-interface); font-size:12.5px; color:var(--text-dim); margin-top:6px; line-height:1.5; max-width:32ch;">A tier-anchored rating. Scoreline counts, not just who won.</div>
   `;
   const controls = document.querySelector('.controls');
   controls.parentNode.insertBefore(hero, controls);
@@ -413,7 +422,7 @@ function buildCompactFiltersBar(){
   const filtersBtn = document.createElement('button');
   filtersBtn.className = 'filter-btn';
   filtersBtn.id = 'openFiltersBtn';
-  filtersBtn.innerHTML = `⚲<span class="filter-dot"></span>`;
+  filtersBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="17" height="17"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2" fill="var(--surface-1)"/><line x1="4" y1="14" x2="20" y2="14"/><circle cx="15" cy="14" r="2" fill="var(--surface-1)"/><line x1="4" y1="21" x2="20" y2="21"/><circle cx="11" cy="21" r="2" fill="var(--surface-1)"/></svg><span class="filter-dot"></span>`;
   toolbar.appendChild(filtersBtn);
   document.querySelector('.controls').insertBefore(toolbar, document.getElementById('tabrow').nextSibling);
   monthFilterRow.style.display = 'none'; // now empty (its select moved out) -- keep it inert, not visible
@@ -512,11 +521,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
     applyRankingEligibility();
     renderRankingsPodium();
     hero.style.display = (activeTab === 'power') ? 'block' : 'none';
+    syncHeaderSectionTitle();
   };
   // The hero also needs to hide immediately when leaving Rankings via a tab
   // that doesn't call render() at all (Players, Games, etc.).
   document.getElementById('tabrow').addEventListener('click', ()=>{
     hero.style.display = (activeTab === 'power') ? 'block' : 'none';
+    syncHeaderSectionTitle();
   });
 
   updateBottomNavHighlight();
