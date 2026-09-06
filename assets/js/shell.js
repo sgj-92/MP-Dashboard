@@ -287,14 +287,14 @@ function buildCompactFiltersBar(){
   const tierbar = document.getElementById('tierbar');
   const searchWrap = document.getElementById('searchWrap');
   const minGamesRow = document.getElementById('minGamesRow');
-  const sortbarPower = document.getElementById('sortbarPower');
+  const monthSelectEl = document.getElementById('monthSelect');
 
-  // Tier and Min Games become real compact dropdowns in the primary bar --
-  // built fresh, but every option's onchange just triggers a .click() on the
-  // real, already-wired legacy button for that value. No logic duplicated.
+  // Tier becomes a real compact dropdown -- built fresh, but every option's
+  // onchange just triggers a .click() on the real, already-wired legacy
+  // button for that value. No logic duplicated. The pill strip itself is
+  // retired for good (see #tierbar{display:none!important} in app.css).
   const tierSelect = document.createElement('select');
   tierSelect.id = 'tierSelectCompact';
-  tierSelect.className = 'fg-select compact-select';
   [...tierbar.querySelectorAll('.tierbtn')].forEach(btn=>{
     const opt = document.createElement('option');
     opt.value = btn.dataset.tier;
@@ -306,42 +306,26 @@ function buildCompactFiltersBar(){
     const btn = tierbar.querySelector(`.tierbtn[data-tier="${tierSelect.value}"]`);
     if(btn) btn.click();
   };
-  tierbar.style.display = 'none'; // real buttons stay in the DOM, just hidden -- logic untouched
 
-  const minGamesSelect = document.createElement('select');
-  minGamesSelect.id = 'minGamesSelectCompact';
-  minGamesSelect.className = 'fg-select compact-select';
-  [...minGamesRow.querySelectorAll('.preset-btn')].forEach(btn=>{
-    const opt = document.createElement('option');
-    opt.value = btn.dataset.n;
-    opt.textContent = btn.textContent === 'All' ? 'All games' : `${btn.textContent} games`;
-    minGamesSelect.appendChild(opt);
-  });
-  minGamesSelect.value = String(minGames);
-  minGamesSelect.onchange = ()=>{
-    const btn = minGamesRow.querySelector(`.preset-btn[data-n="${minGamesSelect.value}"]`);
-    if(btn) btn.click();
-  };
-
-  // 2x2 grid per the approved layout: Month + Tier on row one, Min Games +
-  // Filters on row two -- all four visible together, no horizontal scrolling.
-  const compactBar = document.createElement('div');
-  compactBar.id = 'compactFiltersBar';
-  compactBar.className = 'compact-filters-grid';
-  monthFilterRow.classList.add('compact-month');
-  compactBar.appendChild(monthFilterRow);
-  compactBar.appendChild(tierSelect);
-  compactBar.appendChild(minGamesSelect);
+  // One clean row: Month | Tier | Filter icon. Month's own "Month:" label
+  // wrapper is left behind -- only the raw select moves into the toolbar.
+  const toolbar = document.createElement('div');
+  toolbar.id = 'rankingsToolbar';
+  toolbar.className = 'rankings-toolbar';
+  toolbar.appendChild(monthSelectEl);
+  toolbar.appendChild(tierSelect);
   const filtersBtn = document.createElement('button');
-  filtersBtn.className = 'filter-pill';
+  filtersBtn.className = 'filter-btn';
   filtersBtn.id = 'openFiltersBtn';
-  filtersBtn.textContent = 'Filters';
-  compactBar.appendChild(filtersBtn);
-  document.querySelector('.controls').insertBefore(compactBar, document.getElementById('tabrow').nextSibling);
-  compactBar.appendChild(tierbar); // hidden home for the real buttons, kept functional
+  filtersBtn.innerHTML = `⚲<span class="filter-dot"></span>`;
+  toolbar.appendChild(filtersBtn);
+  document.querySelector('.controls').insertBefore(toolbar, document.getElementById('tabrow').nextSibling);
+  monthFilterRow.style.display = 'none'; // now empty (its select moved out) -- keep it inert, not visible
 
-  // Secondary sheet: Data quality, search, tier buttons (as a backup control
-  // surface), and the three less-frequently-used sort modes.
+  // Everything secondary lives in Filters: Data quality, search, min games
+  // (moved fully off the main screen, per the correction), and the three
+  // less-frequently-used sort modes.
+  const sortbarPower = document.getElementById('sortbarPower');
   const secondarySortWrap = document.createElement('div');
   secondarySortWrap.id = 'secondarySortWrap';
   secondarySortWrap.className = 'fg-row';
@@ -371,12 +355,31 @@ function buildCompactFiltersBar(){
 
   filtersBtn.onclick = ()=> sheet.classList.add('show');
 
-  // Two-way sync: if min-games changes via the full control inside Filters
-  // (input or presets), reflect it in the compact dropdown too.
+  // Gold dot on the Filter icon whenever any non-default filter is active --
+  // the only visible cue needed now that Min Games/Data/Search aren't shown
+  // permanently on screen.
+  const dataQualitySelectEl = document.getElementById('dataQualitySelect');
+  const searchInputEl = document.getElementById('search');
   const minGamesInputEl = document.getElementById('minGamesInput');
-  const syncMinGamesSelect = ()=>{ minGamesSelect.value = String(minGames); };
-  minGamesInputEl.addEventListener('input', ()=> setTimeout(syncMinGamesSelect, 0));
-  document.querySelectorAll('.minGamesPresets .preset-btn').forEach(b=> b.addEventListener('click', ()=> setTimeout(syncMinGamesSelect, 0)));
+  function updateFilterDot(){
+    const nonDefault = minGames !== 10 || (searchInputEl.value.trim() !== '') || (dataQualitySelectEl.value !== 'verified');
+    filtersBtn.classList.toggle('has-filters', nonDefault);
+  }
+  minGamesInputEl.addEventListener('input', ()=> setTimeout(updateFilterDot, 0));
+  document.querySelectorAll('.minGamesPresets .preset-btn').forEach(b=> b.addEventListener('click', ()=> setTimeout(updateFilterDot, 0)));
+  searchInputEl.addEventListener('input', updateFilterDot);
+  dataQualitySelectEl.addEventListener('change', updateFilterDot);
+
+  // Screen isolation: the toolbar belongs to Rankings (both Power Rankings
+  // and Win/Loss share Month/Tier filtering) and must never persist onto
+  // Play/Players/Games/etc. Controlled directly here rather than fighting
+  // app.js's own per-element visibility toggling, which is what caused the
+  // tier pill strip to keep reappearing before.
+  function syncToolbarVisibility(){
+    toolbar.style.display = (activeTab === 'power' || activeTab === 'wl') ? 'grid' : 'none';
+  }
+  document.getElementById('tabrow').addEventListener('click', ()=> setTimeout(syncToolbarVisibility, 0));
+  syncToolbarVisibility();
 }
 
 function buildCollapsibleExplainer(){

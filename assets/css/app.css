@@ -531,29 +531,54 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
    PRESTIGE V1B — polish pass: compact filters, hero, refined podium/header/nav
    ========================================================================== */
 
-/* Compact primary filter bar -- 2x2 grid: Month+Tier, then Min Games+Filters.
-   Every cell is a real, always-visible control, no horizontal scrolling. */
-.compact-filters-grid{
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-  padding: 10px 16px 6px;
+/* Rankings toolbar -- ONE clean row: Month | Tier | Filter icon. No labels
+   above, no duplicate pill strip underneath, all three the same height. */
+.rankings-toolbar{
+  display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: stretch;
+  padding: 10px 16px 8px;
 }
-.compact-filters-grid .compact-month{ background: none; border: none; padding: 0; width: 100%; }
-.compact-filters-grid .compact-month select{ width: 100%; }
-.compact-filters-grid select,
-.compact-select{
-  background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius-sm);
-  color: var(--text); font-family: var(--font-interface); font-size: 12px; padding: 8px 10px; width: 100%;
+.rankings-toolbar select, .rankings-toolbar .filter-btn{
+  height: 38px; box-sizing: border-box;
+  background: var(--bg1); border: 1px solid rgba(212,175,55,0.14); border-radius: var(--radius-sm);
+  color: var(--text); font-family: var(--font-interface); font-size: 12.5px;
+  padding: 0 10px; width: 100%;
 }
-.filter-pill{
-  background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius-sm);
-  color: var(--text-dim); font-family: var(--font-interface); font-size: 12px; font-weight: 600;
-  padding: 8px 10px; text-align: center; cursor: pointer; width: 100%;
+.rankings-toolbar .filter-btn{
+  width: 42px; padding: 0; display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim); cursor: pointer; position: relative; flex-shrink: 0;
 }
+.rankings-toolbar .filter-btn .filter-dot{
+  position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold-bright); display: none;
+}
+.rankings-toolbar .filter-btn.has-filters .filter-dot{ display: block; }
 
-/* Sort row (Rating/Form/Clutch/Upsets) -- guarantee it fits in one row on
-   mobile without scrolling: fixed columns, no growing past viewport. */
-#sortbarPower{ display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 16px 8px; }
-#sortbarPower .sortbtn{ padding: 8px 2px; font-size: 11px; }
+/* Tier pills strip -- permanently retired in favour of the Tier dropdown
+   above. Kept in the DOM (buttons still fire their real click handlers when
+   the dropdown changes) but never shown again, regardless of what inline
+   style app.js's own visibility logic tries to set on it. */
+#tierbar{ display: none !important; }
+/* Same for the old Month row wrapper -- its select has moved into the new
+   toolbar, leaving only an orphaned "Month:" label behind. */
+#monthFilterRow{ display: none !important; }
+
+/* Segmented ranking-mode switcher -- one continuous low-profile surface with
+   subtle internal dividers, not four separate boxes. Selected mode gets a
+   restrained gold treatment, not a full outline. */
+#sortbarPower{
+  display: flex; background: var(--bg1); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 3px; margin: 0 16px 10px; gap: 0;
+}
+#sortbarPower .sortbtn{
+  flex: 1; border: none; border-right: 1px solid var(--line);
+  background: transparent; border-radius: 0;
+  padding: 7px 2px; font-size: 11px; color: var(--text-dim);
+}
+#sortbarPower .sortbtn:last-child{ border-right: none; }
+#sortbarPower .sortbtn.active{
+  color: var(--gold-bright); background: rgba(212,175,55,0.08);
+  border-radius: 6px; border-right-color: transparent;
+}
 
 /* Rankings hero */
 #rankingsHero { background-image: var(--glow-prestige); }
