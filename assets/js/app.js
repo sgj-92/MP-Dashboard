@@ -1,0 +1,4096 @@
+// ===================== BASE (immutable historical) DATA =====================
+const BASE_MATCHES = [{"date": "2026-07-02", "winners": ["Len", "Eli"], "losers": ["Shaun", "Osh"], "sets": [[0, 6], [6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_0", "verified": true}, {"date": "2026-07-02", "winners": ["Dennis", "Osh"], "losers": ["KC", "Eli"], "sets": [[7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_1", "verified": true}, {"date": "2026-07-02", "winners": ["Tee", "MK"], "losers": ["Rhys", "Fee"], "sets": [[6, 0], [6, 2]], "type": "doubles", "note": "", "id": "base_2", "verified": true}, {"date": "2026-07-02", "winners": ["KC", "Shaun"], "losers": ["Osh", "Carla"], "sets": [[6, 4], [6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_3", "verified": true}, {"date": "2026-07-03", "winners": ["Osh"], "losers": ["Len"], "sets": [[15, 13], [15, 11]], "type": "singles", "note": "", "id": "base_4", "verified": true}, {"date": "2026-07-03", "winners": ["Eli", "Fatch"], "losers": ["Stormzy", "Omar"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_5", "verified": true}, {"date": "2026-07-05", "winners": ["Len", "Eli"], "losers": ["Erf", "Max"], "sets": [[3, 6], [6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_6", "verified": true}, {"date": "2026-07-05", "winners": ["Erf", "Eli"], "losers": ["Len", "Max"], "sets": [[6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_7", "verified": true}, {"date": "2026-07-05", "winners": ["Erf", "Len"], "losers": ["Max", "Eli"], "sets": [[6, 1], [5, 0]], "type": "doubles", "note": "walkover/forfeit", "id": "base_8", "verified": true}, {"date": "2026-07-06", "winners": ["Stormzy", "Osh"], "losers": ["Max", "Len"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_9", "verified": true}, {"date": "2026-07-07", "winners": ["Erf", "Osh"], "losers": ["Len", "Eli"], "sets": [[6, 2], [7, 5]], "type": "doubles", "note": "", "id": "base_10", "verified": true}, {"date": "2026-07-08", "winners": ["Rishi", "Max"], "losers": ["Harry", "Shaun"], "sets": [[7, 5], [7, 5]], "type": "doubles", "note": "", "id": "base_11", "verified": true}, {"date": "2026-07-08", "winners": ["Rishi", "Harry"], "losers": ["Max", "Shaun"], "sets": [[6, 7], [6, 4], [7, 5]], "type": "doubles", "note": "", "id": "base_12", "verified": true}, {"date": "2026-07-09", "winners": ["Harry", "Omar"], "losers": ["Max", "Rishi"], "sets": [[6, 3], [7, 6]], "type": "doubles", "note": "", "id": "base_13", "verified": true}, {"date": "2026-07-10", "winners": ["Eli", "Erf"], "losers": ["Kaz", "Max"], "sets": [[4, 6], [6, 1], [6, 1]], "type": "doubles", "note": "", "id": "base_14", "verified": true}, {"date": "2026-07-12", "winners": ["Erf", "Rishi"], "losers": ["PDM", "Eli"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "", "id": "base_15", "verified": true}, {"date": "2026-07-12", "winners": ["Manny", "Kaz"], "losers": ["Osh", "Dennis"], "sets": [[6, 1], [6, 0]], "type": "doubles", "note": "", "id": "base_16", "verified": true}, {"date": "2026-07-12", "winners": ["Manny", "Dennis"], "losers": ["Osh", "Kaz"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_17", "verified": true}, {"date": "2026-07-12", "winners": ["Eli", "Len"], "losers": ["Rishi", "Osh"], "sets": [[7, 5], [5, 7], [7, 5]], "type": "doubles", "note": "", "id": "base_18", "verified": true}, {"date": "2026-07-13", "winners": ["Jords", "Kaz"], "losers": ["Erf", "Rishi"], "sets": [[6, 4], [6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_19", "verified": true}, {"date": "2026-07-13", "winners": ["Harry", "Antz"], "losers": ["Shaun", "Rocky"], "sets": [[4, 6], [6, 4], [9, 8]], "type": "doubles", "note": "3rd set tie-break", "id": "base_20", "verified": true}, {"date": "2026-07-13", "winners": ["Jams", "Rishi"], "losers": ["Fatch", "Jords"], "sets": [[6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_21", "verified": true}, {"date": "2026-07-14", "winners": ["KC", "Erf"], "losers": ["Osh", "Dennis"], "sets": [[2, 6], [6, 1], [6, 2]], "type": "doubles", "note": "", "id": "base_22", "verified": true}, {"date": "2026-07-15", "winners": ["Rishi", "Antz"], "losers": ["Jords", "MK"], "sets": [[1, 6], [6, 3], [6, 0]], "type": "doubles", "note": "", "id": "base_23", "verified": true}, {"date": "2026-07-15", "winners": ["Kaz", "Rishi"], "losers": ["Max", "Erf"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_24", "verified": true}, {"date": "2026-07-16", "winners": ["Max", "PDM"], "losers": ["Rishi", "Jords"], "sets": [[7, 6], [7, 6]], "type": "doubles", "note": "", "id": "base_25", "verified": true}, {"date": "2026-07-16", "winners": ["Len", "Antz"], "losers": ["Harry", "PDM"], "sets": [[6, 2], [6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_26", "verified": true}, {"date": "2026-07-17", "winners": ["Harry", "Len"], "losers": ["Max", "Eli"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "", "id": "base_27", "verified": true}, {"date": "2026-07-17", "winners": ["Len", "Erf"], "losers": ["Kaz", "Rishi"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_28", "verified": true}, {"date": "2026-07-17", "winners": ["Kaz", "Jords"], "losers": ["Rishi", "Erf"], "sets": [[2, 6], [6, 2], [6, 1]], "type": "doubles", "note": "", "id": "base_29", "verified": true}, {"date": "2026-07-18", "winners": ["Rishi", "Eli"], "losers": ["Max", "PDM"], "sets": [[5, 7], [6, 1], [6, 3]], "type": "doubles", "note": "", "id": "base_30", "verified": true}, {"date": "2026-07-20", "winners": ["Harry", "PDM"], "losers": ["Rishi", "Chloe"], "sets": [[6, 2], [4, 6], [6, 2]], "type": "doubles", "note": "opponent listed as 'CC'", "id": "base_31", "verified": true}, {"date": "2026-07-20", "winners": ["Harry", "Rishi"], "losers": ["Jords", "Omar"], "sets": [[6, 4], [8, 7]], "type": "doubles", "note": "", "id": "base_32", "verified": true}, {"date": "2026-07-21", "winners": ["Dennis", "Rishi"], "losers": ["Harry", "PDM"], "sets": [[6, 2], [4, 6], [6, 4]], "type": "doubles", "note": "", "id": "base_33", "verified": true}, {"date": "2026-07-21", "winners": ["KC", "Rishi"], "losers": ["Antz", "Len"], "sets": [[6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_34", "verified": true}, {"date": "2026-07-22", "winners": ["Harry", "Rocky"], "losers": ["Shaun", "Max"], "sets": [[6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_35", "verified": true}, {"date": "2026-07-22", "winners": ["Harry", "Fatch"], "losers": ["Shaun", "Tee"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_36", "verified": true}, {"date": "2026-07-25", "winners": ["Tee", "Fatch"], "losers": ["Rhys", "Fee"], "sets": [[4, 6], [6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_37", "verified": true}, {"date": "2026-07-25", "winners": ["KC", "Shaun"], "losers": ["Max", "PDM"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "", "id": "base_38", "verified": true}, {"date": "2026-07-25", "winners": ["KC", "Max"], "losers": ["Shaun", "PDM"], "sets": [[6, 2], [7, 6]], "type": "doubles", "note": "", "id": "base_39", "verified": true}, {"date": "2026-07-27", "winners": ["Tom", "Shaun"], "losers": ["Max", "Tee"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "", "id": "base_40", "verified": true}, {"date": "2026-07-30", "winners": ["PDM", "Rishi"], "losers": ["Harry", "Rocky"], "sets": [[6, 0], [6, 0]], "type": "doubles", "note": "", "id": "base_41", "verified": true}, {"date": "2026-07-30", "winners": ["KC", "Fatch"], "losers": ["Max", "Rishi"], "sets": [[6, 4], [6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_42", "verified": true}, {"date": "2026-07-30", "winners": ["Fatch", "Antz"], "losers": ["Rishi", "Jords"], "sets": [[6, 2], [1, 6], [6, 3]], "type": "doubles", "note": "", "id": "base_43", "verified": true}, {"date": "2026-08-01", "winners": ["PDM", "Rishi"], "losers": ["Jords", "Omar"], "sets": [[6, 3], [6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_44", "verified": true}, {"date": "2026-08-02", "winners": ["Jams", "Rishi"], "losers": ["Fatch", "Tom"], "sets": [[6, 4], [3, 6], [7, 6]], "type": "doubles", "note": "", "id": "base_45", "verified": true}, {"date": "2026-08-02", "winners": ["Tee", "MK"], "losers": ["Tom", "Shaun"], "sets": [[5, 7], [6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_46", "verified": true}, {"date": "2026-08-03", "winners": ["KC", "Max"], "losers": ["Erf", "Rishi"], "sets": [[5, 7], [6, 1], [7, 6]], "type": "doubles", "note": "", "id": "base_47", "verified": true}, {"date": "2026-08-04", "winners": ["Aubyn", "Antz"], "losers": ["Fatch", "Jams"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_48", "verified": true}, {"date": "2026-08-04", "winners": ["MK", "Fatch"], "losers": ["Shaun", "Tom"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_49", "verified": true}, {"date": "2026-08-05", "winners": ["Rishi", "Jams"], "losers": ["Aubyn", "Antz"], "sets": [[6, 2], [6, 2], [2, 6]], "type": "doubles", "note": "", "id": "base_50", "verified": true}, {"date": "2026-08-05", "winners": ["Rishi", "Omar"], "losers": ["Max", "Eli"], "sets": [[7, 6], [4, 6], [6, 3]], "type": "doubles", "note": "", "id": "base_51", "verified": true}, {"date": "2026-08-06", "winners": ["Skapz", "Rhys"], "losers": ["Tee", "Fee"], "sets": [[6, 2], [6, 2], [3, 6]], "type": "doubles", "note": "", "id": "base_52", "verified": true}, {"date": "2026-08-08", "winners": ["Tom", "Erf"], "losers": ["Antz", "Fatch"], "sets": [[6, 3], [6, 2], [6, 4]], "type": "doubles", "note": "", "id": "base_53", "verified": true}, {"date": "2026-08-08", "winners": ["Erf", "PDM"], "losers": ["Osh", "Fatch"], "sets": [[8, 6], [6, 2]], "type": "doubles", "note": "", "id": "base_54", "verified": true}, {"date": "2026-08-09", "winners": ["Len", "Fatch"], "losers": ["PDM", "Antz"], "sets": [[8, 6], [5, 7], [9, 7]], "type": "doubles", "note": "", "id": "base_55", "verified": true}, {"date": "2026-08-09", "winners": ["Rocky", "Max"], "losers": ["MK", "Fatch"], "sets": [[6, 4], [6, 4], [7, 6]], "type": "doubles", "note": "", "id": "base_56", "verified": true}, {"date": "2026-08-11", "winners": ["Osh", "Eli"], "losers": ["PDM", "Max"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_57", "verified": true}, {"date": "2026-08-11", "winners": ["PDM", "Shaun"], "losers": ["Tarique", "Max"], "sets": [[6, 3], [6, 2]], "type": "doubles", "note": "", "id": "base_58", "verified": true}, {"date": "2026-08-12", "winners": ["Rocky", "PDM"], "losers": ["Rishi", "Max"], "sets": [[6, 2], [6, 4], [6, 7]], "type": "doubles", "note": "", "id": "base_59", "verified": true}, {"date": "2026-08-14", "winners": ["Mulley", "Osh"], "losers": ["KC", "Shaun"], "sets": [[4, 6], [7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_60", "verified": true}, {"date": "2026-08-14", "winners": ["Max", "Kaz"], "losers": ["PDM", "Rishi"], "sets": [[5, 7], [6, 0], [6, 3]], "type": "doubles", "note": "", "id": "base_61", "verified": true}, {"date": "2026-08-15", "winners": ["KC", "Fatch"], "losers": ["Max", "PDM"], "sets": [[4, 6], [7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_62", "verified": true}, {"date": "2026-08-15", "winners": ["Max", "Fatch"], "losers": ["Rocky", "PDM"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_63", "verified": true}, {"date": "2026-08-16", "winners": ["Len", "Eli"], "losers": ["Rishi", "PDM"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "", "id": "base_64", "verified": true}, {"date": "2026-08-16", "winners": ["Osh", "KC"], "losers": ["Max", "Kaz"], "sets": [[6, 1], [6, 2], [6, 1]], "type": "doubles", "note": "", "id": "base_65", "verified": true}, {"date": "2026-08-17", "winners": ["Osh", "Eli"], "losers": ["Len", "KC"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "score corrected from 6-4 6-4", "id": "base_66", "verified": true}, {"date": "2026-08-19", "winners": ["Rishi", "Omar"], "losers": ["PDM", "Shaun"], "sets": [[7, 5], [6, 3], [6, 4]], "type": "doubles", "note": "double or quits", "id": "base_67", "verified": true}, {"date": "2026-08-19", "winners": ["Max", "Aubyn"], "losers": ["Rishi", "Jams"], "sets": [[6, 4], [6, 0], [8, 6]], "type": "doubles", "note": "", "id": "base_68", "verified": true}, {"date": "2026-08-20", "winners": ["Rishi", "Len"], "losers": ["Eli", "Stormzy"], "sets": [[6, 3], [6, 1], [6, 4]], "type": "doubles", "note": "double or quits", "id": "base_69", "verified": true}, {"date": "2026-08-20", "winners": ["Rishi", "Stormzy"], "losers": ["Fatch", "Max"], "sets": [[6, 3], [3, 6], [6, 3]], "type": "doubles", "note": "", "id": "base_70", "verified": true}, {"date": "2026-08-21", "winners": ["Max"], "losers": ["Fatch"], "sets": [[15, 11], [15, 9]], "type": "singles", "note": "", "id": "base_71", "verified": true}, {"date": "2026-08-21", "winners": ["Rishi", "PDM"], "losers": ["Stormzy", "Max"], "sets": [[7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_72", "verified": true}, {"date": "2026-08-21", "winners": ["Stormzy", "Max"], "losers": ["Rishi", "PDM"], "sets": [[6, 3], [2, 6], [6, 2]], "type": "doubles", "note": "rematch same day", "id": "base_73", "verified": true}, {"date": "2026-08-25", "winners": ["Tom", "Rishi"], "losers": ["Max", "Rocky"], "sets": [[2, 6], [6, 3], [6, 2]], "type": "doubles", "note": "", "id": "base_74", "verified": true}, {"date": "2026-08-25", "winners": ["Erf", "Kaz"], "losers": ["Osh", "KC"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "", "id": "base_75", "verified": true}, {"date": "2026-08-25", "winners": ["Erf", "Kaz"], "losers": ["Osh", "Eli"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "", "id": "base_76", "verified": true}, {"date": "2026-08-27", "winners": ["Eli", "Ant Slice"], "losers": ["Rishi", "Max"], "sets": [[8, 6], [6, 2]], "type": "doubles", "note": "", "id": "base_77", "verified": true}, {"date": "2026-08-27", "winners": ["Max", "PDM"], "losers": ["Ant Slice", "Chloe"], "sets": [[4, 6], [6, 2], [6, 2]], "type": "doubles", "note": "", "id": "base_78", "verified": true}, {"date": "2026-06-02", "winners": ["Rishi", "Jords"], "losers": ["Tarique", "Harry"], "sets": [[4, 6], [6, 3], [7, 5]], "type": "doubles", "note": "", "id": "base_79", "verified": true}, {"date": "2026-06-02", "winners": ["Rocky", "Harry"], "losers": ["Rishi", "Jords"], "sets": [[6, 4], [6, 4], [3, 6]], "type": "doubles", "note": "", "id": "base_80", "verified": true}, {"date": "2026-06-03", "winners": ["Harry", "Antz"], "losers": ["Rishi", "MK"], "sets": [[1, 6], [6, 1], [8, 6]], "type": "doubles", "note": "", "id": "base_81", "verified": true}, {"date": "2026-06-04", "winners": ["Harry", "Tom"], "losers": ["Fatch", "Jords"], "sets": [[7, 5], [6, 2]], "type": "doubles", "note": "", "id": "base_82", "verified": true}, {"date": "2026-06-04", "winners": ["Fatch", "Harry"], "losers": ["Tom", "Jords"], "sets": [[2, 6], [6, 1], [7, 5]], "type": "doubles", "note": "", "id": "base_83", "verified": true}, {"date": "2026-06-05", "winners": ["Rocky", "Tarique"], "losers": ["Rishi", "Harry"], "sets": [[6, 3], [6, 4], [2, 6]], "type": "doubles", "note": "", "id": "base_84", "verified": true}, {"date": "2026-06-07", "winners": ["Max", "Tom"], "losers": ["Shaun", "MK"], "sets": [[6, 2], [6, 3], [4, 6]], "type": "doubles", "note": "", "id": "base_85", "verified": true}, {"date": "2026-06-07", "winners": ["Stormzy", "Len"], "losers": ["Rishi", "Antz"], "sets": [[6, 3], [6, 0]], "type": "doubles", "note": "", "id": "base_86", "verified": true}, {"date": "2026-06-07", "winners": ["Rishi", "Antz"], "losers": ["Stormzy", "Len"], "sets": [[7, 6], [4, 6], [6, 3]], "type": "doubles", "note": "rematch same session", "id": "base_87", "verified": true}, {"date": "2026-06-09", "winners": ["Rishi", "Fatch"], "losers": ["Chloe", "Jords"], "sets": [[2, 6], [6, 2], [6, 2]], "type": "doubles", "note": "", "id": "base_88", "verified": true}, {"date": "2026-06-09", "winners": ["Rishi", "Chloe"], "losers": ["Fatch", "Jords"], "sets": [[6, 0], [6, 1]], "type": "doubles", "note": "rematch same session", "id": "base_89", "verified": true}, {"date": "2026-06-09", "winners": ["Erf", "Osh"], "losers": ["Eli", "Len"], "sets": [[4, 6], [7, 5], [6, 3]], "type": "doubles", "note": "", "id": "base_90", "verified": true}, {"date": "2026-06-10", "winners": ["Eli", "Harry"], "losers": ["Jords", "KC"], "sets": [[4, 6], [6, 0], [6, 2]], "type": "doubles", "note": "", "id": "base_91", "verified": true}, {"date": "2026-06-14", "winners": ["Jords", "MK"], "losers": ["Rocky", "Fatch"], "sets": [[9, 7], [6, 1]], "type": "doubles", "note": "", "id": "base_92", "verified": true}, {"date": "2026-06-14", "winners": ["Max", "Shaun"], "losers": ["MK", "Harry"], "sets": [[6, 4], [7, 5], [5, 7]], "type": "doubles", "note": "", "id": "base_93", "verified": true}, {"date": "2026-06-16", "winners": ["Max", "Rishi"], "losers": ["KC", "Tom"], "sets": [[6, 3], [6, 3], [8, 6]], "type": "doubles", "note": "", "id": "base_94", "verified": true}, {"date": "2026-06-16", "winners": ["Jords", "Kaz"], "losers": ["Rishi", "Eli"], "sets": [[6, 4], [6, 3], [6, 2], [2, 6]], "type": "doubles", "note": "4 sets as posted", "id": "base_95", "verified": true}, {"date": "2026-06-18", "winners": ["Shaun", "Rocky"], "losers": ["Harry", "Jords"], "sets": [[6, 1], [6, 4], [6, 2]], "type": "doubles", "note": "", "id": "base_96", "verified": true}, {"date": "2026-06-21", "winners": ["Max", "Rishi"], "losers": ["Tarique", "Kaz"], "sets": [[7, 5], [3, 6], [7, 5]], "type": "doubles", "note": "", "id": "base_97", "verified": true}, {"date": "2026-06-21", "winners": ["Rishi", "Fatch"], "losers": ["Antz", "Tarique"], "sets": [[7, 5], [6, 8], [6, 3]], "type": "doubles", "note": "", "id": "base_98", "verified": true}, {"date": "2026-06-22", "winners": ["Max", "Kaz"], "losers": ["KC", "Rishi"], "sets": [[6, 4], [6, 4], [4, 6]], "type": "doubles", "note": "", "id": "base_99", "verified": true}, {"date": "2026-06-22", "winners": ["Rishi", "Del"], "losers": ["Harry", "Dennis"], "sets": [[6, 2], [6, 4]], "type": "doubles", "note": "'wolf emoji'=Rishi; Del one-off, Tier A", "id": "base_100", "verified": true}, {"date": "2026-06-23", "winners": ["Erf", "Shaun"], "losers": ["Rishi", "Max"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_101", "verified": true}, {"date": "2026-06-24", "winners": ["Erf", "Eli"], "losers": ["KC", "Shaun"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "game 1", "id": "base_102", "verified": true}, {"date": "2026-06-24", "winners": ["KC", "Shaun"], "losers": ["Erf", "Eli"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "game 2 rematch", "id": "base_103", "verified": true}, {"date": "2026-06-26", "winners": ["Fatch", "Antz"], "losers": ["Jords", "M.R"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "M.R identity unconfirmed, Tier C", "id": "base_104", "verified": true}, {"date": "2026-06-28", "winners": ["Len"], "losers": ["Harry"], "sets": [[6, 7], [6, 2], [6, 4]], "type": "singles", "note": "", "id": "base_105", "verified": true}, {"date": "2026-06-29", "winners": ["Kaz", "Osh"], "losers": ["KC", "Erf"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "", "id": "base_106", "verified": true}, {"date": "2026-06-30", "winners": ["KC", "Rishi"], "losers": ["Osh", "Harry"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "", "id": "base_107", "verified": true}, {"date": "2026-06-30", "winners": ["KC", "Rishi"], "losers": ["Harry", "Osh"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "2nd match same session", "id": "base_108", "verified": true}, {"date": "2026-06-30", "winners": ["Harry", "Osh"], "losers": ["KC", "Rishi"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "double or quits decider", "id": "base_109", "verified": true}, {"date": "2026-06-30", "winners": ["Max", "MK"], "losers": ["Tarique", "Rocky"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "", "id": "base_110", "verified": true}, {"date": "2026-06-30", "winners": ["Harry", "Len"], "losers": ["Max", "Erf"], "sets": [[6, 3], [3, 6], [6, 4]], "type": "doubles", "note": "", "id": "base_111", "verified": true}, {"date": "2026-07-11", "winners": ["Omar", "Jords"], "losers": ["Tom", "Max"], "sets": [[7, 6], [4, 6], [6, 2]], "type": "doubles", "note": "final corrected version", "id": "base_112", "verified": true}, {"date": "2026-07-18", "winners": ["Tom", "Chloe"], "losers": ["Fatch", "Antz"], "sets": [[6, 2], [7, 5], [7, 5], [6, 3]], "type": "doubles", "note": "4 sets as posted", "id": "base_113", "verified": true}, {"date": "2026-07-19", "winners": ["Kaz", "Tom"], "losers": ["Rocky", "MK"], "sets": [[6, 1], [6, 1]], "type": "doubles", "note": "", "id": "base_114", "verified": true}, {"date": "2026-08-19", "winners": ["Eli", "Stormzy"], "losers": ["Osh", "Jords"], "sets": [[6, 8], [6, 3], [6, 3]], "type": "doubles", "note": "", "id": "base_115", "verified": true}, {"date": "2026-08-19", "winners": ["Eli", "Stormzy"], "losers": ["Osh", "Jords"], "sets": [[7, 5], [6, 1]], "type": "doubles", "note": "part 2, same session", "id": "base_116", "verified": true}, {"date": "2026-08-23", "winners": ["Stormzy", "Chloe"], "losers": ["Jords", "Tom"], "sets": [[6, 1], [5, 7], [6, 2], [5, 7], [6, 1]], "type": "doubles", "note": "5 sets, final corrected version", "id": "base_117", "verified": true}, {"date": "2026-08-26", "winners": ["PDM", "Max"], "losers": ["Chloe", "Antz"], "sets": [[4, 6], [6, 2], [6, 1]], "type": "doubles", "note": "double or quits 2-1, to be continued", "id": "base_118", "verified": true}, {"date": "2026-08-29", "winners": ["PDM", "Tom"], "losers": ["Fatch", "Shaun"], "sets": [[6, 3], [6, 3], [6, 4]], "type": "doubles", "note": "", "id": "base_119", "verified": true}, {"date": "2026-04-01", "winners": ["Kaz", "Eli"], "losers": ["Twoshay", "Erf"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0001", "id": "early_0", "verified": false}, {"date": "2026-04-01", "winners": ["Aubyn", "Len"], "losers": ["Stormzy", "Max"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0002", "id": "early_1", "verified": false}, {"date": "2026-04-01", "winners": ["Aubyn", "Len"], "losers": ["Stormzy", "Max"], "sets": [[6, 1], [3, 6], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0003", "id": "early_2", "verified": false}, {"date": "2026-04-02", "winners": ["Tom", "Ant Slice"], "losers": ["Tee", "MK"], "sets": [[6, 3], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0004", "id": "early_3", "verified": false}, {"date": "2026-04-03", "winners": ["Kaz", "Erf"], "losers": ["Eli", "Osh"], "sets": [[6, 2], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0005", "id": "early_4", "verified": false}, {"date": "2026-04-03", "winners": ["Dennis", "Erf"], "losers": ["Stormzy", "Osh"], "sets": [[6, 3], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0006", "id": "early_5", "verified": false}, {"date": "2026-04-04", "winners": ["Eli", "Kam"], "losers": ["Stormzy", "Chloe"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0007", "id": "early_6", "verified": false}, {"date": "2026-04-04", "winners": ["Stormzy", "Chloe"], "losers": ["Eli", "Kam"], "sets": [[7, 5], [4, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0008", "id": "early_7", "verified": false}, {"date": "2026-04-04", "winners": ["Max", "Ant Slice"], "losers": ["Stormzy", "Jords"], "sets": [[7, 6], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0009", "id": "early_8", "verified": false}, {"date": "2026-04-05", "winners": ["Ant Slice", "MK"], "losers": ["Max", "Jords"], "sets": [[6, 1], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0010", "id": "early_9", "verified": false}, {"date": "2026-04-05", "winners": ["Kaz", "Kam"], "losers": ["Len", "Tom"], "sets": [[6, 3], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0011", "id": "early_10", "verified": false}, {"date": "2026-04-05", "winners": ["Kaz", "Erf"], "losers": ["Len", "Osh"], "sets": [[6, 4], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0012", "id": "early_11", "verified": false}, {"date": "2026-04-05", "winners": ["Erf", "Max"], "losers": ["Kaz", "Jords"], "sets": [[2, 6], [3, 6]], "type": "doubles", "note": "from spreadsheet MAT0013", "id": "early_12", "verified": false}, {"date": "2026-04-05", "winners": ["Kaz", "Ant Slice"], "losers": ["Len", "Aubyn"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0014", "id": "early_13", "verified": false}, {"date": "2026-04-05", "winners": ["Len", "Ant Slice"], "losers": ["Kaz", "Aubyn"], "sets": [[1, 6], [3, 6]], "type": "doubles", "note": "from spreadsheet MAT0015", "id": "early_14", "verified": false}, {"date": "2026-04-05", "winners": ["Eli", "Stormzy"], "losers": ["Tom", "Rishi"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0016", "id": "early_15", "verified": false}, {"date": "2026-04-06", "winners": ["Stormzy", "bruh"], "losers": ["Kevin", "Eli"], "sets": [[6, 4], [6, 7], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0018", "id": "early_16", "verified": false}, {"date": "2026-04-07", "winners": ["Erf", "Ant Slice"], "losers": ["Osh", "Eli"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0019", "id": "early_17", "verified": false}, {"date": "2026-04-07", "winners": ["Stormzy", "Jords"], "losers": ["Tom", "Max"], "sets": [[6, 7], [6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0020", "id": "early_18", "verified": false}, {"date": "2026-04-08", "winners": ["Ant Slice", "Kam"], "losers": ["Stormzy", "bruh"], "sets": [[7, 6], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0021", "id": "early_19", "verified": false}, {"date": "2026-04-08", "winners": ["Kaz", "Erf"], "losers": ["Dennis", "Eli"], "sets": [[1, 6], [2, 6]], "type": "doubles", "note": "from spreadsheet MAT0022", "id": "early_20", "verified": false}, {"date": "2026-04-09", "winners": ["Eli", "Twoshay"], "losers": ["Osh", "Jords"], "sets": [[6, 2], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0023", "id": "early_21", "verified": false}, {"date": "2026-04-09", "winners": ["Osh", "Twoshay"], "losers": ["Erf", "KC"], "sets": [[6, 2], [2, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0024", "id": "early_22", "verified": false}, {"date": "2026-04-10", "winners": ["Stormzy", "Chloe"], "losers": ["Tom", "Jords"], "sets": [[5, 7], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0025", "id": "early_23", "verified": false}, {"date": "2026-04-11", "winners": ["Eli", "Erf"], "losers": ["Stormzy", "Osh"], "sets": [[6, 2], [2, 6], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0026", "id": "early_24", "verified": false}, {"date": "2026-04-12", "winners": ["Jords", "Erf"], "losers": ["Tom", "Kevin"], "sets": [[6, 3], [3, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0027", "id": "early_25", "verified": false}, {"date": "2026-04-15", "winners": ["Stormzy", "Chloe"], "losers": ["Max", "Eli"], "sets": [[6, 2], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0028", "id": "early_26", "verified": false}, {"date": "2026-04-16", "winners": ["Eli", "Stormzy"], "losers": ["Rishi", "Erf"], "sets": [[2, 6], [7, 6], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0030", "id": "early_27", "verified": false}, {"date": "2026-04-17", "winners": ["Jords", "Ant Slice"], "losers": ["Stormzy", "Chloe"], "sets": [[7, 6], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0031", "id": "early_28", "verified": false}, {"date": "2026-04-19", "winners": ["Jords", "KC"], "losers": ["Max", "Rishi"], "sets": [[1, 6], [6, 4], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0032", "id": "early_29", "verified": false}, {"date": "2026-04-02", "winners": ["KC", "MK"], "losers": ["Kam", "Stormzy"], "sets": [[6, 3], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0033", "id": "early_30", "verified": false}, {"date": "2026-04-09", "winners": ["Tee", "MK"], "losers": ["Aubyn", "Max"], "sets": [[6, 4], [7, 6]], "type": "doubles", "note": "from spreadsheet MAT0034", "id": "early_31", "verified": false}, {"date": "2026-04-19", "winners": ["Ant Slice", "Jords"], "losers": ["Tom", "Aubyn"], "sets": [[5, 7], [6, 1], [6, 1]], "type": "doubles", "note": "from spreadsheet MAT0035", "id": "early_32", "verified": false}, {"date": "2026-04-20", "winners": ["Len", "Mulley"], "losers": ["Twoshay", "Eli"], "sets": [[6, 2], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0036", "id": "early_33", "verified": false}, {"date": "2026-04-21", "winners": ["KC", "Erf"], "losers": ["Rishi", "Kaz"], "sets": [[7, 6], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0038", "id": "early_34", "verified": false}, {"date": "2026-04-22", "winners": ["Jords", "Ant Slice"], "losers": ["Eli", "Chloe"], "sets": [[3, 6], [7, 5], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0039", "id": "early_35", "verified": false}, {"date": "2026-04-21", "winners": ["Jords", "Erf"], "losers": ["Chloe", "Tom"], "sets": [[4, 6], [6, 1], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0040", "id": "early_36", "verified": false}, {"date": "2026-04-22", "winners": ["Rhys", "Aubyn"], "losers": ["Skapz", "Tee"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0042", "id": "early_37", "verified": false}, {"date": "2026-04-23", "winners": ["Max", "Dennis"], "losers": ["Kaz", "Rishi"], "sets": [[6, 7], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0043", "id": "early_38", "verified": false}, {"date": "2026-04-24", "winners": ["Stormzy", "Eli"], "losers": ["Jords", "Max"], "sets": [[4, 6], [6, 2], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0044", "id": "early_39", "verified": false}, {"date": "2026-04-27", "winners": ["Jords", "Erf"], "losers": ["Kaz", "Skapz"], "sets": [[7, 5], [1, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0045", "id": "early_40", "verified": false}, {"date": "2026-04-26", "winners": ["KC", "Erf"], "losers": ["Kaz", "Len"], "sets": [[6, 4], [4, 6], [1, 6]], "type": "doubles", "note": "from spreadsheet MAT0046", "id": "early_41", "verified": false}, {"date": "2026-04-25", "winners": ["Erf", "KC"], "losers": ["Kaz", "Rishi"], "sets": [[6, 7], [1, 6]], "type": "doubles", "note": "from spreadsheet MAT0047", "id": "early_42", "verified": false}, {"date": "2026-04-28", "winners": ["Stormzy", "Chloe"], "losers": ["Manny", "Rishi"], "sets": [[3, 6], [6, 2], [7, 6]], "type": "doubles", "note": "from spreadsheet MAT0048", "id": "early_43", "verified": false}, {"date": "2026-04-25", "winners": ["Kaz", "Erf"], "losers": ["Abby", "Alfie"], "sets": [[6, 7], [6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0050", "id": "early_45", "verified": false}, {"date": "2026-04-30", "winners": ["Jords", "Osh"], "losers": ["Erf", "Max"], "sets": [[7, 5], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0051", "id": "early_46", "verified": false}, {"date": "2026-04-30", "winners": ["Manny", "Osh"], "losers": ["Twoshay", "Erf"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0052", "id": "early_47", "verified": false}, {"date": "2026-04-30", "winners": ["Alfie", "Manny"], "losers": ["Kaz", "Twoshay"], "sets": [[6, 4], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0053", "id": "early_48", "verified": false}, {"date": "2026-04-30", "winners": ["Kaz", "Twoshay"], "losers": ["Alfie", "Manny"], "sets": [[4, 6], [4, 6]], "type": "doubles", "note": "from spreadsheet MAT0054", "id": "early_49", "verified": false}, {"date": "2026-05-01", "winners": ["Kaz", "Alfie"], "losers": ["Manny", "Twoshay"], "sets": [[6, 4], [6, 0]], "type": "doubles", "note": "from spreadsheet MAT0055", "id": "early_50", "verified": false}, {"date": "2026-07-20", "winners": ["Kaz", "Tom"], "losers": ["Rocky", "MK"], "sets": [[6, 0], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0091", "id": "zgnew_0", "verified": true}, {"date": "2026-07-21", "winners": ["Tom", "Shaun"], "losers": ["Max", "Tee"], "sets": [[6, 1], [6, 4]], "type": "doubles", "note": "from spreadsheet MAT0092", "id": "zgnew_1", "verified": true}, {"date": "2026-08-01", "winners": ["Jams", "Rishi"], "losers": ["Fatch", "Tom"], "sets": [[4, 6], [6, 3], [7, 6]], "type": "doubles", "note": "from spreadsheet MAT0098", "id": "zgnew_2", "verified": true}, {"date": "2026-08-02", "winners": ["Tee", "MK"], "losers": ["Tom", "Shaun"], "sets": [[5, 7], [6, 4], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0099", "id": "zgnew_3", "verified": true}, {"date": "2026-08-04", "winners": ["MK", "Fatch"], "losers": ["Shaun", "Tom"], "sets": [[6, 4], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0102", "id": "zgnew_4", "verified": true}, {"date": "2026-08-10", "winners": ["Tom", "Erf"], "losers": ["Antz", "Fatch"], "sets": [[6, 3], [6, 2]], "type": "doubles", "note": "from spreadsheet MAT0115", "id": "zgnew_5", "verified": true}, {"date": "2026-08-25", "winners": ["Tom", "Rishi"], "losers": ["Max", "Rocky"], "sets": [[2, 6], [6, 3], [6, 3]], "type": "doubles", "note": "from spreadsheet MAT0130", "id": "zgnew_6", "verified": true}];
+const BASE_TIERS = {"Manny": "S", "Erf": "A", "Kaz": "A", "Twoshay": "A", "Osh": "A", "Eli": "A", "Dennis": "A", "Ant Slice": "A", "Len": "A", "Rishi": "B", "Omar": "B", "Chloe": "B", "Max": "B", "James": "B", "MK": "B", "Antz": "B", "Rocky": "B", "Harry": "B", "PDM": "B", "Shaun": "B", "Jords": "B", "Tarique": "B", "Tom": "B", "Fatch": "B", "Jams": "C", "Aubyn": "C", "Rhys": "C", "Tee": "C", "Skapz": "C", "Stormzy": "B", "KC": "A", "Mulley": "B", "Fee": "C", "Carla": "B", "Del": "A", "M.R": "C", "Kam": "B", "bruh": "B", "Kevin": "B", "Abby": "B", "Alfie": "B"};
+const BASE_ACTIVE = {"Manny": true, "Erf": true, "Kaz": true, "Twoshay": false, "Osh": true, "Eli": true, "Dennis": true, "Ant Slice": true, "Len": true, "Rishi": true, "Omar": true, "Chloe": true, "Max": true, "James": true, "MK": true, "Antz": true, "Rocky": true, "Harry": true, "PDM": true, "Shaun": true, "Jords": true, "Tarique": true, "Tom": true, "Fatch": true, "Jams": true, "Aubyn": true, "Rhys": true, "Tee": true, "Skapz": true, "Stormzy": true, "KC": true, "Mulley": true, "Fee": true, "Carla": true, "Del": false, "M.R": true, "Kam": false, "bruh": false, "Kevin": false, "Abby": false, "Alfie": false};
+// Tier a player started at, if different from their current tier (e.g. a promotion/demotion).
+// Used only to seed their rating correctly at their first-ever match -- their current tier
+// (BASE_TIERS, above) is still what's used everywhere else: Find a Game, tier boundaries, badges.
+const BASE_STARTING_TIER = {"Fatch": "C"};
+
+// ===================== LIVE STATE =====================
+let ALL_MATCHES = [];      // BASE_MATCHES + user-added
+let TIER_MAP = {};         // name -> tier (base + overrides + new players)
+let ACTIVE_MAP = {};       // name -> bool
+let STARTING_TIER_MAP = {};// name -> tier they started at, if different from current (used for seeding only)
+
+let PLAYERS = [];
+let MATCHES = [];
+let PARTNERSHIPS = [];
+let BEST_PARTNER = {};
+let BOUNDARY_TESTS = [];
+let CALIBRATION_GAMES = [];
+let WITHIN_TIER_GAMES = [];
+let DIFFICULTY_SUGGESTIONS = {};
+let INACTIVE_PLAYERS = new Set();
+let H2H = {};
+
+const TIER_SEED = {S:2000, A:1700, B:1400, C:1100};
+const TIER_ORDER_LIST = ["S","A","B","C"];
+const TIER_IDX = {S:0,A:1,B:2,C:3};
+
+// ===================== STORAGE (Firebase Firestore + localStorage) =====================
+// Fill in your own Firebase project config here (Firebase console > Project settings > General > Your apps).
+const firebaseConfig = {
+  apiKey: "AIzaSyAYDCghLPhMLpHaxTbbC8Rm2sV09UlPKOw",
+  authDomain: "mp---dashboard.firebaseapp.com",
+  projectId: "mp---dashboard",
+  storageBucket: "mp---dashboard.firebasestorage.app",
+  messagingSenderId: "10882600309",
+  appId: "1:10882600309:web:4e3a8e186f465cc35bd73c"
+};
+
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+} catch(e) {
+  console.error('Firebase init failed — check firebaseConfig at the top of the script.', e);
+}
+
+const FS_COLLECTION = 'moneypadel'; // one Firestore collection, one document per storage key
+
+let lastStorageError = null;
+
+function storageAvailable(){
+  return !!db;
+}
+
+async function fsGet(key){
+  const doc = await db.collection(FS_COLLECTION).doc(key).get();
+  return doc.exists ? doc.data().value : null;
+}
+async function fsSet(key, value){
+  await db.collection(FS_COLLECTION).doc(key).set({ value, updatedAt: Date.now() });
+}
+
+const STORAGE_KEY_MATCHES = 'moneypadel_extra_matches';   // pending + approved submissions
+const STORAGE_KEY_TAGS = 'moneypadel_player_tags';
+const STORAGE_KEY_EDITS = 'moneypadel_match_edits';        // id -> override fields
+const STORAGE_KEY_DELETED = 'moneypadel_deleted_ids';      // array of ids, soft-delete
+const STORAGE_KEY_VISIBILITY = 'moneypadel_visibility';    // shared: which sections non-admins can see
+const STORAGE_KEY_MY_NAME = 'moneypadel_my_name';          // personal — localStorage, this device only
+const STORAGE_KEY_GAME_REQUESTS = 'moneypadel_game_requests'; // shared: wishlist + upcoming games
+const STORAGE_KEY_DEV_AREAS = 'moneypadel_dev_areas'; // shared: freeform per-player development notes
+
+// Sections an admin can hide from non-admin viewers. Admins always see everything.
+const VISIBILITY_DEFAULTS = {
+  findgame: false,      // Find a Game — matchmaking, hidden by default
+  difficulty: false,    // Easy/Balanced/Hard suggestions on player profiles
+  callouts: true,       // Call-Outs tab
+  chemistry: true,      // Partnership chemistry rankings
+  power: true,          // Power Rating tab
+  games: true,          // Games (chronological log)
+  players: true,        // Players A–Z
+  wishlist: true,        // Game requests / wishlist
+  upcoming: true,        // Confirmed upcoming games
+};
+const VISIBILITY_LABELS = {
+  findgame: 'Find a Game tab (matchmaking)',
+  difficulty: 'Easy / Balanced / Hard suggestions on profiles',
+  callouts: 'Call-Outs tab',
+  chemistry: 'Partnership chemistry rankings',
+  power: 'Power Rating tab',
+  games: 'Games tab (match log)',
+  players: 'Players tab',
+  wishlist: 'Wishlist tab (game requests)',
+  upcoming: 'Upcoming tab (confirmed games)',
+};
+let visibilityState = {...VISIBILITY_DEFAULTS};
+
+// Admins see everything; everyone else only sees what's switched on.
+function canSee(section){
+  if(isUnlocked) return true;
+  return visibilityState[section] !== false;
+}
+
+async function loadVisibility(){
+  try { const v = await fsGet(STORAGE_KEY_VISIBILITY); if(v) return {...VISIBILITY_DEFAULTS, ...JSON.parse(v)}; } catch(e){ console.error('load visibility failed', e); }
+  return {...VISIBILITY_DEFAULTS};
+}
+async function saveVisibility(vis){
+  try {
+    await fsSet(STORAGE_KEY_VISIBILITY, JSON.stringify(vis));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save visibility failed', e); return false; }
+}
+
+let gameRequestsState = []; // {id, requestedBy, requestedAt, players:[4 names], confirmations:{name:bool}, status:'pending'|'confirmed'|'removed'}
+
+async function loadGameRequests(){
+  try { const v = await fsGet(STORAGE_KEY_GAME_REQUESTS); if(v) return JSON.parse(v); } catch(e){ console.error('load game requests failed', e); }
+  return [];
+}
+async function saveGameRequests(requests){
+  try {
+    await fsSet(STORAGE_KEY_GAME_REQUESTS, JSON.stringify(requests));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save game requests failed', e); return false; }
+}
+
+let devAreasState = []; // [{id, player, text, addedBy, addedAt}]
+
+async function loadDevAreas(){
+  try { const v = await fsGet(STORAGE_KEY_DEV_AREAS); if(v) return JSON.parse(v); } catch(e){ console.error('load dev areas failed', e); }
+  return [];
+}
+async function saveDevAreas(areas){
+  try {
+    await fsSet(STORAGE_KEY_DEV_AREAS, JSON.stringify(areas));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save dev areas failed', e); return false; }
+}
+
+async function loadStoredData(){
+  let extraMatches = [];
+  let tagOverrides = {};
+  let matchEdits = {};
+  let deletedIds = [];
+  try { const v = await fsGet(STORAGE_KEY_MATCHES); if(v) extraMatches = JSON.parse(v); } catch(e){ console.error('load matches failed', e); }
+  try { const v = await fsGet(STORAGE_KEY_TAGS); if(v) tagOverrides = JSON.parse(v); } catch(e){ console.error('load tags failed', e); }
+  try { const v = await fsGet(STORAGE_KEY_EDITS); if(v) matchEdits = JSON.parse(v); } catch(e){ console.error('load edits failed', e); }
+  try { const v = await fsGet(STORAGE_KEY_DELETED); if(v) deletedIds = JSON.parse(v); } catch(e){ console.error('load deleted ids failed', e); }
+  return {extraMatches, tagOverrides, matchEdits, deletedIds};
+}
+
+async function loadMyName(){
+  try { const v = localStorage.getItem(STORAGE_KEY_MY_NAME); if(v) return JSON.parse(v); } catch(e){ /* not set yet */ }
+  return '';
+}
+async function saveMyName(name){
+  try { localStorage.setItem(STORAGE_KEY_MY_NAME, JSON.stringify(name)); } catch(e){ /* best effort */ }
+}
+
+// ===================== ADMIN LOCK (deterrent, not real security) =====================
+const STORAGE_KEY_ADMIN_PW_OWNER = 'moneypadel_admin_pw_owner_hash'; // shared, in Firestore
+const STORAGE_KEY_ADMIN_PW_BOARD = 'moneypadel_admin_pw_board_hash'; // shared, in Firestore
+const STORAGE_KEY_MY_UNLOCKED = 'moneypadel_my_unlocked';  // personal — localStorage, this device only
+
+let ownerPasswordHash = null;
+let boardPasswordHash = null;
+let isUnlocked = false;
+
+function simpleHash(str){
+  let hash = 0;
+  for(let i=0;i<str.length;i++){
+    hash = ((hash<<5)-hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return (hash>>>0).toString(16);
+}
+
+async function loadPasswordHash(key){
+  try { const v = await fsGet(key); if(v) return JSON.parse(v); } catch(e){ console.error('load password failed', key, e); }
+  return null;
+}
+async function savePasswordHash(key, hash){
+  try {
+    await fsSet(key, JSON.stringify(hash));
+    return true;
+  } catch(e){
+    lastStorageError = (e && e.message) ? e.message : String(e);
+    console.error('savePasswordHash failed:', key, e);
+    return false;
+  }
+}
+async function loadMyUnlocked(){
+  try { const v = localStorage.getItem(STORAGE_KEY_MY_UNLOCKED); if(v) return JSON.parse(v) === true; } catch(e){ /* not set yet */ }
+  return false;
+}
+async function saveMyUnlocked(val){
+  try { localStorage.setItem(STORAGE_KEY_MY_UNLOCKED, JSON.stringify(!!val)); } catch(e){ /* best effort */ }
+}
+
+function buildLockScreenHtml(){
+  const settingNew = !ownerPasswordHash && !boardPasswordHash;
+  const storageWarning = !storageAvailable()
+    ? `<div class="section-sub" style="color:#e8a5a1; margin-bottom:8px;">⚠️ This page can't reach shared storage right now. That usually means you're viewing a downloaded copy of this file, or an embed, rather than the actual published/shared link on claude.ai — open that link directly and this should work.</div>`
+    : '';
+  if(settingNew){
+    return `<div class="fg-controls">
+      <div class="section-heading" style="margin-top:0;">🔒 Set an admin password</div>
+      ${storageWarning}
+      <div class="section-sub">No password has been set yet. Whatever you set here will be needed by anyone adding, approving, editing, or deleting games — share it with whoever should have access. You can add a second, independent password later (e.g. for the board to manage themselves) once this one is set. This is a deterrent, not real security: the result is the ledger anyway, this just avoids accidental or casual changes.</div>
+      <div class="fg-row"><label class="fg-label">New password</label><input id="lockPw1" type="password" class="fg-select" /></div>
+      <div class="fg-row"><label class="fg-label">Confirm password</label><input id="lockPw2" type="password" class="fg-select" /></div>
+      <div class="fg-row"><button class="tab-btn active" id="lockSetBtn" style="width:100%;">Set password &amp; unlock</button></div>
+      <div id="lockMessage" class="section-sub"></div>
+    </div>`;
+  }
+  return `<div class="fg-controls">
+    <div class="section-heading" style="margin-top:0;">🔒 Admin area</div>
+    ${storageWarning}
+    <div class="section-sub">Enter either admin password to add, approve, edit, or delete games.</div>
+    <div class="fg-row"><label class="fg-label">Password</label><input id="lockPwInput" type="password" class="fg-select" /></div>
+    <div class="fg-row"><button class="tab-btn active" id="lockUnlockBtn" style="width:100%;">Unlock</button></div>
+    <div id="lockMessage" class="section-sub"></div>
+  </div>`;
+}
+
+function wireLockScreen(onUnlocked){
+  const settingNew = !ownerPasswordHash && !boardPasswordHash;
+  if(settingNew){
+    document.getElementById('lockSetBtn').onclick = async ()=>{
+      const p1 = document.getElementById('lockPw1').value;
+      const p2 = document.getElementById('lockPw2').value;
+      const msg = document.getElementById('lockMessage');
+      if(!p1 || p1.length<4){ msg.textContent='Use at least 4 characters.'; return; }
+      if(p1!==p2){ msg.textContent="Passwords don't match."; return; }
+      const hash = simpleHash(p1);
+      const ok = await savePasswordHash(STORAGE_KEY_ADMIN_PW_OWNER, hash);
+      if(!ok){
+        msg.textContent = storageAvailable()
+          ? `Save failed (${lastStorageError || 'unknown error'}) — try again in a moment.`
+          : `Save failed — this page can't reach shared storage. Make sure you're on the actual published/shared claude.ai link, not a downloaded file.`;
+        return;
+      }
+      ownerPasswordHash = hash;
+      isUnlocked = true;
+      await saveMyUnlocked(true);
+      applyTabVisibility();
+      onUnlocked();
+    };
+  } else {
+    document.getElementById('lockUnlockBtn').onclick = async ()=>{
+      const p = document.getElementById('lockPwInput').value;
+      const msg = document.getElementById('lockMessage');
+      const h = simpleHash(p);
+      if(h === ownerPasswordHash || h === boardPasswordHash){
+        isUnlocked = true;
+        await saveMyUnlocked(true);
+        applyTabVisibility();
+        onUnlocked();
+      } else {
+        msg.textContent = 'Incorrect password.';
+      }
+    };
+  }
+}
+
+async function saveExtraMatches(extraMatches){
+  try {
+    await fsSet(STORAGE_KEY_MATCHES, JSON.stringify(extraMatches));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save matches failed', e); return false; }
+}
+async function saveTagOverrides(tagOverrides){
+  try {
+    await fsSet(STORAGE_KEY_TAGS, JSON.stringify(tagOverrides));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save tags failed', e); return false; }
+}
+async function saveMatchEdits(matchEdits){
+  try {
+    await fsSet(STORAGE_KEY_EDITS, JSON.stringify(matchEdits));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save edits failed', e); return false; }
+}
+async function saveDeletedIds(deletedIds){
+  try {
+    await fsSet(STORAGE_KEY_DELETED, JSON.stringify(deletedIds));
+    return true;
+  } catch(e){ lastStorageError = (e && e.message) ? e.message : String(e); console.error('save deleted ids failed', e); return false; }
+}
+
+let extraMatchesState = [];   // each: {id, date, winners, losers, sets, type, note, status, submittedBy, submittedAt}
+let tagOverridesState = {};
+let matchEditsState = {};     // id -> {date?,winners?,losers?,sets?,type?,note?, editedBy, editedAt}
+let deletedIdsState = [];
+let currentUserName = '';
+
+function rebuildMapsFromState(){
+  TIER_MAP = {...BASE_TIERS};
+  ACTIVE_MAP = {...BASE_ACTIVE};
+  STARTING_TIER_MAP = {...BASE_STARTING_TIER};
+  Object.keys(tagOverridesState).forEach(name=>{
+    const o = tagOverridesState[name];
+    if(o.tier) TIER_MAP[name] = o.tier;
+    if(typeof o.active === 'boolean') ACTIVE_MAP[name] = o.active;
+    if(o.startingTier) STARTING_TIER_MAP[name] = o.startingTier;
+  });
+}
+
+// The list used for rating computation: base + approved submissions, edits applied, deletions removed.
+// Every approved match, edits applied, deletions removed. Includes draws -- this is the source
+// of truth for "what exists", used for display. Rating computation uses getEffectiveMatches()
+// below, which filters draws out, since an unfinished game has no defined winner to rate.
+function getAllApprovedMatches(){
+  let all = BASE_MATCHES.concat(extraMatchesState.filter(m=>m.status==='approved'));
+  all = all.map(m=>{
+    const edit = matchEditsState[m.id];
+    if(!edit) return m;
+    const {date,winners,losers,sets,type,note,isDraw} = edit;
+    return {...m,
+      date: date!==undefined?date:m.date, winners: winners!==undefined?winners:m.winners,
+      losers: losers!==undefined?losers:m.losers, sets: sets!==undefined?sets:m.sets,
+      type: type!==undefined?type:m.type, note: note!==undefined?note:m.note,
+      isDraw: isDraw!==undefined?isDraw:m.isDraw};
+  });
+  all = all.filter(m=>!deletedIdsState.includes(m.id));
+  if(dataQualityFilter === 'verified') all = all.filter(m => m.verified !== false);
+  else if(dataQualityFilter === 'unverified') all = all.filter(m => m.verified === false);
+  return all;
+}
+
+// The list used for rating computation: same as above, minus draws (no winner to rate).
+function getEffectiveMatches(){
+  return getAllApprovedMatches().filter(m => !m.isDraw);
+}
+
+// The list used for the Games tab display: all approved matches (including draws) + pending, never deleted.
+function getDisplayMatches(){
+  const effective = getAllApprovedMatches().map(m=>({...m, _status:'approved'}));
+  const pending = extraMatchesState.filter(m=>m.status==='pending' && !deletedIdsState.includes(m.id)).map(m=>({...m, _status:'pending'}));
+  return effective.concat(pending);
+}
+
+// ===================== RATING ENGINE =====================
+function computeElo(matches, tierMap, startingTierMap){
+  startingTierMap = startingTierMap || {};
+  const ratings = {};
+  function R(name){
+    if(!(name in ratings)) ratings[name] = TIER_SEED[startingTierMap[name] || tierMap[name] || 'B'];
+    return ratings[name];
+  }
+  const K = 28, EPOCHS = 300;
+  for(let epoch=0; epoch<EPOCHS; epoch++){
+    for(const m of matches){
+      const gw = m.sets.reduce((s,set)=>s+set[0],0);
+      const gl = m.sets.reduce((s,set)=>s+set[1],0);
+      const total = (gw+gl) || 1;
+      const actual = gw/total;
+      const wr = m.winners.reduce((s,p)=>s+R(p),0)/m.winners.length;
+      const lr = m.losers.reduce((s,p)=>s+R(p),0)/m.losers.length;
+      const expected = 1/(1+Math.pow(10,(lr-wr)/400));
+      const delta = K*(actual-expected)/EPOCHS*3;
+      m.winners.forEach(p=>{ ratings[p] = R(p) + delta; });
+      m.losers.forEach(p=>{ ratings[p] = R(p) - delta; });
+    }
+  }
+  return ratings;
+}
+
+function enrichMatches(matches, ratings){
+  return matches.map(m=>{
+    const gw = m.sets.reduce((s,set)=>s+set[0],0);
+    const gl = m.sets.reduce((s,set)=>s+set[1],0);
+    const total = (gw+gl) || 1;
+    const actual = gw/total;
+    const wr = m.winners.reduce((s,p)=>s+ratings[p],0)/m.winners.length;
+    const lr = m.losers.reduce((s,p)=>s+ratings[p],0)/m.losers.length;
+    const expected = 1/(1+Math.pow(10,(lr-wr)/400));
+    return {
+      id: m.id, date: m.date, winners: m.winners, losers: m.losers,
+      score: m.sets.map(s=>s.join('-')).join(', '),
+      type: m.type, note: m.note||'', verified: m.verified !== false,
+      games_winner: gw, games_loser: gl,
+      game_share_winner: Math.round(actual*1000)/1000,
+      expected_winshare: Math.round(expected*1000)/1000,
+      team_w_rating: Math.round(wr*10)/10, team_l_rating: Math.round(lr*10)/10,
+      match_strength: Math.round((wr+lr)/2*10)/10,
+      overperformance_winner: Math.round((actual-expected)*1000)/1000,
+    };
+  });
+}
+
+function buildPlayers(enrichedMatches, ratings, tierMap, activeMap){
+  const agg = {};
+  function A(name){
+    if(!agg[name]) agg[name] = {wins:0, losses:0, strengths:[], overperf:[], games_w:0, games_l:0, upset_wins:0, upset_losses:0};
+    return agg[name];
+  }
+  const GAP_THRESHOLD = 15;
+  enrichedMatches.forEach(m=>{
+    const gap = Math.abs(m.team_w_rating - m.team_l_rating);
+    const isClose = gap < GAP_THRESHOLD;
+    const winnerFavored = m.team_w_rating > m.team_l_rating;
+    const isUpset = !isClose && !winnerFavored;
+    m.winners.forEach(p=>{
+      const a = A(p);
+      a.wins++; a.strengths.push(m.match_strength); a.overperf.push(m.overperformance_winner);
+      a.games_w += m.games_winner; a.games_l += m.games_loser;
+      if(isUpset) a.upset_wins++;
+    });
+    m.losers.forEach(p=>{
+      const a = A(p);
+      a.losses++; a.strengths.push(m.match_strength); a.overperf.push(-m.overperformance_winner);
+      a.games_w += m.games_loser; a.games_l += m.games_winner;
+      if(isUpset) a.upset_losses++;
+    });
+  });
+
+  const allNames = Object.keys(ratings);
+  const byTier = {};
+  allNames.forEach(name=>{
+    const t = tierMap[name] || 'B';
+    (byTier[t] = byTier[t]||[]).push(name);
+  });
+
+  const tierAvgRating = {}, tierAvgOpp = {}, tierMinRating = {}, tierMaxRating = {};
+  TIER_ORDER_LIST.forEach(t=>{
+    const names = byTier[t] || [];
+    if(names.length===0) return;
+    tierAvgRating[t] = names.reduce((s,n)=>s+ratings[n],0)/names.length;
+    const opps = names.map(n=>{
+      const a = agg[n];
+      return a && a.strengths.length ? a.strengths.reduce((s,x)=>s+x,0)/a.strengths.length : ratings[n];
+    });
+    tierAvgOpp[t] = opps.reduce((s,x)=>s+x,0)/opps.length;
+    tierMinRating[t] = Math.min(...names.map(n=>ratings[n]));
+    tierMaxRating[t] = Math.max(...names.map(n=>ratings[n]));
+  });
+
+  const PROMO_THRESHOLD = 100, DEMO_THRESHOLD = 100, MIN_GAMES_FOR_RISK = 4;
+
+  const players = [];
+  TIER_ORDER_LIST.forEach(t=>{
+    const names = (byTier[t]||[]).slice().sort((a,b)=>ratings[b]-ratings[a]);
+    names.forEach((name, idx)=>{
+      const a = agg[name] || {wins:0,losses:0,strengths:[],overperf:[],games_w:0,games_l:0,upset_wins:0,upset_losses:0};
+      const total = a.wins + a.losses;
+      const avgStrength = a.strengths.length ? a.strengths.reduce((s,x)=>s+x,0)/a.strengths.length : ratings[name];
+      const avgOverperf = a.overperf.length ? 100*a.overperf.reduce((s,x)=>s+x,0)/a.overperf.length : 0;
+      const idx0 = TIER_IDX[t];
+      const tierAbove = idx0>0 ? TIER_ORDER_LIST[idx0-1] : null;
+      const tierBelow = idx0<3 ? TIER_ORDER_LIST[idx0+1] : null;
+      const promotionGap = (tierAbove && tierMinRating[tierAbove]!==undefined) ? Math.round((tierMinRating[tierAbove]-ratings[name])*10)/10 : null;
+      const demotionGap = (tierBelow && tierMaxRating[tierBelow]!==undefined) ? Math.round((ratings[name]-tierMaxRating[tierBelow])*10)/10 : null;
+      const confidence = total < MIN_GAMES_FOR_RISK ? 'low' : (total < 10 ? 'medium' : 'high');
+      let risk = 'stable';
+      if(confidence==='low') risk='unproven';
+      else if(promotionGap!==null && promotionGap<=PROMO_THRESHOLD) risk='promotion_watch';
+      else if(demotionGap!==null && demotionGap<=DEMO_THRESHOLD) risk='demotion_watch';
+
+      players.push({
+        name, tier: t, rating: Math.round(ratings[name]*10)/10,
+        wins: a.wins, losses: a.losses, total, winpct: total? Math.round(1000*a.wins/total)/10 : 0,
+        avg_match_strength: Math.round(avgStrength*10)/10, avg_overperf_pct: Math.round(avgOverperf*10)/10,
+        game_diff: a.games_w - a.games_l,
+        upset_wins: a.upset_wins, upset_losses: a.upset_losses,
+        upset_total: a.upset_wins+a.upset_losses,
+        upset_rate: total ? Math.round(1000*(a.upset_wins+a.upset_losses)/total)/10 : 0,
+        tier_rank: idx+1, tier_size: names.length,
+        tier_avg_rating: Math.round(tierAvgRating[t]*10)/10,
+        rating_vs_tier_avg: Math.round((ratings[name]-tierAvgRating[t])*10)/10,
+        tier_avg_opp: Math.round(tierAvgOpp[t]*10)/10,
+        opp_vs_tier_avg: Math.round((avgStrength-tierAvgOpp[t])*10)/10,
+        promotion_gap: promotionGap, demotion_gap: demotionGap,
+        confidence, risk, active: activeMap[name] !== false,
+      });
+    });
+  });
+  return players;
+}
+
+function buildH2H(enrichedMatches){
+  const h2h = {};
+  enrichedMatches.forEach(m=>{
+    m.winners.forEach(a=>m.losers.forEach(b=>{
+      const key=[a,b].sort().join('|');
+      h2h[key]=(h2h[key]||0)+1;
+    }));
+  });
+  return h2h;
+}
+
+function buildPartnerships(enrichedMatches, tierMap){
+  const partnerships = {};
+  enrichedMatches.forEach(m=>{
+    [[m.winners, true],[m.losers,false]].forEach(([team,isWin])=>{
+      if(team.length!==2) return;
+      const key = [...team].sort().join('|');
+      if(!partnerships[key]) partnerships[key] = {pair: [...team].sort(), games:0, wins:0, losses:0, overperfSum:0};
+      const p = partnerships[key];
+      p.games++;
+      if(isWin){ p.wins++; p.overperfSum += m.overperformance_winner; }
+      else { p.losses++; p.overperfSum += -m.overperformance_winner; }
+    });
+  });
+  const rows = [];
+  Object.values(partnerships).forEach(p=>{
+    if(p.games<2) return;
+    rows.push({
+      pair: p.pair, games: p.games, wins: p.wins, losses: p.losses,
+      winpct: Math.round(1000*p.wins/p.games)/10,
+      avg_overperf: Math.round(1000*p.overperfSum/p.games)/10,
+      tier_a: tierMap[p.pair[0]], tier_b: tierMap[p.pair[1]],
+    });
+  });
+  rows.sort((a,b)=> b.avg_overperf - a.avg_overperf);
+  return rows;
+}
+
+function buildBestPartner(partnerships){
+  const best = {};
+  partnerships.forEach(r=>{
+    r.pair.forEach((name,i)=>{
+      const partner = r.pair[1-i];
+      const cur = best[name];
+      if(!cur || r.avg_overperf > cur.avg_overperf){
+        best[name] = {partner, games:r.games, wins:r.wins, losses:r.losses, winpct:r.winpct, avg_overperf:r.avg_overperf};
+      }
+    });
+  });
+  return best;
+}
+
+function findWingman(players, targetRating, exclude, sameTier, minGames){
+  let best=null;
+  players.forEach(p=>{
+    if(exclude.has(p.name) || p.total < minGames) return;
+    if(sameTier && p.tier!==sameTier) return;
+    const gap = Math.abs(p.rating-targetRating);
+    if(!best || gap<best.gap) best={gap, p};
+  });
+  return best ? best.p : null;
+}
+
+function buildMatchup(players, focusA, focusB, globalExclude, tier){
+  const byName = {}; players.forEach(p=>byName[p.name]=p);
+  if(!byName[focusA] || !byName[focusB]) return null;
+  const ra=byName[focusA].rating, rb=byName[focusB].rating;
+  const exclude = new Set([focusA,focusB,...globalExclude]);
+
+  // Prefer staying within the same tier even with a less-experienced wingman, over reaching
+  // outside the tier for someone more proven -- especially matters for thin tiers like C.
+  let wingA = tier ? findWingman(players, rb, exclude, tier, 4) : null;
+  if(!wingA && tier) wingA = findWingman(players, rb, exclude, tier, 1);
+  if(!wingA) wingA = findWingman(players, rb, exclude, null, 4);
+  if(!wingA) return null;
+
+  const exclude2 = new Set([...exclude, wingA.name]);
+  let wingB = tier ? findWingman(players, ra, exclude2, tier, 4) : null;
+  if(!wingB && tier) wingB = findWingman(players, ra, exclude2, tier, 1);
+  if(!wingB) wingB = findWingman(players, ra, exclude2, null, 4);
+  if(!wingB) return null;
+
+  const team1=[focusA,wingA.name], team2=[focusB,wingB.name];
+  const t1r=(ra+wingA.rating)/2, t2r=(rb+wingB.rating)/2;
+  return {team1,team2, team1_rating:Math.round(t1r*10)/10, team2_rating:Math.round(t2r*10)/10,
+          team_gap: Math.round(Math.abs(t1r-t2r)*10)/10,
+          wingA_games: wingA.total, wingB_games: wingB.total};
+}
+
+function buildBoundaryTests(activePlayers, h2h){
+  const byName = {}; activePlayers.forEach(p=>byName[p.name]=p);
+  const names = activePlayers.map(p=>p.name);
+  const candidates = [];
+  for(let i=0;i<names.length;i++) for(let j=i+1;j<names.length;j++){
+    const a=names[i], b=names[j];
+    const pa=byName[a], pb=byName[b];
+    if(Math.abs(TIER_IDX[pa.tier]-TIER_IDX[pb.tier]) !== 1) continue;
+    const gap = Math.abs(pa.rating-pb.rating);
+    if(gap>130) continue;
+    const minGames = Math.min(pa.total, pb.total);
+    if(minGames<3) continue;
+    const played = h2h[[a,b].sort().join('|')] || 0;
+    candidates.push({a,b, tier_a:pa.tier, tier_b:pb.tier, rating_a:pa.rating, rating_b:pb.rating,
+                      gap: Math.round(gap*10)/10, played_before: played, games_a: pa.total, games_b: pb.total});
+  }
+  candidates.sort((x,y)=> (x.played_before-y.played_before) || (x.gap-y.gap));
+  const top = candidates.slice(0,8);
+  const focusNames = new Set(); top.forEach(c=>{ focusNames.add(c.a); focusNames.add(c.b); });
+  top.forEach(c=>{
+    const otherFocus = new Set([...focusNames].filter(n=>n!==c.a && n!==c.b));
+    c.matchup = buildMatchup(activePlayers, c.a, c.b, otherFocus);
+  });
+  return top.filter(c=>c.matchup);
+}
+
+function buildCalibrationGames(activePlayers, h2h){
+  const lowSample = activePlayers.filter(p=>p.total<4);
+  const rows = [];
+  lowSample.forEach(p=>{
+    let best=null;
+    activePlayers.forEach(q=>{
+      if(q.name===p.name || q.total<6) return;
+      const played = h2h[[p.name,q.name].sort().join('|')] || 0;
+      const gap = Math.abs(p.rating-q.rating);
+      const score = played*200+gap;
+      if(!best || score<best.score) best={score, opponent:q.name, tier:q.tier, rating:q.rating, games:q.total, gap:Math.round(gap*10)/10, played_before:played};
+    });
+    if(!best) return;
+    rows.push({name:p.name, tier:p.tier, rating:p.rating, games:p.total, best_anchor:best});
+  });
+  rows.sort((a,b)=> a.best_anchor.gap - b.best_anchor.gap);
+  rows.forEach(r=>{ r.matchup = buildMatchup(activePlayers, r.name, r.best_anchor.opponent, new Set()); });
+  return rows.filter(r=>r.matchup);
+}
+
+function buildWithinTierGames(activePlayers, h2h){
+  const byTier = {};
+  activePlayers.forEach(p=>{ (byTier[p.tier]=byTier[p.tier]||[]).push(p); });
+  const picked = [];
+  TIER_ORDER_LIST.forEach(t=>{
+    const tp = byTier[t]||[];
+    if(tp.length<2) return;
+    const cands = [];
+    for(let i=0;i<tp.length;i++) for(let j=i+1;j<tp.length;j++){
+      const p=tp[i], q=tp[j];
+      const minGames = Math.min(p.total,q.total);
+      if(minGames<3) continue;
+      const gap = Math.abs(p.rating-q.rating);
+      const played = h2h[[p.name,q.name].sort().join('|')] || 0;
+      cands.push({tier:t, a:p.name, b:q.name, rating_a:p.rating, rating_b:q.rating,
+                  gap:Math.round(gap*10)/10, games_a:p.total, games_b:q.total, played_before:played});
+    }
+    // Balance closeness against staleness: a tiny gap that's been played many times is still
+    // interesting (a settled rivalry), it shouldn't be buried just because it's not "fresh".
+    cands.forEach(c=> c.score = c.gap + c.played_before * 2);
+    cands.sort((x,y)=> x.score - y.score);
+    picked.push(...cands.slice(0,2));
+  });
+  const byTierFocus = {};
+  picked.forEach(c=>{ (byTierFocus[c.tier]=byTierFocus[c.tier]||new Set()).add(c.a); byTierFocus[c.tier].add(c.b); });
+  picked.forEach(c=>{
+    const otherFocus = new Set([...byTierFocus[c.tier]].filter(n=>n!==c.a && n!==c.b));
+    c.matchup = buildMatchup(activePlayers, c.a, c.b, otherFocus, c.tier);
+    if(c.matchup){
+      const allP = c.matchup.team1.concat(c.matchup.team2);
+      const byName = {}; activePlayers.forEach(p=>byName[p.name]=p);
+      const tiersInvolved = [...new Set(allP.map(n=>byName[n].tier))].sort();
+      c.matchup.pure_tier = (tiersInvolved.length===1 && tiersInvolved[0]===c.tier);
+      c.matchup.tiers_involved = tiersInvolved;
+      c.matchup.has_light_wingman = (c.matchup.wingA_games < 4 || c.matchup.wingB_games < 4);
+    }
+  });
+  return picked.filter(c=>c.matchup);
+}
+
+function bestPairNear(players, targetRating, exclude){
+  let best=null;
+  const pool = players.filter(p=>!exclude.has(p.name));
+  for(let i=0;i<pool.length;i++) for(let j=i+1;j<pool.length;j++){
+    const p=pool[i], q=pool[j];
+    const avg=(p.rating+q.rating)/2;
+    const gap=Math.abs(avg-targetRating);
+    if(!best || gap<best.gap) best={gap, pair:[p.name,q.name], avg_rating:Math.round(avg*10)/10};
+  }
+  return best ? {pair:best.pair, avg_rating:best.avg_rating, gap_to_target:Math.round(best.gap*10)/10} : null;
+}
+
+function buildDifficultySuggestions(allPlayers, activePlayers){
+  const diff = {};
+  const byTier = {};
+  activePlayers.forEach(p=>{ (byTier[p.tier]=byTier[p.tier]||[]).push(p); });
+
+  allPlayers.forEach(p=>{
+    const R = p.rating;
+    const exclude = new Set([p.name]);
+    const tierPeers = (byTier[p.tier]||[]).filter(x=>x.name!==p.name);
+    const withinTier = tierPeers.length >= 2;
+
+    let easy, balanced, hard;
+    if(withinTier){
+      const tierRatings = (byTier[p.tier]||[]).map(x=>x.rating);
+      const tierMin = Math.min(...tierRatings), tierMax = Math.max(...tierRatings);
+      easy = bestPairNear(tierPeers, tierMin, exclude);
+      balanced = bestPairNear(tierPeers, R, exclude);
+      hard = bestPairNear(tierPeers, tierMax, exclude);
+    } else {
+      // not enough same-tier players (e.g. Manny, the only Tier S player) -- fall back to any tier
+      easy = bestPairNear(activePlayers, R-150, exclude);
+      balanced = bestPairNear(activePlayers, R, exclude);
+      hard = bestPairNear(activePlayers, R+150, exclude);
+    }
+
+    diff[p.name] = {
+      easy, balanced, hard, withinTier,
+      crossTier: bestPairNear(activePlayers, R, exclude), // best overall-rating match regardless of tier
+    };
+  });
+  return diff;
+}
+
+function recomputeAll(){
+  rebuildMapsFromState();
+  ALL_MATCHES = getEffectiveMatches();
+  const ratings = computeElo(ALL_MATCHES, TIER_MAP, STARTING_TIER_MAP);
+  MATCHES = enrichMatches(ALL_MATCHES, ratings);
+  PLAYERS = buildPlayers(MATCHES, ratings, TIER_MAP, ACTIVE_MAP);
+  PLAYERS.forEach(p=>{
+    const form = computeRecentForm(p.name, 10);
+    p.recent_form = form ? form.avgPct : null;
+    p.recent_form_games = form ? form.games : 0;
+    p.recent_form_wins = form ? form.wins : 0;
+    p.recent_form_losses = form ? form.losses : 0;
+    p.recent_form_days_ago = form ? form.daysSinceLastGame : null;
+    p.recent_form_stale = form ? form.daysSinceLastGame > RECENT_FORM_STALE_DAYS : false;
+  });
+  H2H = buildH2H(MATCHES);
+  PARTNERSHIPS = buildPartnerships(MATCHES, TIER_MAP);
+  BEST_PARTNER = buildBestPartner(PARTNERSHIPS);
+  INACTIVE_PLAYERS = new Set(PLAYERS.filter(p=>!p.active).map(p=>p.name));
+  const activePlayers = PLAYERS.filter(p=>p.active);
+  BOUNDARY_TESTS = buildBoundaryTests(activePlayers, H2H);
+  CALIBRATION_GAMES = buildCalibrationGames(activePlayers, H2H);
+  WITHIN_TIER_GAMES = buildWithinTierGames(activePlayers, H2H);
+  DIFFICULTY_SUGGESTIONS = buildDifficultySuggestions(PLAYERS, activePlayers);
+  const monthSelectEl = document.getElementById('monthSelect');
+  if(monthSelectEl) populateMonthSelect(monthSelectEl);
+}
+
+
+
+const TIERS = ["All","S","A","B","C"];
+let activeTab = "power";
+let activeTier = "All";
+let activeSort = "wins";
+let activeSortP = "rating";
+let query = "";
+let minGames = 10;
+let selectedMonth = 'all';
+let selectedGamesPlayer = 'all';
+let dataQualityFilter = 'verified'; // 'all' | 'verified' (June onwards) | 'unverified' (pre-June, single-sourced)
+
+function getAvailableMonths(){
+  const months = new Set();
+  getDisplayMatches().forEach(m=> months.add(m.date.slice(0,7)));
+  return [...months].sort();
+}
+function monthLabel(ym){
+  const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const [y,m] = ym.split('-');
+  return names[parseInt(m)-1] + ' ' + y;
+}
+function dayLabel(ymd){
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const [y,m,d] = ymd.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  return `${days[dt.getDay()]}, ${d} ${months[m-1]} ${y}`;
+}
+function computeMonthlyStats(month){
+  const filtered = month==='all' ? MATCHES : MATCHES.filter(m=>m.date.slice(0,7)===month);
+  // Judge opponent strength and upset status using each player's rating AS OF this specific
+  // month, not their season-long rating -- otherwise "avg opp." and "upset" would be judged by
+  // a different yardstick than the Month Rating headline number sitting right next to them.
+  const monthlyRatings = month==='all' ? {} : computeMonthlyRating(month);
+  function ratingFor(name){
+    if(name in monthlyRatings) return monthlyRatings[name];
+    const p = PLAYERS.find(x=>x.name===name);
+    return p ? p.rating : 1400; // fallback should never actually trigger for a match within this month
+  }
+  const agg = {};
+  function A(name){
+    if(!agg[name]) agg[name] = {wins:0, losses:0, strengths:[], overperf:[], games_w:0, games_l:0, upset_wins:0, upset_losses:0};
+    return agg[name];
+  }
+  const GAP_THRESHOLD = 15;
+  filtered.forEach(m=>{
+    const winnerTeamRating = m.winners[1] ? (ratingFor(m.winners[0]) + ratingFor(m.winners[1])) / 2 : ratingFor(m.winners[0]);
+    const loserTeamRating = m.losers[1] ? (ratingFor(m.losers[0]) + ratingFor(m.losers[1])) / 2 : ratingFor(m.losers[0]);
+    const monthMatchStrength = (winnerTeamRating + loserTeamRating) / 2;
+    const gap = Math.abs(winnerTeamRating - loserTeamRating);
+    const isClose = gap < GAP_THRESHOLD;
+    const winnerFavored = winnerTeamRating > loserTeamRating;
+    const isUpset = !isClose && !winnerFavored;
+    m.winners.forEach(p=>{
+      const a = A(p);
+      a.wins++; a.strengths.push(monthMatchStrength); a.overperf.push(m.overperformance_winner);
+      a.games_w += m.games_winner; a.games_l += m.games_loser;
+      if(isUpset) a.upset_wins++;
+    });
+    m.losers.forEach(p=>{
+      const a = A(p);
+      a.losses++; a.strengths.push(monthMatchStrength); a.overperf.push(-m.overperformance_winner);
+      a.games_w += m.games_loser; a.games_l += m.games_winner;
+      if(isUpset) a.upset_losses++;
+    });
+  });
+  const stats = {};
+  Object.keys(agg).forEach(name=>{
+    const a = agg[name];
+    const total = a.wins+a.losses;
+    const avgStrength = a.strengths.length ? a.strengths.reduce((s,x)=>s+x,0)/a.strengths.length : 0;
+    const avgOverperf = a.overperf.length ? 100*a.overperf.reduce((s,x)=>s+x,0)/a.overperf.length : 0;
+    stats[name] = {
+      wins:a.wins, losses:a.losses, total, winpct: total?Math.round(1000*a.wins/total)/10:0,
+      avg_match_strength: Math.round(avgStrength*10)/10, avg_overperf_pct: Math.round(avgOverperf*10)/10,
+      game_diff: a.games_w-a.games_l,
+      upset_wins:a.upset_wins, upset_losses:a.upset_losses, upset_total:a.upset_wins+a.upset_losses,
+      upset_rate: total?Math.round(1000*(a.upset_wins+a.upset_losses)/total)/10:0,
+    };
+  });
+  return stats;
+}
+
+// A genuine tier-seeded rating computed from ONLY the given month's matches -- as if that month
+// were its own mini-season. Uses the exact same engine as the official Power Rating, just on a
+// restricted match set. Players with no games that month simply won't appear in the result.
+function computeMonthlyRating(month){
+  if(month === 'all') return {};
+  const monthMatches = ALL_MATCHES.filter(m => m.date.slice(0,7) === month);
+  return computeElo(monthMatches, TIER_MAP, STARTING_TIER_MAP);
+}
+
+// Builds the raw ingredients for a "monthly awards" style recap: games played, wins/losses/draws
+// and points (3/win, 1/draw), win% and loss% (of all games that month, draws included in the
+// denominator), doughnuts conceded (any set lost 0-6 or similar), and a "hardest games" score
+// (that player's average opponent strength that month, scaled down by 300 -- the same tier-gap
+// unit used everywhere else in the app -- into a friendlier small number).
+// Skip filtering by date when 'all' is chosen, so the same summary format also works as a
+// whole-season recap, not just a single month.
+function computeMonthlySummaryStats(month){
+  const agg = {};
+  function A(name){
+    if(!agg[name]) agg[name] = {wins:0, losses:0, draws:0, doughnuts:0, strengths:[], games_w:0, games_l:0};
+    return agg[name];
+  }
+
+  // Rated (non-draw) matches: ALL_MATCHES carries the raw set scores; MATCHES (same index, same
+  // order) carries the computed match_strength -- combine the two rather than assuming either
+  // array alone has everything needed.
+  ALL_MATCHES.forEach((raw, idx)=>{
+    if(month !== 'all' && raw.date.slice(0,7) !== month) return;
+    const enriched = MATCHES[idx];
+    if(!enriched) return;
+    const allNames = [...new Set([...raw.winners, ...raw.losers])];
+    allNames.forEach(n => A(n).strengths.push(enriched.match_strength));
+    raw.winners.forEach(n=>{ A(n).wins++; A(n).games_w += enriched.games_winner; A(n).games_l += enriched.games_loser; });
+    raw.losers.forEach(n=>{ A(n).losses++; A(n).games_w += enriched.games_loser; A(n).games_l += enriched.games_winner; });
+    raw.sets.forEach(([x,y])=>{
+      if(y === 0) raw.losers.forEach(n=>A(n).doughnuts++);
+      if(x === 0) raw.winners.forEach(n=>A(n).doughnuts++);
+    });
+  });
+
+  // Draws are excluded from the rating engine entirely, so they're pulled separately here --
+  // "winners"/"losers" on a draw just mean team1/team2, not an actual result.
+  getAllApprovedMatches().filter(m => m.isDraw && (month==='all' || m.date.slice(0,7)===month)).forEach(m=>{
+    const allNames = [...new Set([...m.winners, ...m.losers])];
+    const strengthEstimate = allNames.reduce((s,n)=>{
+      const p = PLAYERS.find(x=>x.name===n);
+      return s + (p ? p.rating : 1400);
+    }, 0) / (allNames.length || 1);
+    allNames.forEach(n => A(n).strengths.push(strengthEstimate));
+    const team1Games = m.sets.reduce((s,[x,y])=>s+x,0);
+    const team2Games = m.sets.reduce((s,[x,y])=>s+y,0);
+    m.winners.forEach(n=>{ A(n).draws++; A(n).games_w += team1Games; A(n).games_l += team2Games; });
+    m.losers.forEach(n=>{ A(n).draws++; A(n).games_w += team2Games; A(n).games_l += team1Games; });
+    m.sets.forEach(([x,y])=>{
+      if(y === 0) m.losers.forEach(n=>A(n).doughnuts++);
+      if(x === 0) m.winners.forEach(n=>A(n).doughnuts++);
+    });
+  });
+
+  const out = {};
+  Object.keys(agg).forEach(name=>{
+    const a = agg[name];
+    const games = a.wins + a.losses + a.draws;
+    const avgStrength = a.strengths.length ? a.strengths.reduce((s,x)=>s+x,0)/a.strengths.length : 0;
+    out[name] = {
+      name, games, wins: a.wins, losses: a.losses, draws: a.draws,
+      points: a.wins*3 + a.draws*1,
+      winpct: games ? Math.round(1000*a.wins/games)/10 : 0,
+      losspct: games ? Math.round(1000*a.losses/games)/10 : 0,
+      gd: a.games_w - a.games_l,
+      doughnuts: a.doughnuts,
+      hardness: Math.round((avgStrength/300)*10)/10,
+      avg_opp: Math.round(avgStrength),
+    };
+  });
+  return out;
+}
+
+// Turns a metric into a ranked, tie-grouped top-N list: {rank, names:[...], value}. Ties share a
+// rank and are grouped together (e.g. two players tied for 3rd both show as rank 3).
+function topNTied(statsArr, key, n, descending){
+  const sorted = statsArr.slice().sort((a,b)=> descending ? b[key]-a[key] : a[key]-b[key]);
+  const groups = [];
+  sorted.forEach(s=>{
+    const last = groups[groups.length-1];
+    if(last && last.value === s[key]){
+      last.names.push(s.name);
+    } else {
+      groups.push({ value: s[key], names: [s.name] });
+    }
+  });
+  return groups.slice(0, n).map((g,i)=>({ rank: i+1, names: g.names, value: g.value }));
+}
+const ZERO_MONTH_STATS = {wins:0,losses:0,total:0,winpct:0,avg_match_strength:0,avg_overperf_pct:0,game_diff:0,upset_wins:0,upset_losses:0,upset_total:0,upset_rate:0};
+
+function populateMonthSelect(selectEl){
+  if(!selectEl) return;
+  const months = getAvailableMonths();
+  selectEl.innerHTML = `<option value="all">All time</option>` + months.map(m=>`<option value="${m}" ${m===selectedMonth?'selected':''}>${monthLabel(m)}</option>`).join('');
+  selectEl.value = selectedMonth;
+}
+
+function applyTabVisibility(){
+  const tabSectionMap = {
+    power: 'power',
+    callouts: 'callouts',
+    findgame: 'findgame',
+    games: 'games',
+    players: 'players',
+    wishlist: 'wishlist',
+    upcoming: 'upcoming',
+    // 'wl' and 'manage' are always available (manage is lock-gated on its own)
+  };
+  document.querySelectorAll('#tabrow .tab-btn').forEach(btn=>{
+    const tab = btn.dataset.tab;
+    const section = tabSectionMap[tab];
+    const visible = !section || canSee(section);
+    btn.style.display = visible ? '' : 'none';
+    // if the active tab just got hidden, fall back to Win/Loss
+    if(!visible && activeTab === tab){
+      activeTab = 'wl';
+      document.querySelectorAll('#tabrow .tab-btn').forEach(b=>b.classList.remove('active'));
+      const wlBtn = document.querySelector('#tabrow .tab-btn[data-tab="wl"]');
+      if(wlBtn) wlBtn.classList.add('active');
+      ['calloutsView','playersView','findGameView','manageView','gamesView','h2hView','wishlistView','upcomingView'].forEach(id=>{
+        const el = document.getElementById(id); if(el) el.style.display = 'none';
+      });
+      const listEl = document.getElementById('list'); if(listEl) listEl.style.display = 'block';
+      ['tierbar','searchWrap','minGamesRow','monthFilterRow','dataQualityRow','sortbar'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(el) el.style.display = (id==='searchWrap') ? 'block' : 'flex';
+      });
+      const sp = document.getElementById('sortbarPower'); if(sp) sp.style.display = 'none';
+    }
+  });
+}
+
+function rerenderCurrentTab(){
+  if(activeTab==='wl' || activeTab==='power') render();
+  else if(activeTab==='games') renderGamesTab();
+  else if(activeTab==='callouts') renderCallouts();
+}
+
+
+const tierbar = document.getElementById('tierbar');
+TIERS.forEach(t=>{
+  const b = document.createElement('button');
+  b.className = 'tierbtn' + (t==='All' ? ' active' : '');
+  b.textContent = t === 'All' ? 'All players' : 'Tier ' + t;
+  b.dataset.tier = t;
+  b.onclick = ()=>{ activeTier = t; document.querySelectorAll('.tierbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(); };
+  tierbar.appendChild(b);
+});
+
+document.querySelectorAll('#tabrow .tab-btn').forEach(b=>{
+  b.onclick = ()=>{
+    activeTab = b.dataset.tab;
+    document.querySelectorAll('#tabrow .tab-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+
+    const isCallouts = activeTab === 'callouts';
+    const isPlayers = activeTab === 'players';
+    const isFindGame = activeTab === 'findgame';
+    const isManage = activeTab === 'manage';
+    const isGames = activeTab === 'games';
+    const isH2H = activeTab === 'h2h';
+    const isWishlist = activeTab === 'wishlist';
+    const isUpcoming = activeTab === 'upcoming';
+    const isSummary = activeTab === 'summary';
+    const isListView = !isCallouts && !isPlayers && !isFindGame && !isManage && !isGames && !isH2H && !isWishlist && !isUpcoming && !isSummary;
+
+    document.getElementById('tierbar').style.display = isListView ? 'flex' : 'none';
+    document.getElementById('searchWrap').style.display = (isListView || isPlayers) ? 'block' : 'none';
+    document.getElementById('minGamesRow').style.display = isListView ? 'flex' : 'none';
+    document.getElementById('monthFilterRow').style.display = isListView ? 'flex' : 'none';
+    document.getElementById('dataQualityRow').style.display = (isListView || isCallouts) ? 'flex' : 'none';
+    document.getElementById('sortbar').style.display = (activeTab==='wl') ? 'flex' : 'none';
+    document.getElementById('sortbarPower').style.display = (activeTab==='power') ? 'flex' : 'none';
+    document.getElementById('list').style.display = isListView ? 'block' : 'none';
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('calloutsView').style.display = isCallouts ? 'block' : 'none';
+    document.getElementById('playersView').style.display = isPlayers ? 'block' : 'none';
+    document.getElementById('findGameView').style.display = isFindGame ? 'block' : 'none';
+    document.getElementById('manageView').style.display = isManage ? 'block' : 'none';
+    document.getElementById('gamesView').style.display = isGames ? 'block' : 'none';
+    document.getElementById('h2hView').style.display = isH2H ? 'block' : 'none';
+    document.getElementById('wishlistView').style.display = isWishlist ? 'block' : 'none';
+    document.getElementById('upcomingView').style.display = isUpcoming ? 'block' : 'none';
+    document.getElementById('summaryView').style.display = isSummary ? 'block' : 'none';
+
+    const HEADER_SUB_BY_TAB = {
+      wl: 'Parsed from the group chats, June–August 2026 · tap a player for their match log',
+      power: 'A tier-anchored power rating · scoreline counts, not just who won · tap a player for details',
+      callouts: 'Games worth setting up next, based on what the data can\'t yet confirm',
+      findgame: 'Pick a player, a scope, and a difficulty — generate real opponent options on demand',
+      manage: 'Add results going forward and tag who\'s active — everything above recalculates instantly',
+      games: 'Every game, newest first — pending ones need approval before they count',
+      h2h: 'Pick two players and see their full history, as opponents and as teammates',
+      wishlist: 'Propose a game — once all four players confirm, it moves to Upcoming',
+      upcoming: 'Games everyone has confirmed they\'re in for',
+      summary: 'A monthly awards recap, built from the same data as everywhere else — copy it straight into WhatsApp',
+      players: 'Every player, A–Z · tap a name for their full profile',
+    };
+    document.getElementById('headerSub').textContent = HEADER_SUB_BY_TAB[activeTab] || HEADER_SUB_BY_TAB.players;
+
+    const EXPLAINER_BY_TAB = {
+      wl: 'Built from readable trophy-emoji results across the main group chat and Results Only, with names and tiers confirmed against the group. Excludes single-set/"money game" results, matches against non-members, and a couple of results with no opponent named or a disputed winner.',
+      power: 'Ratings start from the tier each player is already known to sit in (S highest, C lowest) — the tiers are treated as real signal, not something the model has to rediscover from scratch. From there, results move you based on <b>games won within each match</b>, not just who won — a close 3-set loss barely costs anything, a 6-1 6-2 loss costs a lot. A player with few games stays close to their tier baseline since there isn\'t much evidence yet to move them; a player with a long track record can drift further from it. "Avg opp." is the average strength of everyone you\'ve played with and against. "Clutch %" compares your actual scorelines to what your tier and opponents would predict. "Upset wins/losses" count matches where the underdog won outright (or the favorite lost outright) by a meaningful ratings gap — a fast way to spot giant-killers and upset-prone favorites. Use the min-games filter below to hide anyone with too few games for these numbers to mean much. "Recent Form" sorts by wins over the last 10 games first, then by average overperformance as a tiebreaker — a faster-moving signal than the overall rating, useful for spotting who\'s trending right now.',
+      callouts: 'Suggested matchups are full 2v2s — a wingman is added to each side, chosen to keep team strength balanced, so these are games you could actually go and organize. This spans every tier, not just the ones with the least data — S/A near-ties get surfaced the same way as small-sample C-tier players. Every player also has their own Easy / Balanced / Hard opponent suggestions on their profile page. The Data filter above changes which matches feed these ratings — defaults to June onwards only.',
+      findgame: '"Within my tier" keeps every suggested player inside your own tier — easy always means the weakest pair actually in your tier, hard the strongest, never a reach into a different tier. "Any tier" opens it up and targets a rating roughly 150 points below/above your own. Each suggested opponent pair also comes with a partner recommendation — the player who\'d make it an even match, with a proven-chemistry option flagged where one exists. Five options shown each time, ranked by fit — this is computed live, not a fixed list, so try different scopes and difficulties freely. Players who\'ve gone inactive are excluded from every suggestion here, though their history stays visible elsewhere.',
+      manage: 'This data is shared — anyone who opens this artifact sees the same games and tags. Ratings, tiers, and every suggestion above recompute from scratch the moment you add a game or change a tag.',
+      games: 'Editing or deleting a game recalculates every rating instantly. Your name is required for any change here so the group can see who touched what.',
+      h2h: 'Opponent record only counts matches where the two were on opposite teams; teammate record only counts matches where they played together.',
+      wishlist: 'Anyone can propose a game. Each of the four named players confirms it themselves from their own player profile — once all four are in, it moves to the Upcoming tab automatically.',
+      upcoming: 'These four have all confirmed. Once the game is actually played, add the real result from the Games tab as normal.',
+      summary: 'Points: 3 for a win, 1 for a draw. "Hardest games" is average opponent strength that month, scaled down by 300 for a friendlier number. "Doughnuts" are sets lost 0-6 or similar. Player of the Month is whoever tops the points table.',
+      players: '',
+    };
+    document.getElementById('explainer').innerHTML = EXPLAINER_BY_TAB[activeTab] || '';
+
+    if(isCallouts) renderCallouts();
+    else if(isPlayers) renderPlayersTab();
+    else if(isFindGame) renderFindGame();
+    else if(isManage) renderManage();
+    else if(isGames) renderGamesTab();
+    else if(isH2H) renderH2H();
+    else if(isWishlist) renderWishlist();
+    else if(isUpcoming) renderUpcoming();
+    else if(isSummary) renderSummary();
+    else render();
+  };
+});
+
+document.querySelectorAll('#sortbar .sortbtn').forEach(b=>{
+  b.onclick = ()=>{ activeSort = b.dataset.sort; document.querySelectorAll('#sortbar .sortbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(); };
+});
+document.querySelectorAll('#sortbarPower .sortbtn').forEach(b=>{
+  b.onclick = ()=>{ activeSortP = b.dataset.sortp; document.querySelectorAll('#sortbarPower .sortbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(); };
+});
+
+document.getElementById('search').addEventListener('input', e=>{
+  query = e.target.value.trim().toLowerCase();
+  if(activeTab === 'players') renderPlayersTab(); else render();
+});
+
+const minGamesInput = document.getElementById('minGamesInput');
+function setMinGames(n){
+  minGames = n;
+  minGamesInput.value = n;
+  document.querySelectorAll('.preset-btn').forEach(b=> b.classList.toggle('active', parseInt(b.dataset.n)===n));
+}
+minGamesInput.addEventListener('input', e=>{
+  minGames = Math.max(0, parseInt(e.target.value) || 0);
+  document.querySelectorAll('.preset-btn').forEach(b=> b.classList.toggle('active', parseInt(b.dataset.n)===minGames));
+  render();
+});
+document.querySelectorAll('.preset-btn').forEach(b=>{
+  b.onclick = ()=>{
+    minGames = parseInt(b.dataset.n);
+    minGamesInput.value = minGames;
+    document.querySelectorAll('.preset-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    render();
+  };
+});
+
+const monthSelect = document.getElementById('monthSelect');
+monthSelect.addEventListener('change', e=>{
+  const wasAll = selectedMonth === 'all';
+  const isNowAll = e.target.value === 'all';
+  selectedMonth = e.target.value;
+  if(wasAll && !isNowAll){
+    setMinGames(5); // switching into a monthly review -- games-per-month are naturally lower
+  } else if(!wasAll && isNowAll){
+    setMinGames(10); // back to the overall view -- restore the usual default
+  }
+  rerenderCurrentTab();
+});
+
+const dataQualitySelect = document.getElementById('dataQualitySelect');
+dataQualitySelect.value = dataQualityFilter;
+dataQualitySelect.addEventListener('change', e=>{
+  dataQualityFilter = e.target.value;
+  recomputeAll();
+  rerenderCurrentTab();
+});
+
+
+function sortRows(rows){
+  const arr = [...rows];
+  if(activeTab==='wl'){
+    if(activeSort==='winpct') arr.sort((a,b)=> b.winpct - a.winpct || b.total - a.total);
+    else if(activeSort==='total') arr.sort((a,b)=> b.total - a.total);
+    else if(activeSort==='wins') arr.sort((a,b)=> b.wins - a.wins);
+    else if(activeSort==='name') arr.sort((a,b)=> a.name.localeCompare(b.name));
+  } else {
+    if(activeSortP==='rating') arr.sort((a,b)=> b.rating - a.rating);
+    else if(activeSortP==='month_rating') arr.sort((a,b)=> (b.month_rating ?? -Infinity) - (a.month_rating ?? -Infinity));
+    else if(activeSortP==='recent_form') arr.sort((a,b)=> {
+      // Stale form (no game in a while) shouldn't outrank someone who's actually active right now.
+      if(a.recent_form_stale !== b.recent_form_stale) return a.recent_form_stale ? 1 : -1;
+      return (b.recent_form_wins ?? -999) - (a.recent_form_wins ?? -999) || (b.recent_form ?? -999) - (a.recent_form ?? -999);
+    });
+    else if(activeSortP==='avg_match_strength') arr.sort((a,b)=> b.avg_match_strength - a.avg_match_strength);
+    else if(activeSortP==='avg_overperf_pct') arr.sort((a,b)=> b.avg_overperf_pct - a.avg_overperf_pct);
+    else if(activeSortP==='upset_total') arr.sort((a,b)=> b.upset_rate - a.upset_rate || b.upset_total - a.upset_total);
+    else if(activeSortP==='name') arr.sort((a,b)=> a.name.localeCompare(b.name));
+  }
+  return arr;
+}
+
+function render(){
+  const monthRatingBtn = document.getElementById('sortMonthRatingBtn');
+  if(monthRatingBtn){
+    const showIt = selectedMonth !== 'all';
+    monthRatingBtn.style.display = showIt ? '' : 'none';
+    if(!showIt && activeSortP === 'month_rating'){
+      // The month filter was cleared while sorted by it -- fall back to the season rating.
+      activeSortP = 'rating';
+      document.querySelectorAll('#sortbarPower .sortbtn').forEach(b=> b.classList.toggle('active', b.dataset.sortp==='rating'));
+    }
+  }
+
+  let rows = PLAYERS.filter(p => activeTier==='All' || p.tier===activeTier);
+  let monthlyRatings = {};
+  if(selectedMonth !== 'all'){
+    const monthly = computeMonthlyStats(selectedMonth);
+    monthlyRatings = computeMonthlyRating(selectedMonth);
+    rows = rows.map(p => ({...p, ...(monthly[p.name] || ZERO_MONTH_STATS),
+      month_rating: (p.name in monthlyRatings) ? Math.round(monthlyRatings[p.name]*10)/10 : null}));
+  }
+  rows = rows.filter(p => p.total >= minGames);
+  if(query) rows = rows.filter(p => p.name.toLowerCase().includes(query));
+  rows = sortRows(rows);
+
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
+  list.innerHTML = '';
+  empty.style.display = rows.length ? 'none' : 'block';
+
+  if(selectedMonth !== 'all'){
+    const note = document.createElement('div');
+    note.className = 'section-sub';
+    note.style.padding = '8px 2px';
+    note.innerHTML = activeTab==='power'
+      ? `Showing <b style="color:var(--text);">${monthLabel(selectedMonth)}</b> only — record, avg opp., clutch and upsets are for this month. "This month" is a genuine tier-seeded rating using only ${monthLabel(selectedMonth)}'s matches, as if it were its own mini-season — separate from the overall rating, which stays as-is.`
+      : `Showing <b style="color:var(--text);">${monthLabel(selectedMonth)}</b> only.`;
+    list.appendChild(note);
+  }
+
+  rows.forEach((p, i)=>{
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.onclick = ()=> openSheet(p.name);
+    if(activeTab==='wl'){
+      row.innerHTML = `
+        <div class="rank">${i+1}</div>
+        <div class="badge ${p.tier}">${p.tier}</div>
+        <div class="namecol">
+          <div class="nm">${p.name}</div>
+          <div class="meta">${p.total} game${p.total===1?'':'s'} played</div>
+        </div>
+        <div class="wl">
+          <div class="pct">${p.winpct}%</div>
+          <div class="rec"><span class="w">${p.wins}W</span> · <span class="l">${p.losses}L</span></div>
+        </div>
+      `;
+    } else {
+      const perfClass = p.avg_overperf_pct > 0.5 ? 'perf-pos' : (p.avg_overperf_pct < -0.5 ? 'perf-neg' : '');
+      const perfSign = p.avg_overperf_pct > 0 ? '+' : '';
+      const formHtml = (p.recent_form !== null && p.recent_form !== undefined)
+        ? (()=>{
+            const fClass = p.recent_form_stale ? '' : (p.recent_form > 3 ? 'perf-pos' : (p.recent_form < -3 ? 'perf-neg' : ''));
+            const fSign = p.recent_form >= 0 ? '+' : '';
+            const staleTag = p.recent_form_stale ? ` <span style="color:var(--text-dim);">· stale, last played ${fmtDaysAgo(p.recent_form_days_ago)}</span>` : '';
+            return `<div class="rating-sub ${fClass}" style="font-size:10px; ${p.recent_form_stale?'opacity:0.6;':''}">form (${p.recent_form_games}g): ${fSign}${p.recent_form}% <span style="color:var(--green);">${p.recent_form_wins}W</span>-<span style="color:var(--red);">${p.recent_form_losses}L</span>${staleTag}</div>`;
+          })()
+        : '';
+
+      const inMonthView = selectedMonth !== 'all';
+      const hasMonthGames = inMonthView && p.month_rating !== null && p.month_rating !== undefined;
+      const bigNumberHtml = (inMonthView && hasMonthGames)
+        ? `<div class="rating-big">${Math.round(p.month_rating)}</div>`
+        : (inMonthView
+            ? `<div class="rating-big" style="color:var(--text-dim); font-size:20px;">–</div>`
+            : `<div class="rating-big">${Math.round(p.rating)}</div>`);
+      const seasonSubHtml = inMonthView
+        ? `<div class="rating-sub" style="font-size:10px; color:var(--text-dim);">overall: ${Math.round(p.rating)}</div>`
+        : '';
+      const monthRatingHtml = (inMonthView && !hasMonthGames)
+        ? `<div class="rating-sub" style="font-size:10px; color:var(--text-dim);">no games this month</div>`
+        : '';
+
+      const wlHtml = inMonthView ? ` · <span style="color:var(--green);">${p.wins}W</span>-<span style="color:var(--red);">${p.losses}L</span>` : '';
+
+      row.innerHTML = `
+        <div class="rank">${i+1}</div>
+        <span class="tier-badge tier-${p.tier.toLowerCase()}">${p.tier}</span>
+        <div class="namecol">
+          <div class="nm">${p.name}</div>
+          <div class="meta">avg opp. ${Math.round(p.avg_match_strength)} · ${p.total} games${wlHtml}</div>
+          <div class="upset-mini"><span class="uw upset-drill" data-player="${p.name}" data-kind="upset_wins" style="cursor:pointer; text-decoration:underline;">${p.upset_wins} upset win${p.upset_wins===1?'':'s'}</span> · <span class="ul upset-drill" data-player="${p.name}" data-kind="upset_losses" style="cursor:pointer; text-decoration:underline;">${p.upset_losses} upset loss${p.upset_losses===1?'':'es'}</span> (${p.upset_rate}% of games)</div>
+        </div>
+        <div class="wl">
+          ${bigNumberHtml}
+          <div class="rating-sub ${perfClass}">${perfSign}${p.avg_overperf_pct}% clutch</div>
+          ${formHtml}
+          ${seasonSubHtml}
+          ${monthRatingHtml}
+        </div>
+      `;
+    }
+    list.appendChild(row);
+    row.querySelectorAll('.upset-drill').forEach(el=>{
+      el.onclick = (e)=>{
+        e.stopPropagation();
+        openSheet(el.dataset.player, el.dataset.kind);
+      };
+    });
+  });
+}
+
+function ratingOf(n){ const x = PLAYERS.find(pl=>pl.name===n); return x ? Math.round(x.rating) : null; }
+
+const RISK_LABELS = {
+  promotion_watch: {text: "Promotion watch", cls: "risk-promotion"},
+  demotion_watch: {text: "Demotion watch", cls: "risk-demotion"},
+  unproven: {text: "Unproven — small sample", cls: "risk-unproven"},
+  stable: {text: "Stable", cls: "risk-stable"},
+};
+
+function computeRecentForm(name, windowSize){
+  windowSize = windowSize || 10;
+  const own = MATCHES.filter(m => m.winners.includes(name) || m.losers.includes(name))
+    .sort((a,b)=> a.date < b.date ? 1 : -1) // newest first
+    .slice(0, windowSize);
+  if(own.length === 0) return null;
+  const vals = own.map(m=>{
+    const won = m.winners.includes(name);
+    return won ? m.overperformance_winner : -m.overperformance_winner;
+  });
+  const avg = vals.reduce((s,x)=>s+x,0) / vals.length;
+  const wins = own.filter(m=>m.winners.includes(name)).length;
+  const losses = own.length - wins;
+  const lastGameDate = own[0].date; // own is sorted newest-first
+  const daysSinceLastGame = Math.floor((new Date() - new Date(lastGameDate)) / 86400000);
+  return { avgPct: Math.round(avg*1000)/10, games: own.length, wins, losses, lastGameDate, daysSinceLastGame };
+}
+
+// A player who hasn't played in a while shouldn't read as "trending" just because their last
+// batch of games happened to go well -- this is the cutoff for treating Recent Form as stale.
+const RECENT_FORM_STALE_DAYS = 14;
+function fmtDaysAgo(days){
+  if(days === 0) return 'today';
+  if(days === 1) return '1 day ago';
+  if(days < 14) return days + ' days ago';
+  const weeks = Math.round(days/7);
+  if(weeks < 8) return weeks + (weeks===1?' week ago':' weeks ago');
+  const months = Math.round(days/30);
+  return months + (months===1?' month ago':' months ago');
+}
+
+function buildProfileText(p){
+  const parts = [];
+
+  // confidence / sample size
+  if(p.confidence === 'low'){
+    parts.push(`Only ${p.total} game${p.total===1?'':'s'} played so far — this rating leans heavily on the Tier ${p.tier} baseline rather than on much personal evidence, so it's the least certain kind of number in this dataset.`);
+  } else if(p.confidence === 'medium'){
+    parts.push(`${p.total} games played — enough to start moving away from the Tier ${p.tier} baseline, but still a fairly thin sample.`);
+  } else {
+    parts.push(`${p.total} games played — a solid track record, so this rating is largely earned rather than assumed from the tier.`);
+  }
+
+  // position within tier
+  const rankText = `Ranked #${p.tier_rank} of ${p.tier_size} in Tier ${p.tier}`;
+  if(Math.abs(p.rating_vs_tier_avg) < 15){
+    parts.push(`${rankText}, right around the tier average (${Math.round(p.tier_avg_rating)}).`);
+  } else if(p.rating_vs_tier_avg > 0){
+    parts.push(`${rankText}, ${Math.round(p.rating_vs_tier_avg)} points above the tier average (${Math.round(p.tier_avg_rating)}).`);
+  } else {
+    parts.push(`${rankText}, ${Math.round(Math.abs(p.rating_vs_tier_avg))} points below the tier average (${Math.round(p.tier_avg_rating)}).`);
+  }
+
+  // schedule strength
+  if(Math.abs(p.opp_vs_tier_avg) < 20){
+    parts.push(`Opposition faced has been about average for the tier.`);
+  } else if(p.opp_vs_tier_avg > 0){
+    parts.push(`Opposition faced has run tougher than the tier average by ${Math.round(p.opp_vs_tier_avg)} points — a harder schedule than most tier-mates.`);
+  } else {
+    parts.push(`Opposition faced has run softer than the tier average by ${Math.round(Math.abs(p.opp_vs_tier_avg))} points — an easier schedule than most tier-mates.`);
+  }
+
+  // clutch
+  if(p.avg_overperf_pct > 3){
+    parts.push(`Scorelines have run ahead of what the ratings predicted (+${p.avg_overperf_pct}% clutch) — results have generally been better than expected.`);
+  } else if(p.avg_overperf_pct < -3){
+    parts.push(`Scorelines have run behind what the ratings predicted (${p.avg_overperf_pct}% clutch) — results have generally been a bit worse than expected.`);
+  } else {
+    parts.push(`Scorelines have tracked expectation closely (${p.avg_overperf_pct>=0?'+':''}${p.avg_overperf_pct}% clutch) — nothing unusual going on there.`);
+  }
+
+  // upsets
+  if(p.upset_wins > 0 || p.upset_losses > 0){
+    parts.push(`${p.upset_wins} upset win${p.upset_wins===1?'':'s'} and ${p.upset_losses} upset loss${p.upset_losses===1?'':'es'} on record.`);
+  }
+
+  // risk verdict
+  if(p.risk === 'promotion_watch'){
+    parts.push(`<b>Sits within ${Math.round(p.promotion_gap)} points of the tier above's floor</b> — a decent run would make a real case for promotion.`);
+  } else if(p.risk === 'demotion_watch'){
+    parts.push(`<b>Sits within ${Math.round(p.demotion_gap)} points of the tier below's ceiling</b> — worth keeping an eye on, though not a clear-cut case yet.`);
+  } else if(p.risk === 'unproven'){
+    parts.push(`Too little data to say anything definitive about tier placement either way.`);
+  } else {
+    parts.push(`Comfortably clear of both tier boundaries — no case for moving either way right now.`);
+  }
+
+  // best partnership
+  const bp = BEST_PARTNER[p.name];
+  if(bp){
+    const smallSample = bp.games < 3 ? ' (small sample)' : '';
+    parts.push(`Best chemistry so far has been with <b>${bp.partner}</b> — ${bp.wins}-${bp.losses} together (${bp.winpct}%), ${bp.avg_overperf>=0?'+':''}${bp.avg_overperf}% ahead of what the matchups alone predicted${smallSample}.`);
+  }
+
+  return parts.join(' ');
+}
+
+function renderCallouts(){
+  const box = document.getElementById('calloutsView');
+  let html = '';
+
+  if(canSee('chemistry')){
+    html += `<div class="section-heading">🤝 Best chemistry partnerships</div>`;
+    html += `<div class="section-sub">Ranked by how much a pairing overperforms what the matchup alone would predict, not just their win rate — this is what "they barely lose together" actually looks like in the numbers. Minimum 2 games together; small samples are flagged.</div>`;
+    const topPartnerships = PARTNERSHIPS.filter(p=>p.games>=2).sort((a,b)=> b.avg_overperf - a.avg_overperf).slice(0,8);
+    topPartnerships.forEach(p=>{
+      const perfClass = p.avg_overperf > 3 ? 'perf-pos' : (p.avg_overperf < -3 ? 'perf-neg' : '');
+      const smallSample = p.games < 3 ? ` <span style="color:var(--text-dim); font-size:10px;">(small sample)</span>` : '';
+      html += `<div class="callout-card">
+        <div class="cc-title">${p.pair[0]} (Tier ${p.tier_a}) &amp; ${p.pair[1]} (Tier ${p.tier_b})${smallSample}</div>
+        <div class="cc-detail">${p.games} games together · ${p.wins}-${p.losses} (${p.winpct}%) · <span class="${perfClass}">${p.avg_overperf>=0?'+':''}${p.avg_overperf}% chemistry</span></div>
+      </div>`;
+    });
+  }
+
+  html += `<div class="section-heading">🏆 Within-tier rank clarifiers</div>`;
+  html += `<div class="section-sub">Near-ties inside the same tier, from S down to C — a mix of unsettled fresh matchups and razor-thin margins even after plenty of meetings, since both are worth knowing about.</div>`;
+  const tierOrderDisplay = ["S","A","B","C"];
+  tierOrderDisplay.forEach(t=>{
+    const games = WITHIN_TIER_GAMES.filter(c=>c.tier===t);
+    if(games.length === 0) return;
+    html += `<div style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:11.5px; color:var(--gold-dim); font-weight:700; margin:8px 0 4px;">TIER ${t}</div>`;
+    games.forEach(c=>{
+      const m = c.matchup;
+      let wingNote = '';
+      if(!m.pure_tier){
+        wingNote = `<br/><span style="color:var(--text-dim); font-size:10.5px;">wingmen pulled partly from Tier ${m.tiers_involved.filter(x=>x!==t).join(', ')} — no other Tier ${t} player available to fill both sides</span>`;
+      } else if(m.has_light_wingman){
+        wingNote = `<br/><span style="color:var(--text-dim); font-size:10.5px;">stays all Tier ${t} — one wingman has fewer than 4 games, so treat the balance as a bit more provisional</span>`;
+      }
+      html += `<div class="callout-card">
+        <div class="cc-title">${c.a} (${Math.round(c.rating_a)}, ${c.games_a}g) vs ${c.b} (${Math.round(c.rating_b)}, ${c.games_b}g)</div>
+        <div class="cc-detail">Just ${c.gap} rating points apart · played each other ${c.played_before}x so far</div>
+        <div class="matchup-vs"><b>${m.team1[0]} &amp; ${m.team1[1]}</b> (${Math.round(m.team1_rating)}) &nbsp;vs&nbsp; <b>${m.team2[0]} &amp; ${m.team2[1]}</b> (${Math.round(m.team2_rating)})<br/><span style="color:var(--text-dim); font-size:11px;">teams balanced within ${m.team_gap} pts</span>${wingNote}</div>
+      </div>`;
+    });
+  });
+
+  html += `<div class="section-heading">🎯 Boundary tests</div>`;
+  html += `<div class="section-sub">Close ratings straddling a tier line — these games carry the most weight for deciding if the line is in the right place. A wingman is added to each side to keep the two teams balanced.</div>`;
+  if(BOUNDARY_TESTS.length === 0){
+    html += `<div class="section-sub">No close cross-tier pairings with enough of a track record yet.</div>`;
+  } else {
+    BOUNDARY_TESTS.forEach(c=>{
+      const m = c.matchup;
+      html += `<div class="callout-card">
+        <div class="cc-title">${c.a} (Tier ${c.tier_a}, ${Math.round(c.rating_a)}) vs ${c.b} (Tier ${c.tier_b}, ${Math.round(c.rating_b)})</div>
+        <div class="cc-detail">Only ${c.gap} rating points apart despite sitting in different tiers · played each other ${c.played_before}x so far</div>
+        <div class="matchup-vs"><b>${m.team1[0]} &amp; ${m.team1[1]}</b> (${Math.round(m.team1_rating)}) &nbsp;vs&nbsp; <b>${m.team2[0]} &amp; ${m.team2[1]}</b> (${Math.round(m.team2_rating)})<br/><span style="color:var(--text-dim); font-size:11px;">teams balanced within ${m.team_gap} pts</span></div>
+      </div>`;
+    });
+  }
+
+  html += `<div class="section-heading">📋 Players worth calling out</div>`;
+  html += `<div class="section-sub">Low-sample players, matched against the closest-rated opponent with a real track record who they haven't already played much — the fastest way to firm up an uncertain number.</div>`;
+  CALIBRATION_GAMES.forEach(c=>{
+    const b = c.best_anchor;
+    const m = c.matchup;
+    html += `<div class="callout-card">
+      <div class="cc-title">${c.name} (Tier ${c.tier}, ${Math.round(c.rating)}, ${c.games}g) → ${b.opponent} (Tier ${b.tier}, ${Math.round(b.rating)}, ${b.games}g)</div>
+      <div class="cc-detail">${c.games} game${c.games===1?'':'s'} on record for ${c.name} · ${b.gap} point gap · played before: ${b.played_before}x</div>
+      <div class="matchup-vs"><b>${m.team1[0]} &amp; ${m.team1[1]}</b> (${Math.round(m.team1_rating)}) &nbsp;vs&nbsp; <b>${m.team2[0]} &amp; ${m.team2[1]}</b> (${Math.round(m.team2_rating)})<br/><span style="color:var(--text-dim); font-size:11px;">teams balanced within ${m.team_gap} pts</span></div>
+    </div>`;
+  });
+
+  box.innerHTML = html;
+}
+
+let playersTierFilter = 'All';
+let playersActiveFilter = 'all'; // 'all' | 'active' | 'inactive'
+let playersSortBy = 'name';      // 'name' | 'rating'
+
+function renderPlayersTab(){
+  const box = document.getElementById('playersView');
+
+  let rows = [...PLAYERS];
+  if(playersTierFilter !== 'All') rows = rows.filter(p => p.tier === playersTierFilter);
+  if(playersActiveFilter === 'active') rows = rows.filter(p => p.active);
+  else if(playersActiveFilter === 'inactive') rows = rows.filter(p => !p.active);
+  if(query) rows = rows.filter(p => p.name.toLowerCase().includes(query));
+
+  if(playersSortBy === 'rating') rows.sort((a,b)=> b.rating - a.rating);
+  else rows.sort((a,b)=> a.name.localeCompare(b.name));
+
+  let html = `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Tier</label>
+      <div class="tierbar" id="playersTierBar" style="padding:0;"></div>
+    </div>
+    <div class="fg-row"><label class="fg-label">Status</label>
+      <div class="fg-toggle" id="playersActiveToggle">
+        <button class="fg-toggle-btn ${playersActiveFilter==='all'?'active':''}" data-active="all">All</button>
+        <button class="fg-toggle-btn ${playersActiveFilter==='active'?'active':''}" data-active="active">Active</button>
+        <button class="fg-toggle-btn ${playersActiveFilter==='inactive'?'active':''}" data-active="inactive">Inactive</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label">Sort</label>
+      <div class="fg-toggle" id="playersSortToggle">
+        <button class="fg-toggle-btn ${playersSortBy==='name'?'active':''}" data-sortby="name">A–Z</button>
+        <button class="fg-toggle-btn ${playersSortBy==='rating'?'active':''}" data-sortby="rating">Power Rating</button>
+      </div>
+    </div>
+  </div>`;
+
+  if(rows.length === 0){
+    html += `<div class="section-sub">No players match that filter.</div>`;
+    box.innerHTML = html;
+    wirePlayersControls();
+    return;
+  }
+
+  let lastLetter = '';
+  rows.forEach(p=>{
+    const showLetter = playersSortBy === 'name';
+    const letter = p.name[0].toUpperCase();
+    const newLetter = showLetter && letter !== lastLetter;
+    if(showLetter) lastLetter = letter;
+    const statusBadge = p.active
+      ? `<span class="risk-badge risk-stable" style="margin-left:6px;">Active</span>`
+      : `<span class="risk-badge risk-unproven" style="margin-left:6px;">Inactive</span>`;
+    html += `<div class="alpha-row" onclick="openSheet('${p.name.replace(/'/g,"\\'")}')">
+      <div class="alpha-letter">${newLetter ? letter : ''}</div>
+      <div class="alpha-name">${p.name}${statusBadge}</div>
+      <div class="alpha-tier">Tier ${p.tier} · ${Math.round(p.rating)}</div>
+    </div>`;
+  });
+
+  box.innerHTML = html;
+  wirePlayersControls();
+}
+
+function wirePlayersControls(){
+  const bar = document.getElementById('playersTierBar');
+  if(bar){
+    TIERS.forEach(t=>{
+      const b = document.createElement('button');
+      b.className = 'tierbtn' + (t===playersTierFilter ? ' active' : '');
+      b.textContent = t === 'All' ? 'All' : 'Tier ' + t;
+      b.onclick = ()=>{ playersTierFilter = t; renderPlayersTab(); };
+      bar.appendChild(b);
+    });
+  }
+  document.querySelectorAll('#playersActiveToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{ playersActiveFilter = b.dataset.active; renderPlayersTab(); };
+  });
+  document.querySelectorAll('#playersSortToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{ playersSortBy = b.dataset.sortby; renderPlayersTab(); };
+  });
+}
+
+// ===== Find a Game =====
+function h2hCount(a,b){ return H2H[[a,b].sort().join('|')] || 0; }
+
+let fgPlayer = null;
+let fgScope = 'tier';
+let fgDiff = 'easy';
+
+function initFindGame(){
+  const sel = document.getElementById('fgPlayerSelect');
+  if(sel.options.length === 0){
+    const sorted = [...PLAYERS].sort((a,b)=>a.name.localeCompare(b.name));
+    sorted.forEach(p=>{
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = `${p.name} (Tier ${p.tier})`;
+      sel.appendChild(opt);
+    });
+    fgPlayer = sorted[0].name;
+    sel.value = fgPlayer;
+    sel.addEventListener('change', e=>{ fgPlayer = e.target.value; renderFindGameResults(); });
+  }
+  document.querySelectorAll('#fgScopeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{ fgScope = b.dataset.scope; document.querySelectorAll('#fgScopeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderFindGameResults(); };
+  });
+  document.querySelectorAll('#fgDiffToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{ fgDiff = b.dataset.diff; document.querySelectorAll('#fgDiffToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderFindGameResults(); };
+  });
+}
+
+function generateCandidatePairs(player, scope, diff, topN){
+  const pool = PLAYERS.filter(p => p.name !== player.name && !INACTIVE_PLAYERS.has(p.name) && (scope==='any' || p.tier === player.tier));
+  let target;
+  if(scope === 'tier'){
+    const tierRatings = PLAYERS.filter(p=>p.tier===player.tier && !INACTIVE_PLAYERS.has(p.name)).map(p=>p.rating);
+    const tierMin = Math.min(...tierRatings), tierMax = Math.max(...tierRatings);
+    target = diff==='easy' ? tierMin : (diff==='hard' ? tierMax : player.rating);
+  } else {
+    target = diff==='easy' ? player.rating - 150 : (diff==='hard' ? player.rating + 150 : player.rating);
+  }
+
+  const results = [];
+  for(let i=0; i<pool.length; i++){
+    for(let j=i+1; j<pool.length; j++){
+      const p = pool[i], q = pool[j];
+      const avg = (p.rating + q.rating) / 2;
+      const gap = Math.abs(avg - target);
+      const h2h_p = h2hCount(player.name, p.name);
+      const h2h_q = h2hCount(player.name, q.name);
+      results.push({ pair: [p.name, q.name], tiers: [p.tier, q.tier], avg: Math.round(avg*10)/10,
+                      gap: Math.round(gap*10)/10, played_p: h2h_p, played_q: h2h_q });
+    }
+  }
+  results.sort((a,b)=> a.gap - b.gap || (a.played_p+a.played_q) - (b.played_p+b.played_q));
+  return results.slice(0, topN);
+}
+
+function generateCandidatePartners(player, scope, topN){
+  const pool = PLAYERS.filter(p => p.name !== player.name && !INACTIVE_PLAYERS.has(p.name) && (scope==='any' || p.tier === player.tier));
+  const poolNames = new Set(pool.map(p=>p.name));
+
+  // known chemistry first
+  const history = PARTNERSHIPS
+    .filter(pt => pt.pair.includes(player.name) && poolNames.has(pt.pair[0]===player.name ? pt.pair[1] : pt.pair[0]))
+    .map(pt => {
+      const partnerName = pt.pair[0]===player.name ? pt.pair[1] : pt.pair[0];
+      return { name: partnerName, source: 'history', games: pt.games, wins: pt.wins, losses: pt.losses,
+               winpct: pt.winpct, chemistry: pt.avg_overperf };
+    })
+    .sort((a,b)=> b.chemistry - a.chemistry);
+
+  const usedNames = new Set(history.map(h=>h.name));
+  const fresh = pool
+    .filter(p => !usedNames.has(p.name))
+    .map(p => ({ name: p.name, source: 'fresh', tier: p.tier, rating: p.rating,
+                 gap: Math.round(Math.abs(p.rating - player.rating)*10)/10,
+                 played: h2hCount(player.name, p.name) }))
+    .sort((a,b)=> a.gap - b.gap);
+
+  return { history: history.slice(0, 2), fresh: fresh.slice(0, topN) };
+}
+
+function suggestPartnerForTarget(player, targetTeamAvg, scope, excludeNames){
+  const excluded = new Set([player.name, ...(excludeNames || [])]);
+  const pool = PLAYERS.filter(p => !excluded.has(p.name) && !INACTIVE_PLAYERS.has(p.name) && (scope==='any' || p.tier === player.tier));
+  const idealPartnerRating = 2*targetTeamAvg - player.rating;
+
+  let closest = null;
+  pool.forEach(p=>{
+    const gap = Math.abs(p.rating - idealPartnerRating);
+    if(closest===null || gap < closest.gap) closest = {name:p.name, rating:p.rating, tier:p.tier, gap: Math.round(gap*10)/10};
+  });
+
+  const poolNames = new Set(pool.map(p=>p.name));
+  const chemMatches = PARTNERSHIPS
+    .filter(pt => pt.pair.includes(player.name) && pt.games>=2 && pt.avg_overperf > 3)
+    .map(pt => pt.pair[0]===player.name ? pt.pair[1] : pt.pair[0])
+    .filter(n => poolNames.has(n));
+
+  return { closest, chemistryPartner: chemMatches.length ? chemMatches[0] : null };
+}
+
+function renderFindGameResults(){
+  const player = PLAYERS.find(p=>p.name===fgPlayer);
+  if(!player) return;
+  const candidates = generateCandidatePairs(player, fgScope, fgDiff, 5);
+  const partners = generateCandidatePartners(player, fgScope, 3);
+  const box = document.getElementById('fgResults');
+
+  const diffLabel = {easy:'Easy', balanced:'Balanced', hard:'Hard'}[fgDiff];
+  const scopeLabel = fgScope==='tier' ? `within Tier ${player.tier}` : 'across any tier';
+
+  let html = `<div class="section-heading" style="margin-top:2px;">🤝 Suggested partners</div>`;
+  html += `<div class="section-sub">Proven chemistry first, then the closest-rated fresh option, ${scopeLabel}.</div>`;
+  if(partners.history.length === 0 && partners.fresh.length === 0){
+    html += `<div class="section-sub">Not enough other players in this scope — try "Any tier".</div>`;
+  } else {
+    partners.history.forEach(h=>{
+      const smallSample = h.games < 3 ? ' (small sample)' : '';
+      html += `<div class="fg-result-card">
+        <div class="fg-result-rank">Proven chemistry</div>
+        <div class="fg-result-teams"><b>${h.name}</b></div>
+        <div class="fg-result-detail">${h.games} games together · ${h.wins}-${h.losses} (${h.winpct}%) · ${h.chemistry>=0?'+':''}${h.chemistry}% chemistry${smallSample}</div>
+      </div>`;
+    });
+    partners.fresh.forEach(f=>{
+      html += `<div class="fg-result-card">
+        <div class="fg-result-rank">Fresh option</div>
+        <div class="fg-result-teams"><b>${f.name}</b></div>
+        <div class="fg-result-detail">Tier ${f.tier} · rating ${Math.round(f.rating)} (${f.gap} pt gap) · played together ${f.played}x</div>
+      </div>`;
+    });
+  }
+
+  html += `<div class="section-heading">🎯 Suggested opponents &amp; who to bring</div>`;
+  html += `<div class="section-sub">Best ${diffLabel.toLowerCase()} opponent pairs for <b style="color:var(--text);">${player.name}</b> (${Math.round(player.rating)}), ${scopeLabel} — each paired with the partner that would make it an even match.</div>`;
+
+  if(candidates.length === 0){
+    html += `<div class="section-sub">Not enough other players in this scope to suggest anything — try "Any tier".</div>`;
+  } else {
+    candidates.forEach((c, i)=>{
+      const tierNote = c.tiers[0]===c.tiers[1] ? `Tier ${c.tiers[0]}` : `Tier ${c.tiers[0]} &amp; Tier ${c.tiers[1]}`;
+      const ps = suggestPartnerForTarget(player, c.avg, fgScope, c.pair);
+      let partnerLine = '';
+      if(ps.chemistryPartner && ps.chemistryPartner !== ps.closest?.name){
+        partnerLine = `<div style="margin-top:5px; font-size:11px; color:var(--gold-bright);">Bring: ${ps.chemistryPartner} (proven chemistry) — or ${ps.closest ? ps.closest.name+' ('+Math.round(ps.closest.rating)+') for the closest even match' : 'no rating-matched option in this scope'}</div>`;
+      } else if(ps.closest){
+        partnerLine = `<div style="margin-top:5px; font-size:11px; color:var(--text-dim);">Bring: <b style="color:var(--gold-bright);">${ps.closest.name}</b> (Tier ${ps.closest.tier}, ${Math.round(ps.closest.rating)}) to even it up</div>`;
+      }
+      html += `<div class="fg-result-card">
+        <div class="fg-result-rank">Option ${i+1}</div>
+        <div class="fg-result-teams"><b>${c.pair[0]} &amp; ${c.pair[1]}</b></div>
+        <div class="fg-result-detail">${tierNote} · avg rating ${c.avg} &nbsp;·&nbsp; you've played ${c.pair[0]} ${c.played_p}x, ${c.pair[1]} ${c.played_q}x</div>
+        ${partnerLine}
+      </div>`;
+    });
+  }
+  box.innerHTML = html;
+}
+
+function renderFindGame(){
+  initFindGame();
+  renderFindGameResults();
+}
+
+function buildCallOutSection(name){
+  if(!canSee('callouts')) return '';
+  const relevant = [];
+  WITHIN_TIER_GAMES.forEach(c=>{ if(c.a===name || c.b===name) relevant.push(c.matchup); });
+  BOUNDARY_TESTS.forEach(c=>{ if(c.a===name || c.b===name) relevant.push(c.matchup); });
+  CALIBRATION_GAMES.forEach(c=>{ if(c.name===name) relevant.push(c.matchup); });
+  if(relevant.length === 0) return '';
+  let html = `<div class="section-heading" style="margin-top:14px;">📋 Call-out for ${name}</div>`;
+  relevant.forEach(m=>{
+    html += `<div class="matchup-vs"><b>${m.team1[0]} &amp; ${m.team1[1]}</b> (${Math.round(m.team1_rating)}) &nbsp;vs&nbsp; <b>${m.team2[0]} &amp; ${m.team2[1]}</b> (${Math.round(m.team2_rating)})<br/><span style="color:var(--text-dim); font-size:11px;">this would help settle where ${name}'s rating actually sits</span></div>`;
+  });
+  return html;
+}
+
+function buildDifficultySection(name){
+  if(!canSee('difficulty')) return '';
+  const d = DIFFICULTY_SUGGESTIONS[name];
+  if(!d || !d.easy || !d.balanced || !d.hard) return '';
+  const easy = d.easy, bal = d.balanced, hard = d.hard;
+  const player = PLAYERS.find(p=>p.name===name);
+  const tierNote = d.withinTier
+    ? `within Tier ${player ? player.tier : ''}`
+    : `across any tier — not enough other Tier ${player ? player.tier : ''} players to keep this within-tier`;
+  const allSame = (easy.pair.join()===bal.pair.join()) && (bal.pair.join()===hard.pair.join());
+
+  let html = `<div class="section-heading" style="margin-top:14px;">🎮 Suggest a game for ${name}</div>`;
+  if(allSame){
+    html += `<div class="section-sub">${name}'s rating is far enough out on its own that there's no meaningful easy/hard range (${tierNote}) — this is simply the toughest game available.</div>
+      <div class="matchup-vs"><b>${easy.pair[0]} &amp; ${easy.pair[1]}</b> (avg ${Math.round(easy.avg_rating)})</div>`;
+  } else {
+    html += `<div class="section-sub">Opponent pairs picked so the two-player average lands near an easy / even / hard target relative to ${name}'s own rating, ${tierNote}.</div>
+      <div class="difficulty-row">
+        <div class="difficulty-pill diff-easy">EASY</div>
+        <div class="difficulty-pill diff-balanced">BALANCED</div>
+        <div class="difficulty-pill diff-hard">HARD</div>
+      </div>
+      <div class="matchup-vs"><b>Easy:</b> ${easy.pair[0]} &amp; ${easy.pair[1]} (avg ${Math.round(easy.avg_rating)})</div>
+      <div class="matchup-vs"><b>Balanced:</b> ${bal.pair[0]} &amp; ${bal.pair[1]} (avg ${Math.round(bal.avg_rating)})</div>
+      <div class="matchup-vs"><b>Hard:</b> ${hard.pair[0]} &amp; ${hard.pair[1]} (avg ${Math.round(hard.avg_rating)})</div>`;
+  }
+
+  if(d.crossTier && (!d.withinTier || d.crossTier.pair.join() !== bal.pair.join())){
+    html += `<div style="margin-top:10px; font-size:11px; color:var(--gold-dim); text-transform:uppercase; letter-spacing:.04em;">Recommended across tiers</div>
+      <div class="matchup-vs"><b>${d.crossTier.pair[0]} &amp; ${d.crossTier.pair[1]}</b> (avg ${Math.round(d.crossTier.avg_rating)}) <span style="color:var(--text-dim); font-size:11px;">— closest overall rating match, any tier</span></div>`;
+  }
+  return html;
+}
+
+function buildRankingNeighborsSection(name){
+  const target = PLAYERS.find(p=>p.name===name);
+  if(!target) return '';
+  const pool = PLAYERS.filter(p => p.active || p.name === name).sort((a,b)=> b.rating - a.rating);
+  const idx = pool.findIndex(p=>p.name===name);
+  if(idx === -1) return '';
+  const above = idx > 0 ? pool[idx-1] : null;
+  const below = idx < pool.length-1 ? pool[idx+1] : null;
+
+  let html = `<div class="section-heading" style="margin-top:14px;">📊 Neighbours in the rankings</div>`;
+  if(!target.active){
+    html += `<div class="section-sub">${name} is inactive — shown against the active player list only.</div>`;
+  }
+  html += `<div class="matchup-vs">`;
+  if(above){
+    const gap = Math.round((above.rating - target.rating)*10)/10;
+    html += `<div>▲ <b>${above.name}</b> (Tier ${above.tier}, ${Math.round(above.rating)}) — ${gap} pts above</div>`;
+  } else {
+    html += `<div style="color:var(--text-dim);">▲ Nobody rated higher — top of the board</div>`;
+  }
+  html += `<div style="margin:6px 0; padding:4px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); text-align:center; color:var(--gold-bright); font-weight:700;">${name}</div>`;
+  if(below){
+    const gap = Math.round((target.rating - below.rating)*10)/10;
+    html += `<div>▼ <b>${below.name}</b> (Tier ${below.tier}, ${Math.round(below.rating)}) — ${gap} pts below</div>`;
+  } else {
+    html += `<div style="color:var(--text-dim);">▼ Nobody rated lower — bottom of the board</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+// The per-game rating weight shown to users. Derived from the real engine's K (28) times the
+// damping factor removed (x3 epochs-per-pass), i.e. the full-weight contribution one match's
+// performance signal carries. Used only for this readable breakdown, not for the official rating.
+const DISPLAY_MATCH_WEIGHT = 84;
+
+// A result within this band of the prediction counts as "played to expectation" -- no rating
+// movement at all. Once a result crosses the line, the full overperformance counts, not just
+// the amount past the threshold. Hardcoded, not a per-group setting.
+const NEUTRAL_PERFORMANCE_BAND = 0.05; // 5 percentage points of game-share
+
+function displayDeltaFromOverperf(overperf){
+  if(Math.abs(overperf) < NEUTRAL_PERFORMANCE_BAND) return 0;
+  return Math.round(DISPLAY_MATCH_WEIGHT * overperf * 10) / 10;
+}
+
+function computePlayerJourney(name){
+  const indexed = MATCHES.map((m, idx) => ({ ...m, _idx: idx })).filter(m => m.winners.includes(name) || m.losers.includes(name));
+  if(indexed.length === 0) return null;
+
+  indexed.sort((a,b)=>{
+    if(a.date !== b.date) return a.date < b.date ? -1 : 1;
+    return a._idx - b._idx; // stable tie-break for same-day matches
+  });
+
+  const tier = STARTING_TIER_MAP[name] || TIER_MAP[name] || 'B';
+  let running = TIER_SEED[tier];
+  const journey = [{ type:'start', date: null, rating: running, label: `Tier ${tier} starting point` }];
+
+  indexed.forEach(m=>{
+    const won = m.winners.includes(name);
+    // Same basis as the "favored/expected/actual/over-under-performed" text shown alongside this:
+    // both now come from this one overperformance value, so they can never contradict each other.
+    const overperf = won ? m.overperformance_winner : -m.overperformance_winner;
+    const delta = displayDeltaFromOverperf(overperf);
+    running = Math.round((running + delta) * 10) / 10;
+    journey.push({
+      type: 'match', _idx: m._idx, date: m.date, rating: running, delta, won,
+      overperfPts: Math.round(overperf*1000)/10,
+    });
+  });
+
+  return journey;
+}
+
+// Same idea as computePlayerJourney, but for one specific month, and built to guarantee it
+// actually reconciles with the Month Rating headline figure once all that month's games are in --
+// each checkpoint re-runs the real engine on the whole month's network up to that point (the same
+// growing-subset approach computeMonthlyRating itself uses), rather than a simplified formula.
+// The trade-off: because ratings are solved jointly across everyone in the month, a single game's
+// checkpoint-to-checkpoint step can very occasionally not match that game's own over/underperformed
+// label if another game elsewhere in the month shifted the equilibrium at the same point -- this is
+// rare in a single month's smaller network, and the final total is always correct either way.
+function computeMonthlyJourney(name, month){
+  const monthMatches = ALL_MATCHES.filter(m => m.date.slice(0,7) === month);
+  if(monthMatches.length === 0) return null;
+  // Array.prototype.sort is stable, so matches on the same date keep their original relative order.
+  const monthSorted = monthMatches.slice().sort((a,b)=> a.date < b.date ? -1 : (a.date > b.date ? 1 : 0));
+
+  const playerMatchIds = new Set(monthSorted.filter(m => m.winners.includes(name) || m.losers.includes(name)).map(m=>m.id));
+  if(playerMatchIds.size === 0) return null;
+
+  const idToAllIdx = {};
+  ALL_MATCHES.forEach((m,i)=>{ idToAllIdx[m.id] = i; });
+
+  const tier = STARTING_TIER_MAP[name] || TIER_MAP[name] || 'B';
+  const journey = [{ type:'start', date: null, rating: TIER_SEED[tier], label: `Tier ${tier} starting point` }];
+
+  const cumulativeSubset = [];
+  monthSorted.forEach(m=>{
+    cumulativeSubset.push(m);
+    if(!playerMatchIds.has(m.id)) return;
+    const ratings = computeElo(cumulativeSubset, TIER_MAP, STARTING_TIER_MAP);
+    const newRating = Math.round(ratings[name]*10)/10;
+    const prevRating = journey[journey.length-1].rating;
+    const delta = Math.round((newRating - prevRating)*10)/10;
+    const won = m.winners.includes(name);
+    const enriched = MATCHES[idToAllIdx[m.id]];
+    const myExpected = won ? enriched.expected_winshare : (1 - enriched.expected_winshare);
+    const myActual = won ? enriched.game_share_winner : (1 - enriched.game_share_winner);
+    journey.push({
+      type: 'match', _idx: idToAllIdx[m.id], date: m.date, rating: newRating, delta, won,
+      overperfPts: Math.round((myActual - myExpected)*1000)/10,
+    });
+  });
+
+  // Guarantee the final point matches the Month Rating headline exactly, even if this player's
+  // own last game in the month wasn't the very last game anyone played that month.
+  const finalRatings = computeElo(monthSorted, TIER_MAP, STARTING_TIER_MAP);
+  const finalVal = Math.round(finalRatings[name]*10)/10;
+  const lastPoint = journey[journey.length-1];
+  if(Math.abs(lastPoint.rating - finalVal) > 0.05){
+    const delta = Math.round((finalVal - lastPoint.rating)*10)/10;
+    journey.push({ type:'today', date: 'end of month', rating: finalVal, delta, label: 'End of month (current)' });
+  }
+
+  return journey;
+}
+
+function buildJourneyChartSvg(journey){
+  const w = 320, h = 110, padX = 8, padY = 12;
+  const ratings = journey.map(j=>j.rating);
+  const minR = Math.min(...ratings), maxR = Math.max(...ratings);
+  const range = (maxR - minR) || 1;
+  const stepX = journey.length > 1 ? (w - padX*2) / (journey.length - 1) : 0;
+  const toXY = (j,i) => {
+    const x = padX + i*stepX;
+    const y = padY + (h - padY*2) * (1 - (j.rating - minR)/range);
+    return [x, y];
+  };
+  const points = journey.map((j,i)=> toXY(j,i).map(v=>v.toFixed(1)).join(',')).join(' ');
+
+  const dots = journey.map((j,i)=>{
+    const [x,y] = toXY(j,i);
+    let color = '#a89c82'; // neutral (starting point)
+    if(j.type === 'match' || j.type === 'today'){
+      color = j.delta > 0 ? '#5a9c5a' : (j.delta < 0 ? '#b5453f' : '#a89c82');
+    }
+    const r = (i === journey.length-1) ? 4 : 2.3;
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${color}"/>`;
+  }).join('');
+
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:${h}px; display:block;">
+    <polyline points="${points}" fill="none" stroke="#a89c82" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" opacity="0.45"/>
+    ${dots}
+  </svg>`;
+}
+
+function buildJourneySection(name, journey){
+  if(!journey || journey.length < 2) return '';
+  const start = Math.round(journey[0].rating);
+  const end = Math.round(journey[journey.length-1].rating);
+  const diff = end - start;
+  const diffLabel = diff >= 0 ? `+${diff}` : `${diff}`;
+  const diffClass = diff > 0 ? 'perf-pos' : (diff < 0 ? 'perf-neg' : '');
+  const startingTierOverride = STARTING_TIER_MAP[name];
+  const currentTier = TIER_MAP[name];
+  const tierNote = (startingTierOverride && startingTierOverride !== currentTier)
+    ? ` ${name} started at Tier ${startingTierOverride} and is now Tier ${currentTier} — the starting point reflects Tier ${startingTierOverride}, not the current tier, since that's what was true when they first played.`
+    : '';
+
+  let html = `<div class="section-heading" style="margin-top:14px;">📈 Rating journey</div>`;
+  html += `<div class="section-sub">From tier starting point (${start}) to a rough ${end} today — <span class="${diffClass}">${diffLabel} pts</span>. Each dot is one game — green moved this estimate up, red moved it down, based on games won vs. what was expected, matching the same figures shown on each match below. This is a readable breakdown of your results, not the official calculation — the real rating is solved jointly across everyone's games at once, so this total won't always land exactly on the Power Rating shown above, but the direction and shape of the trend will match your actual results.${tierNote}</div>`;
+  html += `<div class="matchup-vs" style="padding:8px;">${buildJourneyChartSvg(journey)}</div>`;
+  return html;
+}
+
+function buildRecentFormSection(name){
+  const form = computeRecentForm(name, 10);
+  if(!form || form.games < 3) return ''; // not enough recent data to be meaningful
+  const isStale = form.daysSinceLastGame > RECENT_FORM_STALE_DAYS;
+  const pct = form.avgPct;
+  const cls = isStale ? '' : (pct > 3 ? 'perf-pos' : (pct < -3 ? 'perf-neg' : ''));
+  const sign = pct >= 0 ? '+' : '';
+  let note;
+  if(isStale) note = `hasn't played in a while, so this doesn't reflect current form`;
+  else if(pct > 8) note = 'trending up clearly — worth watching for a promotion case';
+  else if(pct > 3) note = 'trending up modestly';
+  else if(pct < -8) note = 'trending down clearly';
+  else if(pct < -3) note = 'trending down modestly';
+  else note = 'holding roughly steady';
+  const staleWarning = isStale
+    ? `<div class="section-sub" style="color:#e8a5a1; margin-top:4px;">⚠️ Last played ${fmtDaysAgo(form.daysSinceLastGame)} — this record is from before then, not a sign of current form.</div>`
+    : '';
+  return `<div class="section-heading" style="margin-top:14px;">📊 Recent form (last ${form.games} games)</div>
+    <div class="matchup-vs" style="${isStale?'opacity:0.7;':''}"><span class="${cls}" style="font-weight:700; font-size:15px;">${sign}${pct}%</span> <span style="color:var(--green); font-weight:700;">${form.wins}W</span>-<span style="color:var(--red); font-weight:700;">${form.losses}L</span> <span style="color:var(--text-dim); font-size:11.5px;">average overperformance vs. expectation — ${note}. This is separate from the overall rating above and moves faster, since it's a short window.</span></div>${staleWarning}`;
+}
+
+function buildDevAreasSection(name){
+  const notes = devAreasState.filter(a => a.player === name);
+  let html = `<div class="section-heading" style="margin-top:14px;">🎯 Development Areas</div>`;
+  html += `<div class="section-sub">Freeform notes on what ${name} is working on — anyone can add one.</div>`;
+  if(notes.length === 0){
+    html += `<div class="section-sub">Nothing added yet.</div>`;
+  } else {
+    notes.slice().sort((a,b)=> a.addedAt < b.addedAt ? 1 : -1).forEach(note=>{
+      const isArmed = armedDeleteId === ('dev_'+note.id);
+      html += `<div class="callout-card" style="padding:10px 12px;">
+        <div style="font-size:12.5px;">${note.text}</div>
+        <div style="margin-top:4px; font-size:10.5px; color:var(--text-dim);">added by ${note.addedBy} (${fmtRelative(note.addedAt)})</div>
+        ${isUnlocked ? `<div class="difficulty-row" style="margin-top:6px;"><button class="preset-btn dev-area-delete-btn" data-note-id="${note.id}" style="flex:1; font-size:11px; padding:6px; ${isArmed?'color:#e8a5a1; border-color:var(--red);':''}">${isArmed?'Confirm delete?':'Delete'}</button></div>` : ''}
+      </div>`;
+    });
+  }
+  html += `<div class="fg-controls" style="margin-top:6px;">
+    <div class="fg-row"><textarea id="devAreaInput" class="fg-select" rows="2" placeholder="e.g. Second serve consistency, moving forward to the net sooner..." style="width:100%; resize:vertical;"></textarea></div>
+    <div class="fg-row"><button class="preset-btn" id="devAreaSubmit" style="width:100%;">Add development area</button></div>
+    <div id="devAreaMessage" class="section-sub"></div>
+  </div>`;
+  return html;
+}
+
+function buildMonthlyRatingSection(name){
+  if(selectedMonth === 'all') return '';
+  const monthlyRatings = computeMonthlyRating(selectedMonth);
+  const p = PLAYERS.find(x=>x.name===name);
+  const label = monthLabel(selectedMonth);
+  if(!(name in monthlyRatings)){
+    return `<div class="section-heading" style="margin-top:14px;">📅 ${label} rating</div>
+      <div class="section-sub">No games for ${name} in ${label}.</div>`;
+  }
+  const rating = Math.round(monthlyRatings[name]*10)/10;
+  const gamesThisMonth = MATCHES.filter(m => (m.winners.includes(name) || m.losers.includes(name)) && m.date.slice(0,7)===selectedMonth).length;
+  return `<div class="section-heading" style="margin-top:14px;">📅 ${label} rating</div>
+    <div class="matchup-vs"><b style="font-size:15px;">${Math.round(rating)}</b> <span style="color:var(--text-dim); font-size:11.5px;">— a tier-seeded rating using only ${gamesThisMonth} game${gamesThisMonth===1?'':'s'} from ${label}, as if that month were its own mini-season. Overall rating (${Math.round(p.rating)}) stays the official number.</span></div>`;
+}
+
+function openSheet(name, matchFilter){
+  const p = PLAYERS.find(x=>x.name===name);
+  document.getElementById('sheetName').textContent = name;
+  const riskInfo = RISK_LABELS[p.risk] || RISK_LABELS.stable;
+  document.getElementById('sheetSub').innerHTML = `Tier ${p.tier} · Money Padel &nbsp; <span class="risk-badge ${riskInfo.cls}">${riskInfo.text}</span>`;
+  document.getElementById('sheetStats').innerHTML = `
+    <div><b>${Math.round(p.rating)}</b>Power rating</div>
+    <div><b>${p.winpct}%</b>Win rate</div>
+    <div><b>${p.wins}-${p.losses}</b>Record</div>
+    <div><b>${p.upset_wins}-${p.upset_losses}</b>Upset W-L</div>
+  `;
+  const journey = computePlayerJourney(name);
+  const deltaByIdx = {};
+  if(journey) journey.forEach(j=>{ if(j.type==='match') deltaByIdx[j._idx] = j.delta; });
+
+  // If a month is active, the match cards below get filtered to just that month -- so the points
+  // shown on each of those cards should come from that same month's own engine (every game counts,
+  // no neutral band), not the season-long journey's hard-cliff rule. Otherwise a real, active month
+  // with only a handful of games could show "0 pts" on most of them just because they were close to
+  // the season-long expectation, even though the month's own rating moved on every one of them.
+  if(selectedMonth !== 'all'){
+    const monthJourneyForDelta = computeMonthlyJourney(name, selectedMonth);
+    if(monthJourneyForDelta) monthJourneyForDelta.forEach(j=>{ if(j.type==='match') deltaByIdx[j._idx] = j.delta; });
+  }
+
+  document.getElementById('sheetProfile').innerHTML = `<div class="profile-box">${buildProfileText(p)}</div>` + buildDevAreasSection(name) + buildGameRequestsForPlayerSection(name) + buildRecentFormSection(name) + buildMonthlyRatingSection(name) + buildJourneySection(name, journey) + buildRankingNeighborsSection(name) + buildCallOutSection(name) + buildDifficultySection(name);
+  let ms = MATCHES.map((m, idx)=>({...m, _idx: idx})).filter(m => m.winners.includes(name) || m.losers.includes(name));
+  ms.sort((a,b)=> a.date < b.date ? 1 : -1);
+
+  // If a month is selected elsewhere in the app, keep this profile's match log scoped to it too.
+  const monthActive = selectedMonth !== 'all';
+  if(monthActive){
+    ms = ms.filter(m => m.date.slice(0,7) === selectedMonth);
+  }
+
+  let filterBannerHtml = '';
+  const upsetFilterActive = matchFilter === 'upset_wins' || matchFilter === 'upset_losses';
+  if(upsetFilterActive){
+    // If a month is active, judge "upset" by ratings as of that month too, so this drill-down's
+    // count always matches the upset figures already shown in the monthly list view.
+    const monthlyRatingsForFilter = monthActive ? computeMonthlyRating(selectedMonth) : null;
+    const ratingForFilter = (n) => {
+      if(monthlyRatingsForFilter && (n in monthlyRatingsForFilter)) return monthlyRatingsForFilter[n];
+      const p2 = PLAYERS.find(x=>x.name===n);
+      return p2 ? p2.rating : 1400;
+    };
+    ms = ms.filter(m=>{
+      const won = m.winners.includes(name);
+      let myTeamRating, oppTeamRating;
+      if(monthActive){
+        const winnerR = m.winners[1] ? (ratingForFilter(m.winners[0])+ratingForFilter(m.winners[1]))/2 : ratingForFilter(m.winners[0]);
+        const loserR = m.losers[1] ? (ratingForFilter(m.losers[0])+ratingForFilter(m.losers[1]))/2 : ratingForFilter(m.losers[0]);
+        myTeamRating = won ? winnerR : loserR;
+        oppTeamRating = won ? loserR : winnerR;
+      } else {
+        myTeamRating = won ? m.team_w_rating : m.team_l_rating;
+        oppTeamRating = won ? m.team_l_rating : m.team_w_rating;
+      }
+      const gap = Math.abs(myTeamRating - oppTeamRating);
+      const favored = myTeamRating > oppTeamRating;
+      if(gap < 15) return false; // must be a genuine gap on paper to count as an upset
+      return matchFilter === 'upset_wins' ? (won && !favored) : (!won && favored);
+    });
+  }
+
+  if(monthActive || upsetFilterActive){
+    const monthPart = monthActive ? monthLabel(selectedMonth) : '';
+    const upsetPart = upsetFilterActive ? (matchFilter === 'upset_wins' ? 'upset wins' : 'upset losses') : '';
+    let label;
+    if(monthActive && upsetFilterActive) label = `${upsetPart} in ${monthPart}`;
+    else if(monthActive) label = monthPart;
+    else label = upsetPart;
+    const clearLabel = upsetFilterActive ? 'show all games' + (monthActive ? ` in ${monthPart}` : '') : '';
+    filterBannerHtml = `<div class="section-sub" style="padding:8px 2px;">Showing only ${label} for ${name}${upsetFilterActive ? ` — <span id="clearProfileFilter" style="text-decoration:underline; cursor:pointer; color:var(--gold-bright);">${clearLabel}</span>` : ''}</div>`;
+    if(ms.length === 0){
+      filterBannerHtml += `<div class="section-sub">No games match this.</div>`;
+    }
+  }
+
+  const box = document.getElementById('sheetMatches');
+  box.innerHTML = filterBannerHtml + ms.map(m=>{
+    const won = m.winners.includes(name);
+    const myTeam = won ? m.winners : m.losers;
+    const oppTeam = won ? m.losers : m.winners;
+    const partner = m.type==='doubles' ? myTeam.filter(n=>n!==name)[0] : null;
+
+    const myTeamRating = won ? m.team_w_rating : m.team_l_rating;
+    const oppTeamRating = won ? m.team_l_rating : m.team_w_rating;
+    const favored = myTeamRating > oppTeamRating;
+    const gap = Math.round(Math.abs(myTeamRating - oppTeamRating));
+
+    const myExpectedShare = won ? m.expected_winshare : (1 - m.expected_winshare);
+    const myActualShare = won ? m.game_share_winner : (1 - m.game_share_winner);
+    const myGames = won ? m.games_winner : m.games_loser;
+    const oppGames = won ? m.games_loser : m.games_winner;
+
+    const perf = (myActualShare - myExpectedShare) * 100;
+    const perfRounded = Math.round(perf * 10) / 10;
+    const neutralPts = NEUTRAL_PERFORMANCE_BAND * 100;
+    const perfLabel = perfRounded >= neutralPts ? `<span class="perf-pos">overperformed +${perfRounded}pts on games</span>`
+                     : (perfRounded <= -neutralPts ? `<span class="perf-neg">underperformed ${perfRounded}pts on games</span>`
+                     : `<span style="color:var(--text-dim)">games roughly as expected</span>`);
+
+    const isCloseOnPaper = gap < 15;
+    let upsetTag = '';
+    if(!isCloseOnPaper){
+      if(favored && !won) upsetTag = `<div class="upset-tag upset-bad">⚠️ UPSET LOSS — lost as the favorite</div>`;
+      else if(!favored && won) upsetTag = `<div class="upset-tag upset-good">🔥 UPSET WIN — won as the underdog</div>`;
+    }
+
+    const favLabel = isCloseOnPaper
+      ? `evenly matched on paper (${gap} pt gap)`
+      : (favored ? `favored by ${gap} pts on paper` : `underdogs by ${gap} pts on paper`);
+
+    const namesWithRatings = myTeam.map(n => `${n} (${ratingOf(n)})`).join(' &amp; ');
+    const oppWithRatings = oppTeam.map(n => `${n} (${ratingOf(n)})`).join(' &amp; ');
+
+    const delta = deltaByIdx[m._idx];
+    let deltaLabel = '';
+    if(delta !== undefined){
+      const deltaClass = delta > 0 ? 'perf-pos' : (delta < 0 ? 'perf-neg' : '');
+      const deltaText = delta > 0 ? `+${delta}` : `${delta}`;
+      deltaLabel = `<div style="margin-top:4px; font-weight:700;"><span class="${deltaClass}">${deltaText} pts</span> <span style="color:var(--text-dim); font-weight:400; font-size:11px;">rating change from this game</span></div>`;
+    }
+
+    const isArmed = armedDeleteId === m.id;
+    const adminButtons = isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
+      <button class="preset-btn profile-edit-btn" data-match-id="${m.id}" style="flex:1;">Edit</button>
+      <button class="preset-btn profile-delete-btn" data-match-id="${m.id}" style="flex:1; ${isArmed?'color:#e8a5a1; border-color:var(--red);':''}">${isArmed ? 'Confirm delete?' : 'Delete'}</button>
+    </div>` : '';
+
+    return `<div class="match">
+      <div class="top"><span>${m.date}${m.type==='singles' ? ' · Singles' : ''}</span><span style="color:${won?'var(--green)':'var(--red)'}">${won?'WIN':'LOSS'}</span></div>
+      ${upsetTag}
+      <div class="teams"><b>${namesWithRatings}</b> vs ${oppWithRatings}</div>
+      <div class="score">${m.score}${m.note ? ' · '+m.note : ''}</div>
+      <div style="margin-top:5px; font-size:11.5px; color:var(--text-dim); line-height:1.5;">
+        ${favLabel}, expected ~${Math.round(myExpectedShare*100)}% of games<br/>
+        actually took ${myGames}/${myGames+oppGames} games (${Math.round(myActualShare*100)}%)
+      </div>
+      <div style="margin-top:4px;">${perfLabel}</div>
+      ${deltaLabel}
+      ${adminButtons}
+    </div>`;
+  }).join('');
+  document.getElementById('overlay').classList.add('show');
+
+  box.querySelectorAll('.profile-edit-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.dataset.matchId;
+      closeSheet();
+      navigateToGamesTabForEdit(id);
+    };
+  });
+  box.querySelectorAll('.profile-delete-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.matchId;
+      if(armedDeleteId === id){
+        await deleteMatch(id);
+        openSheet(name); // refresh this sheet with the deletion applied
+      } else {
+        armedDeleteId = id;
+        openSheet(name); // re-render to show "Confirm delete?"
+      }
+    };
+  });
+
+  document.querySelectorAll('.confirm-request-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.requestId;
+      const player = btn.dataset.player;
+      const req = gameRequestsState.find(r=>r.id===id);
+      if(!req) return;
+      req.confirmations[player] = true;
+      if(req.players.every(n=>req.confirmations[n])) req.status = 'confirmed';
+      const ok = await saveGameRequests(gameRequestsState);
+      if(!ok){ req.confirmations[player] = false; return; }
+      openSheet(name); // refresh to reflect the confirmation
+    };
+  });
+  wireRequestPlayerLinks(document.getElementById('sheetProfile'));
+
+  const clearFilterEl = document.getElementById('clearProfileFilter');
+  if(clearFilterEl) clearFilterEl.onclick = ()=> openSheet(name);
+
+  const devSubmitBtn = document.getElementById('devAreaSubmit');
+  if(devSubmitBtn){
+    devSubmitBtn.onclick = async ()=>{
+      const msg = document.getElementById('devAreaMessage');
+      const text = document.getElementById('devAreaInput').value.trim();
+      if(!text){ msg.textContent = 'Write something first.'; return; }
+      const addedBy = requireName();
+      if(!addedBy) return;
+      const note = { id: 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2,8), player: name, text, addedBy, addedAt: new Date().toISOString() };
+      devAreasState.push(note);
+      const ok = await saveDevAreas(devAreasState);
+      if(!ok){
+        devAreasState.pop();
+        msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage.`;
+        return;
+      }
+      openSheet(name);
+    };
+  }
+  document.querySelectorAll('.dev-area-delete-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const noteId = btn.dataset.noteId;
+      const armKey = 'dev_' + noteId;
+      if(armedDeleteId === armKey){
+        devAreasState = devAreasState.filter(a=>a.id!==noteId);
+        await saveDevAreas(devAreasState);
+        armedDeleteId = null;
+      } else {
+        armedDeleteId = armKey;
+      }
+      openSheet(name);
+    };
+  });
+}
+
+function navigateToGamesTabForEdit(matchId){
+  editingMatchId = matchId;
+  armedDeleteId = null;
+  const gamesTabBtn = document.querySelector('#tabrow .tab-btn[data-tab="games"]');
+  if(gamesTabBtn) gamesTabBtn.click();
+}
+
+let linkedRequestId = null;
+
+function navigateToGamesTabForResult(req){
+  linkedRequestId = req.id;
+  addGameExpanded = true;
+  editingMatchId = null;
+  armedDeleteId = null;
+  const gamesTabBtn = document.querySelector('#tabrow .tab-btn[data-tab="games"]');
+  if(gamesTabBtn) gamesTabBtn.click();
+
+  const a1 = document.getElementById('agA1');
+  if(a1){
+    a1.value = req.players[0] || '';
+    document.getElementById('agA2').value = req.players[1] || '';
+    document.getElementById('agB1').value = req.players[2] || '';
+    document.getElementById('agB2').value = req.players[3] || '';
+    checkForNewPlayers();
+    const anchor = document.getElementById('addGameBody');
+    if(anchor){ try { anchor.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e){ /* non-critical */ } }
+  }
+}
+function closeSheet(){ document.getElementById('overlay').classList.remove('show'); }
+document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeSheet(); });
+
+// ===================== MANAGE TAB =====================
+let addGameSets = [{w:'', l:''}, {w:'', l:''}];
+
+function allPlayerNames(){
+  return [...PLAYERS].map(p=>p.name).sort((a,b)=>a.localeCompare(b));
+}
+
+function renderManage(){
+  const box = document.getElementById('manageView');
+  if(!isUnlocked){
+    box.innerHTML = buildLockScreenHtml();
+    wireLockScreen(renderManage);
+    return;
+  }
+  let html = '';
+
+  html += `<div class="section-heading">🔮 Predict a matchup</div>`;
+  html += `<div class="section-sub">Pick up to two names per side and see what the current ratings expect — no game needs to exist yet. Leave a second name blank for singles.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Team A</label>
+      <input id="predA1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
+      <input id="predA2" list="playerNamesList" class="fg-select" placeholder="Partner (optional)" />
+    </div>
+    <div class="fg-row"><label class="fg-label">Team B</label>
+      <input id="predB1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
+      <input id="predB2" list="playerNamesList" class="fg-select" placeholder="Partner (optional)" />
+    </div>
+    <div id="predResult"></div>
+  </div>`;
+
+  html += `<div class="section-heading">🏷️ Player tags</div>`;
+  html += `<div class="section-sub">Toggle who's currently active — inactive players are skipped by every suggestion engine but keep their full history. You can also add someone who hasn't played yet.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Add a new player</label>
+      <input id="npName" class="fg-select" placeholder="Name" style="margin-bottom:6px;" />
+      <select id="npTier" class="fg-select">
+        <option value="S">Tier S</option><option value="A">Tier A</option>
+        <option value="B" selected>Tier B</option><option value="C">Tier C</option>
+      </select>
+    </div>
+    <div class="fg-row"><button class="preset-btn" id="npAdd">+ Add player</button></div>
+    <div id="npMessage" class="section-sub"></div>
+  </div>`;
+
+  html += `<div id="playerTagsList"></div>`;
+
+  html += `<div class="section-heading">👁️ Visible to everyone</div>`;
+  html += `<div class="section-sub">Switch off anything you'd rather keep admin-only. You always see everything; these toggles only affect people who haven't unlocked. Matchmaking suggestions are hidden by default since they'd otherwise show everyone's ideal opponents to the whole group.</div>`;
+  html += `<div class="fg-controls">` + Object.keys(VISIBILITY_DEFAULTS).map(key=>`
+    <div class="alpha-row">
+      <div class="alpha-name" style="font-size:13px;">${VISIBILITY_LABELS[key]}</div>
+      <button class="preset-btn vis-toggle ${visibilityState[key]!==false?'active':''}" data-vis="${key}" style="width:100px;">${visibilityState[key]!==false?'Visible':'Admin only'}</button>
+    </div>`).join('') + `<div id="visMessage" class="section-sub"></div></div>`;
+
+  html += `<div class="section-heading">🔑 Admin lock</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><button class="preset-btn" id="lockNowBtn" style="width:100%;">🔒 Lock admin area</button></div>
+  </div>`;
+
+  html += `<div class="section-heading">🔑 Your password</div>`;
+  html += `<div class="section-sub">${ownerPasswordHash ? 'Change your own password. This never touches the board password.' : 'Not set yet — this shouldn\'t normally happen once one exists, but you can set it here if needed.'}</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><input id="cpOwnerCurrent" type="password" class="fg-select" placeholder="${ownerPasswordHash ? 'Current password' : '(leave blank — not set yet)'}" style="margin-bottom:6px;" /></div>
+    <div class="fg-row"><input id="cpOwnerNew" type="password" class="fg-select" placeholder="New password" /></div>
+    <div class="fg-row"><button class="preset-btn" id="cpOwnerSubmit">Update your password</button></div>
+    <div id="cpOwnerMessage" class="section-sub"></div>
+  </div>`;
+
+  html += `<div class="section-heading">🔑 Board password</div>`;
+  html += `<div class="section-sub">${boardPasswordHash ? 'A second, independent password — whoever knows it can change it themselves without touching yours.' : 'Not set up yet. Set one here to give the board their own password, separate from yours.'}</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><input id="cpBoardCurrent" type="password" class="fg-select" placeholder="${boardPasswordHash ? 'Current board password' : '(leave blank — not set yet)'}" style="margin-bottom:6px;" /></div>
+    <div class="fg-row"><input id="cpBoardNew" type="password" class="fg-select" placeholder="New board password" /></div>
+    <div class="fg-row"><button class="preset-btn" id="cpBoardSubmit">${boardPasswordHash ? 'Update board password' : 'Set board password'}</button></div>
+    <div id="cpBoardMessage" class="section-sub"></div>
+  </div>`;
+
+  html += `<div class="section-heading">📤 Export data</div>`;
+  html += `<div class="section-sub">Downloads a .csv file to your device — opens straight in Excel, Google Sheets, or Numbers.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><button class="preset-btn" id="exportMatchesBtn" style="width:100%;">Export all matches</button></div>
+    <div class="fg-row"><button class="preset-btn" id="exportPlayersBtn" style="width:100%;">Export player stats</button></div>
+    <div id="exportMessage" class="section-sub"></div>
+  </div>`;
+
+  box.innerHTML = html;
+
+  const today = new Date().toISOString().slice(0,10);
+
+  function renderPrediction(){
+    const resultBox = document.getElementById('predResult');
+    const a1 = document.getElementById('predA1').value.trim();
+    const a2 = document.getElementById('predA2').value.trim();
+    const b1 = document.getElementById('predB1').value.trim();
+    const b2 = document.getElementById('predB2').value.trim();
+
+    if(!a1 || !b1){ resultBox.innerHTML = ''; return; }
+
+    const teamA = [a1, a2].filter(Boolean);
+    const teamB = [b1, b2].filter(Boolean);
+    const allNames = [...teamA, ...teamB];
+    const missing = allNames.filter(n => !PLAYERS.find(p=>p.name.toLowerCase()===n.toLowerCase()));
+    if(missing.length){
+      resultBox.innerHTML = `<div class="section-sub" style="color:var(--red);">Unrecognized name${missing.length>1?'s':''}: ${missing.join(', ')}</div>`;
+      return;
+    }
+    if(new Set(allNames.map(n=>n.toLowerCase())).size !== allNames.length){
+      resultBox.innerHTML = `<div class="section-sub" style="color:var(--red);">The same name appears on both sides.</div>`;
+      return;
+    }
+
+    const getP = (n) => PLAYERS.find(p=>p.name.toLowerCase()===n.toLowerCase());
+    const ratingA = teamA.reduce((s,n)=>s+getP(n).rating,0) / teamA.length;
+    const ratingB = teamB.reduce((s,n)=>s+getP(n).rating,0) / teamB.length;
+    const gap = Math.abs(ratingA - ratingB);
+    const isClose = gap < 15;
+    const aFavored = ratingA > ratingB;
+    const expectedA = 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
+
+    const teamALabel = teamA.map(n=>`${n} (${Math.round(getP(n).rating)})`).join(' &amp; ');
+    const teamBLabel = teamB.map(n=>`${n} (${Math.round(getP(n).rating)})`).join(' &amp; ');
+    const favLine = isClose
+      ? `Evenly matched on paper (${Math.round(gap)} pt gap).`
+      : (aFavored
+        ? `<b>${teamA.join(' & ')}</b> favored by ${Math.round(gap)} pts on paper.`
+        : `<b>${teamB.join(' & ')}</b> favored by ${Math.round(gap)} pts on paper.`);
+
+    resultBox.innerHTML = `<div class="matchup-vs" style="margin-top:8px;">
+      <div><b style="color:var(--text);">${teamALabel}</b> vs <b style="color:var(--text);">${teamBLabel}</b></div>
+      <div style="margin-top:6px; font-size:12.5px;">${favLine}</div>
+      <div style="margin-top:4px; font-size:12.5px; color:var(--text-dim);">Expected split of games: ${Math.round(expectedA*100)}% / ${Math.round((1-expectedA)*100)}%</div>
+      <div style="margin-top:6px; font-size:10.5px; color:var(--text-dim);">Based on current ratings only — nothing here is recorded, and this doesn't need a real game to exist.</div>
+    </div>`;
+  }
+  ['predA1','predA2','predB1','predB2'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', renderPrediction);
+  });
+
+  document.getElementById('npAdd').onclick = async ()=>{
+    const name = document.getElementById('npName').value.trim();
+    const tier = document.getElementById('npTier').value;
+    const msg = document.getElementById('npMessage');
+    if(!name){ msg.textContent = 'Enter a name first.'; return; }
+    if(PLAYERS.some(p=>p.name.toLowerCase()===name.toLowerCase())){
+      msg.textContent = `${name} already exists.`; return;
+    }
+    tagOverridesState[name] = {...(tagOverridesState[name]||{}), tier, active:true};
+    const ok = await saveTagOverrides(tagOverridesState);
+    if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; return; }
+    msg.textContent = `${name} added to Tier ${tier}. They'll appear once they've played a game.`;
+    document.getElementById('npName').value = '';
+  };
+
+  document.querySelectorAll('.vis-toggle').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const key = btn.dataset.vis;
+      visibilityState[key] = !(visibilityState[key] !== false);
+      const ok = await saveVisibility(visibilityState);
+      const msg = document.getElementById('visMessage');
+      if(!ok){
+        visibilityState[key] = !visibilityState[key]; // revert
+        if(msg) msg.textContent = 'Save failed — try again.';
+        return;
+      }
+      if(msg) msg.textContent = '';
+      applyTabVisibility();
+      renderManage();
+    };
+  });
+
+  document.getElementById('lockNowBtn').onclick = async ()=>{
+    isUnlocked = false;
+    await saveMyUnlocked(false);
+    applyTabVisibility();
+    renderManage();
+  };
+
+  document.getElementById('cpOwnerSubmit').onclick = async ()=>{
+    const cur = document.getElementById('cpOwnerCurrent').value;
+    const next = document.getElementById('cpOwnerNew').value;
+    const msg = document.getElementById('cpOwnerMessage');
+    if(ownerPasswordHash && simpleHash(cur) !== ownerPasswordHash){ msg.textContent = 'Current password is incorrect.'; return; }
+    if(!next || next.length<4){ msg.textContent = 'New password needs at least 4 characters.'; return; }
+    const ok = await savePasswordHash(STORAGE_KEY_ADMIN_PW_OWNER, simpleHash(next));
+    if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`; return; }
+    ownerPasswordHash = simpleHash(next);
+    msg.textContent = 'Your password has been updated.';
+    document.getElementById('cpOwnerCurrent').value=''; document.getElementById('cpOwnerNew').value='';
+  };
+
+  document.getElementById('cpBoardSubmit').onclick = async ()=>{
+    const cur = document.getElementById('cpBoardCurrent').value;
+    const next = document.getElementById('cpBoardNew').value;
+    const msg = document.getElementById('cpBoardMessage');
+    if(boardPasswordHash && simpleHash(cur) !== boardPasswordHash){ msg.textContent = 'Current board password is incorrect.'; return; }
+    if(!next || next.length<4){ msg.textContent = 'New password needs at least 4 characters.'; return; }
+    const ok = await savePasswordHash(STORAGE_KEY_ADMIN_PW_BOARD, simpleHash(next));
+    if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`; return; }
+    boardPasswordHash = simpleHash(next);
+    msg.textContent = 'Board password has been updated.';
+    document.getElementById('cpBoardCurrent').value=''; document.getElementById('cpBoardNew').value='';
+  };
+
+  document.getElementById('exportMatchesBtn').onclick = ()=>{
+    try { exportMatchesCsv(); document.getElementById('exportMessage').textContent = 'Downloaded.'; }
+    catch(e){ document.getElementById('exportMessage').textContent = 'Export failed: ' + (e.message||e); }
+  };
+  document.getElementById('exportPlayersBtn').onclick = ()=>{
+    try { exportPlayersCsv(); document.getElementById('exportMessage').textContent = 'Downloaded.'; }
+    catch(e){ document.getElementById('exportMessage').textContent = 'Export failed: ' + (e.message||e); }
+  };
+
+  renderPlayerTagsList();
+}
+
+function csvEscape(val){
+  const s = (val === null || val === undefined) ? '' : String(val);
+  if(/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
+  return s;
+}
+function downloadCsv(filename, headers, rows){
+  const lines = [headers.map(csvEscape).join(',')];
+  rows.forEach(r => lines.push(r.map(csvEscape).join(',')));
+  const csvContent = lines.join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+function exportMatchesCsv(){
+  const headers = ['Date','Type','Team A','Team B','Score','Winner','Draw','Team A Rating','Team B Rating','Expected Win % (A/B whichever won)','Actual Win %','Overperformance %','Verified','Status','Submitted By'];
+  const displayMatches = getDisplayMatches();
+  const rows = displayMatches.map(m=>{
+    const enrichedIdx = m.isDraw ? -1 : idToIdxGlobalForExport(m.id);
+    const enriched = enrichedIdx >= 0 ? MATCHES[enrichedIdx] : null;
+    return [
+      m.date, m.type || 'doubles',
+      m.winners.join(' & '), m.losers.join(' & '),
+      m.sets.map(s=>s.join('-')).join(', '),
+      m.isDraw ? '' : m.winners.join(' & '),
+      m.isDraw ? 'Yes' : 'No',
+      enriched ? enriched.team_w_rating : '',
+      enriched ? enriched.team_l_rating : '',
+      enriched ? Math.round(enriched.expected_winshare*1000)/10 : '',
+      enriched ? Math.round(enriched.game_share_winner*1000)/10 : '',
+      enriched ? Math.round(enriched.overperformance_winner*1000)/10 : '',
+      m.verified === false ? 'No (pre-June, single-sourced)' : 'Yes',
+      m._status || 'approved',
+      m.submittedBy || (m.id.startsWith('base_') ? 'Historical record' : ''),
+    ];
+  });
+  downloadCsv(`money_padel_matches_${new Date().toISOString().slice(0,10)}.csv`, headers, rows);
+}
+
+function idToIdxGlobalForExport(id){
+  for(let i=0;i<ALL_MATCHES.length;i++){ if(ALL_MATCHES[i].id === id) return i; }
+  return -1;
+}
+
+function exportPlayersCsv(){
+  const headers = ['Name','Tier','Active','Rating','Games','Wins','Losses','Win %','Avg Opponent','Clutch %','Upset Wins','Upset Losses','Recent Form % (last 10)','Recent Form W-L'];
+  const rows = PLAYERS.map(p=>[
+    p.name, p.tier, INACTIVE_PLAYERS.has(p.name) ? 'No' : 'Yes',
+    Math.round(p.rating*10)/10, p.total, p.wins, p.losses,
+    p.total ? Math.round(1000*p.wins/p.total)/10 : 0,
+    Math.round(p.avg_match_strength), p.avg_overperf_pct,
+    p.upset_wins, p.upset_losses,
+    p.recent_form !== null && p.recent_form !== undefined ? p.recent_form : '',
+    (p.recent_form_wins !== undefined) ? `${p.recent_form_wins}-${p.recent_form_losses}` : '',
+  ]);
+  downloadCsv(`money_padel_players_${new Date().toISOString().slice(0,10)}.csv`, headers, rows);
+}
+
+
+function parseQuickEntryText(text){
+  const rawLines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  if(rawLines.length < 3){
+    return { error: 'Needs a winning team line, at least one set score, and a losing team line.' };
+  }
+
+  const scoreRe = /(\d+)\s*-\s*(\d+)/;
+  const teamLines = [];
+  const setLines = [];
+  rawLines.forEach(line=>{
+    if(!line.includes('&') && !/[a-zA-Z]{3,}/.test(line.replace(/🏆/g,'')) && scoreRe.test(line)){
+      setLines.push(line);
+    } else {
+      teamLines.push(line);
+    }
+  });
+
+  if(teamLines.length !== 2){
+    return { error: `Expected exactly 2 team lines but found ${teamLines.length}. Make sure each set score is on its own line, like "6-4".` };
+  }
+  if(setLines.length === 0){
+    return { error: 'No set scores found — each set should be on its own line, like "6-4".' };
+  }
+
+  const [line1, line2] = teamLines;
+  const line1HasTrophy = line1.includes('🏆');
+  const line2HasTrophy = line2.includes('🏆');
+  if(line1HasTrophy && line2HasTrophy){
+    return { error: 'Both teams have 🏆 — put it next to at most one team, or remove it from both if this was a draw.' };
+  }
+  const isDraw = !line1HasTrophy && !line2HasTrophy;
+
+  const cleanTeam = (line) => line.replace(/🏆/g,'').trim().split('&').map(n=>n.trim()).filter(n=>n.length>0);
+  const team1 = cleanTeam(line1);
+  const team2 = cleanTeam(line2);
+
+  if(team1.length !== team2.length || (team1.length!==1 && team1.length!==2)){
+    return { error: 'Each team needs the same number of players — 1 for singles, 2 for doubles.' };
+  }
+
+  const sets = [];
+  setLines.forEach(line=>{
+    const m = line.match(scoreRe);
+    if(m) sets.push([parseInt(m[1],10), parseInt(m[2],10)]);
+  });
+  if(sets.length === 0){
+    return { error: 'Could not read any set scores.' };
+  }
+
+  if(isDraw){
+    return { winners: team1, losers: team2, sets, isSingles: team1.length === 1, isDraw: true };
+  }
+
+  const winnerIsTeam1 = line1HasTrophy;
+  const orientedSets = winnerIsTeam1 ? sets : sets.map(([a,b])=>[b,a]);
+  return {
+    winners: winnerIsTeam1 ? team1 : team2,
+    losers: winnerIsTeam1 ? team2 : team1,
+    sets: orientedSets,
+    isSingles: team1.length === 1,
+  };
+}
+
+function renderAddGameSets(){
+  const box = document.getElementById('agSets');
+  box.innerHTML = addGameSets.map((s,i)=>`
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+      <input type="number" min="0" max="30" value="${s.w}" data-idx="${i}" data-side="w" class="ag-set-input fg-select" style="width:70px;" placeholder="A" />
+      <span style="color:var(--text-dim);">–</span>
+      <input type="number" min="0" max="30" value="${s.l}" data-idx="${i}" data-side="l" class="ag-set-input fg-select" style="width:70px;" placeholder="B" />
+      ${addGameSets.length>1 ? `<button class="preset-btn" data-remove="${i}" style="margin-left:auto;">Remove</button>` : ''}
+    </div>
+  `).join('');
+  box.querySelectorAll('.ag-set-input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const idx = parseInt(e.target.dataset.idx), side = e.target.dataset.side;
+      addGameSets[idx][side] = e.target.value;
+    });
+  });
+  box.querySelectorAll('[data-remove]').forEach(btn=>{
+    btn.onclick = ()=>{ addGameSets.splice(parseInt(btn.dataset.remove),1); renderAddGameSets(); };
+  });
+}
+
+function checkForNewPlayers(){
+  const names = ['agA1','agA2','agB1','agB2'].map(id=>document.getElementById(id).value.trim()).filter(n=>n);
+  const known = new Set(PLAYERS.map(p=>p.name.toLowerCase()));
+  const newNames = names.filter(n=>!known.has(n.toLowerCase()));
+  const row = document.getElementById('agNewPlayerRow');
+  const box = document.getElementById('agNewPlayerTiers');
+  if(newNames.length===0){ row.style.display='none'; box.innerHTML=''; return; }
+  row.style.display = 'block';
+  box.innerHTML = newNames.map(n=>`
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+      <span style="font-size:13px; flex:1;">${n}</span>
+      <select class="fg-select ag-new-tier" data-name="${n}" style="width:120px;">
+        <option value="S">Tier S</option><option value="A">Tier A</option>
+        <option value="B" selected>Tier B</option><option value="C">Tier C</option>
+      </select>
+    </div>
+  `).join('');
+}
+
+async function submitNewGame(){
+  const msg = document.getElementById('agMessage');
+  currentUserName = document.getElementById('gamesYourName').value.trim();
+  if(!currentUserName){
+    msg.textContent = 'Enter your name at the top first — every submission needs one.'; return;
+  }
+  await saveMyName(currentUserName);
+
+  const date = document.getElementById('agDate').value;
+  const isSingles = document.querySelector('#agTypeToggle .fg-toggle-btn.active').dataset.type === 'singles';
+  const isDraw = document.querySelector('#agOutcomeToggle .fg-toggle-btn.active').dataset.outcome === 'draw';
+  const a1 = document.getElementById('agA1').value.trim();
+  const a2 = document.getElementById('agA2').value.trim();
+  const b1 = document.getElementById('agB1').value.trim();
+  const b2 = document.getElementById('agB2').value.trim();
+
+  if(!date || !a1 || !b1 || (!isSingles && (!a2 || !b2))){
+    msg.textContent = 'Fill in the date and all player names.'; return;
+  }
+  const winners = isSingles ? [a1] : [a1,a2];
+  const losers = isSingles ? [b1] : [b1,b2];
+  if(new Set([...winners,...losers].map(n=>n.toLowerCase())).size !== winners.length+losers.length){
+    msg.textContent = 'The same name appears twice — check your entries.'; return;
+  }
+
+  const sets = [];
+  for(const s of addGameSets){
+    const w = parseInt(s.w), l = parseInt(s.l);
+    if(isNaN(w) || isNaN(l)) continue;
+    sets.push([w,l]);
+  }
+  if(sets.length===0){ msg.textContent = 'Enter at least one set score.'; return; }
+  if(!isDraw){
+    const setsWon = sets.filter(s=>s[0]>s[1]).length, setsLost = sets.filter(s=>s[1]>s[0]).length;
+    if(setsWon < setsLost){
+      msg.textContent = 'Team A\'s scores should be the winning side — swap the teams, check your set scores, or mark this as not finished / a draw.'; return;
+    }
+  }
+
+  // register any new players with chosen tiers
+  document.querySelectorAll('.ag-new-tier').forEach(sel=>{
+    const name = sel.dataset.name;
+    tagOverridesState[name] = {...(tagOverridesState[name]||{}), tier: sel.value, active:true};
+  });
+  if(document.querySelectorAll('.ag-new-tier').length>0){
+    await saveTagOverrides(tagOverridesState);
+  }
+
+  const id = 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  const newMatch = {id, date, winners, losers, sets, type: isSingles?'singles':'doubles', note:'', isDraw,
+                     status:'pending', submittedBy: currentUserName, submittedAt: new Date().toISOString()};
+  extraMatchesState.push(newMatch);
+  const ok = await saveExtraMatches(extraMatchesState);
+  if(!ok){ msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; extraMatchesState.pop(); return; }
+
+  recomputeAll();
+
+  let linkedNote = '';
+  if(linkedRequestId){
+    gameRequestsState = gameRequestsState.filter(r=>r.id!==linkedRequestId);
+    await saveGameRequests(gameRequestsState);
+    linkedNote = ' Removed from Upcoming.';
+    linkedRequestId = null;
+  }
+
+  msg.textContent = isDraw
+    ? `Submitted as a draw. ${winners.join(' & ')} vs ${losers.join(' & ')} — waiting for approval, won't affect any rating.${linkedNote}`
+    : `Submitted. ${winners.join(' & ')} def ${losers.join(' & ')} — waiting for approval in the Games tab.${linkedNote}`;
+  document.getElementById('agA1').value=''; document.getElementById('agA2').value='';
+  document.getElementById('agB1').value=''; document.getElementById('agB2').value='';
+  document.querySelectorAll('#agOutcomeToggle .fg-toggle-btn').forEach(x=>x.classList.toggle('active', x.dataset.outcome==='decisive'));
+  document.getElementById('agTeamALabel').textContent = 'Team A (winners)';
+  document.getElementById('agTeamBLabel').textContent = 'Team B (losers)';
+  document.getElementById('agSetsLabel').textContent = 'Set scores (Team A – Team B)';
+  addGameSets = [{w:'',l:''},{w:'',l:''}];
+  renderAddGameSets();
+  document.getElementById('agNewPlayerRow').style.display='none';
+}
+
+function renderPlayerTagsList(){
+  const box = document.getElementById('playerTagsList');
+  const rows = [...PLAYERS].sort((a,b)=>a.name.localeCompare(b.name));
+  box.innerHTML = rows.map(p=>{
+    const startingTier = STARTING_TIER_MAP[p.name] || '';
+    return `
+    <div class="alpha-row" style="flex-wrap:wrap; row-gap:6px;">
+      <div class="alpha-name" style="flex-basis:100%;">${p.name}</div>
+      <select class="fg-select ptag-tier" data-name="${p.name}" style="width:80px;">
+        ${['S','A','B','C'].map(t=>`<option value="${t}" ${t===p.tier?'selected':''}>${t}</option>`).join('')}
+      </select>
+      <select class="fg-select ptag-starting" data-name="${p.name}" style="width:150px;" title="Only affects how their rating was seeded at their first match">
+        <option value="" ${startingTier===''?'selected':''}>Started: same as now</option>
+        ${['S','A','B','C'].map(t=>`<option value="${t}" ${t===startingTier?'selected':''}>Started at Tier ${t}</option>`).join('')}
+      </select>
+      <button class="preset-btn ptag-active ${p.active?'active':''}" data-name="${p.name}" style="width:80px;">${p.active?'Active':'Inactive'}</button>
+    </div>
+  `;}).join('');
+
+  box.querySelectorAll('.ptag-tier').forEach(sel=>{
+    sel.addEventListener('change', async e=>{
+      const name = e.target.dataset.name;
+      tagOverridesState[name] = {...(tagOverridesState[name]||{}), tier: e.target.value};
+      await saveTagOverrides(tagOverridesState);
+      recomputeAll();
+      renderPlayerTagsList();
+    });
+  });
+  box.querySelectorAll('.ptag-starting').forEach(sel=>{
+    sel.addEventListener('change', async e=>{
+      const name = e.target.dataset.name;
+      const val = e.target.value;
+      const cur = {...(tagOverridesState[name]||{})};
+      if(val) cur.startingTier = val; else delete cur.startingTier;
+      tagOverridesState[name] = cur;
+      await saveTagOverrides(tagOverridesState);
+      recomputeAll();
+      renderPlayerTagsList();
+    });
+  });
+  box.querySelectorAll('.ptag-active').forEach(btn=>{
+    btn.addEventListener('click', async e=>{
+      const name = e.target.dataset.name;
+      const cur = PLAYERS.find(p=>p.name===name);
+      const newActive = !(cur ? cur.active : true);
+      tagOverridesState[name] = {...(tagOverridesState[name]||{}), active: newActive};
+      const ok = await saveTagOverrides(tagOverridesState);
+      if(!ok) return;
+      recomputeAll();
+      renderPlayerTagsList();
+    });
+  });
+}
+
+// ===================== INIT =====================
+
+// ===================== GAMES TAB =====================
+let editingMatchId = null;
+let armedDeleteId = null;
+let expandedGameId = null;
+let addGameExpanded = false;
+
+function computeMatchDelta(idxInAllMatches, preferMonthIfActive){
+  if(idxInAllMatches === undefined || idxInAllMatches === null) return null;
+  const m = MATCHES[idxInAllMatches];
+  if(!m) return null;
+  // If asked to, and a month is active, and this specific game falls within it: use that month's
+  // own engine (every game counts, no neutral band), matching the month-scoped views elsewhere.
+  if(preferMonthIfActive && selectedMonth !== 'all' && m.date.slice(0,7) === selectedMonth){
+    const monthJourney = computeMonthlyJourney(m.winners[0], selectedMonth);
+    if(monthJourney){
+      const entry = monthJourney.find(e => e.type==='match' && e._idx === idxInAllMatches);
+      if(entry) return entry.delta;
+    }
+  }
+  // Same basis as the "favored/expected/actual/over-under-performed" text shown alongside this,
+  // so the two can never contradict each other the way two different calculations could.
+  return displayDeltaFromOverperf(m.overperformance_winner);
+}
+
+function buildMatchDetailBlock(m, idxInAllMatches, contextHasMonthFigure, preferMonthIfActive){
+  const gap = Math.abs(m.team_w_rating - m.team_l_rating);
+  const isClose = gap < 15;
+  const winnerFavored = m.team_w_rating > m.team_l_rating;
+  const favLabel = isClose
+    ? `evenly matched on paper (${Math.round(gap)} pt gap)`
+    : (winnerFavored ? `winners favored by ${Math.round(gap)} pts on paper` : `winners were underdogs by ${Math.round(gap)} pts on paper`);
+
+  const winnersWithRatings = m.winners.map(n => `${n} (${ratingOf(n)})`).join(' &amp; ');
+  const losersWithRatings = m.losers.map(n => `${n} (${ratingOf(n)})`).join(' &amp; ');
+
+  const expectedPct = Math.round(m.expected_winshare*100);
+  const actualPct = Math.round(m.game_share_winner*100);
+  const perf = Math.round(m.overperformance_winner*1000)/10;
+  const neutralPts = NEUTRAL_PERFORMANCE_BAND * 100;
+  const perfLabel = perf >= neutralPts ? `<span class="perf-pos">winners overperformed +${perf}pts on games</span>`
+                   : (perf <= -neutralPts ? `<span class="perf-neg">winners underperformed ${perf}pts on games</span>`
+                   : `<span style="color:var(--text-dim);">games roughly as expected</span>`);
+
+  const delta = computeMatchDelta(idxInAllMatches, preferMonthIfActive);
+  const usedMonthEngine = preferMonthIfActive && selectedMonth !== 'all' && m.date.slice(0,7) === selectedMonth;
+  let deltaHtml = '';
+  if(delta !== null){
+    const winnerLabel = delta >= 0 ? `+${delta}` : `${delta}`;
+    const loserVal = Math.round(-delta*10)/10;
+    const loserLabel = loserVal >= 0 ? `+${loserVal}` : `${loserVal}`;
+    const winnerClass = delta >= 0 ? 'perf-pos' : 'perf-neg';
+    const loserClass = loserVal >= 0 ? 'perf-pos' : 'perf-neg';
+    deltaHtml = `<div style="margin-top:6px;">
+      <div style="font-size:10px; color:var(--gold-dim); text-transform:uppercase; letter-spacing:.03em; margin-bottom:2px;">${usedMonthEngine ? `${monthLabel(selectedMonth)} rating impact` : `Overall (season) rating impact${contextHasMonthFigure ? ' — a different figure from the month total above' : ''}`}</div>
+      <span class="${winnerClass}" style="font-weight:700;">${winnerLabel} pts</span> <span style="color:var(--text-dim); font-size:11px;">for winners</span>
+      &nbsp;·&nbsp;
+      <span class="${loserClass}" style="font-weight:700;">${loserLabel} pts</span> <span style="color:var(--text-dim); font-size:11px;">for losers</span>
+    </div>`;
+  }
+
+  return `<div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--line); font-size:11.5px; color:var(--text-dim); line-height:1.6;">
+    <div><b style="color:var(--text);">${winnersWithRatings}</b> vs ${losersWithRatings}</div>
+    <div style="margin-top:4px;">${favLabel}, expected ~${expectedPct}% of games</div>
+    <div>actually took ${m.games_winner}/${m.games_winner+m.games_loser} games (${actualPct}%)</div>
+    <div style="margin-top:4px;">${perfLabel}</div>
+    ${deltaHtml}
+  </div>`;
+}
+
+function fmtRelative(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diffH = Math.round((now-d)/3600000);
+  if(diffH < 1) return 'just now';
+  if(diffH < 24) return diffH + 'h ago';
+  const diffD = Math.round(diffH/24);
+  return diffD + 'd ago';
+}
+
+function requireName(){
+  const el = document.getElementById('gamesYourName');
+  let name = el ? el.value.trim() : currentUserName;
+  if(!name){
+    if(el){
+      // On the Games tab, the name field is visible -- show the inline message there.
+      const msg = document.getElementById('gamesMessage');
+      if(msg) msg.textContent = 'Enter your name at the top first.';
+      return null;
+    }
+    // Acting from somewhere without a name field (profile, H2H) -- ask directly.
+    let typed = '';
+    try { typed = (window.prompt('Enter your name so the group knows who made this change:') || '').trim(); } catch(e){ /* prompt unavailable */ }
+    if(!typed) return null;
+    name = typed;
+  }
+  currentUserName = name;
+  saveMyName(name);
+  return name;
+}
+
+// ===================== HEAD TO HEAD =====================
+let h2hPlayerA = null;
+let h2hPlayerB = null;
+
+function renderH2H(){
+  const box = document.getElementById('h2hView');
+  const names = [...PLAYERS].map(p=>p.name).sort((a,b)=>a.localeCompare(b));
+  if(!h2hPlayerA) h2hPlayerA = names[0];
+  if(!h2hPlayerB) h2hPlayerB = names.find(n=>n!==h2hPlayerA) || names[0];
+
+  let html = `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Player A</label>
+      <select id="h2hSelectA" class="fg-select"></select>
+    </div>
+    <div class="fg-row"><label class="fg-label">Player B</label>
+      <select id="h2hSelectB" class="fg-select"></select>
+    </div>
+    <div class="fg-row"><label class="fg-label">Month</label>
+      <select id="h2hMonthSelect" class="fg-select"></select>
+    </div>
+  </div>`;
+
+  if(h2hPlayerA === h2hPlayerB){
+    html += `<div class="section-sub">Pick two different players to compare.</div>`;
+    box.innerHTML = html;
+    populateMonthSelect(document.getElementById('h2hMonthSelect'));
+    document.getElementById('h2hMonthSelect').addEventListener('change', e=>{ selectedMonth = e.target.value; renderH2H(); });
+    wireH2HSelects(names);
+    return;
+  }
+
+  const monthActive = selectedMonth !== 'all';
+
+  if(monthActive){
+    const monthlyRatings = computeMonthlyRating(selectedMonth);
+    const monthlyStatsAll = computeMonthlyStats(selectedMonth);
+    const aHas = h2hPlayerA in monthlyRatings, bHas = h2hPlayerB in monthlyRatings;
+    const aOverall = PLAYERS.find(p=>p.name===h2hPlayerA).rating;
+    const bOverall = PLAYERS.find(p=>p.name===h2hPlayerB).rating;
+    const aMonth = aHas ? Math.round(monthlyRatings[h2hPlayerA]) : null;
+    const bMonth = bHas ? Math.round(monthlyRatings[h2hPlayerB]) : null;
+    const aAhead = aHas && bHas && aMonth > bMonth;
+    const bAhead = aHas && bHas && bMonth > aMonth;
+    const aStats = monthlyStatsAll[h2hPlayerA];
+    const bStats = monthlyStatsAll[h2hPlayerB];
+    const aWL = aStats ? `<span style="color:var(--green);">${aStats.wins}W</span>-<span style="color:var(--red);">${aStats.losses}L</span>` : '0W-0L';
+    const bWL = bStats ? `<span style="color:var(--green);">${bStats.wins}W</span>-<span style="color:var(--red);">${bStats.losses}L</span>` : '0W-0L';
+
+    html += `<div class="section-heading" style="margin-top:6px;">📊 Power Rating — ${monthLabel(selectedMonth)}</div>`;
+    html += `<div class="matchup-vs" style="padding:12px;">
+      <div style="display:flex; justify-content:space-around; text-align:center;">
+        <div>
+          <div style="font-weight:700; margin-bottom:2px;">${h2hPlayerA}</div>
+          <div style="font-size:24px; font-weight:700; color:${aAhead?'var(--gold-bright)':'var(--text)'};">${aMonth !== null ? aMonth : '–'}</div>
+          <div style="font-size:11px; margin-top:2px;">${aWL}</div>
+          <div style="font-size:10px; color:var(--text-dim);">overall: ${Math.round(aOverall)}</div>
+        </div>
+        <div style="align-self:center; color:var(--text-dim); font-size:13px;">vs</div>
+        <div>
+          <div style="font-weight:700; margin-bottom:2px;">${h2hPlayerB}</div>
+          <div style="font-size:24px; font-weight:700; color:${bAhead?'var(--gold-bright)':'var(--text)'};">${bMonth !== null ? bMonth : '–'}</div>
+          <div style="font-size:11px; margin-top:2px;">${bWL}</div>
+          <div style="font-size:10px; color:var(--text-dim);">overall: ${Math.round(bOverall)}</div>
+        </div>
+      </div>
+    </div>`;
+
+    const idToIdxH2H = {};
+    ALL_MATCHES.forEach((m,i)=>{ idToIdxH2H[m.id] = i; });
+
+    html += `<div class="section-sub" style="padding:4px 2px;">Each player starts the month at their tier baseline. The running total below replays the same engine as the Power Rating above, checkpoint by checkpoint, so it always ends exactly on that figure once every game for the month is in.</div>`;
+
+    [h2hPlayerA, h2hPlayerB].forEach(pname=>{
+      const monthJourney = computeMonthlyJourney(pname, selectedMonth);
+      const startPoint = monthJourney ? Math.round(monthJourney[0].rating) : null;
+      const monthEntries = monthJourney ? monthJourney.filter(e=>e.type==='match') : [];
+      html += `<div class="section-sub" style="font-weight:700; color:var(--text); margin-top:8px;">${pname}'s games this month${startPoint!==null ? ` — started at ${startPoint}` : ''}</div>`;
+      if(monthEntries.length === 0){
+        html += `<div class="section-sub">No games for ${pname} in ${monthLabel(selectedMonth)}.</div>`;
+      } else {
+        monthEntries.forEach(e=>{
+          const m = MATCHES[e._idx];
+          const myTeam = e.won ? m.winners : m.losers;
+          const oppTeam = e.won ? m.losers : m.winners;
+          const partner = m.type==='doubles' ? myTeam.filter(n=>n!==pname)[0] : null;
+          const teamLabel = partner ? `${pname} &amp; ${partner}` : pname;
+          const deltaClass = e.delta > 0 ? 'perf-pos' : (e.delta < 0 ? 'perf-neg' : '');
+          const deltaLabel = e.delta > 0 ? `+${e.delta}` : `${e.delta}`;
+          const isExpanded = expandedGameId === m.id;
+          const detailContent = isExpanded ? buildMatchDetailBlock(m, idToIdxH2H[m.id], true) : '';
+          html += `<div class="callout-card" style="padding:8px 12px;">
+            <div class="game-card-clickable h2h-month-game" data-gameid="${m.id}" style="cursor:pointer;">
+              <div style="display:flex; justify-content:space-between; font-size:11.5px;">
+                <span><b>${teamLabel}</b> vs ${oppTeam.join(' &amp; ')}</span>
+                <span style="color:${e.won?'var(--green)':'var(--red)'};">${e.won?'WIN':'LOSS'}</span>
+              </div>
+              <div style="margin-top:2px; color:var(--text-dim); font-size:11px;">${e.date} · ${m.score}</div>
+              <div style="margin-top:4px;"><span class="${deltaClass}" style="font-weight:700;">${deltaLabel} pts this month</span> <span style="color:var(--text-dim); font-size:11px;">→ month running total: ${Math.round(e.rating)}</span></div>
+              ${!isExpanded ? `<div style="margin-top:2px; color:var(--text-dim); font-size:10px;">tap for the overall (season) breakdown of this game</div>` : ''}
+              ${detailContent}
+            </div>
+          </div>`;
+        });
+      }
+    });
+  }
+
+  const opponentMatches = MATCHES.filter(m=>{
+    const aWon = m.winners.includes(h2hPlayerA) && m.losers.includes(h2hPlayerB);
+    const bWon = m.winners.includes(h2hPlayerB) && m.losers.includes(h2hPlayerA);
+    return (aWon || bWon) && (!monthActive || m.date.slice(0,7)===selectedMonth);
+  }).sort((a,b)=> a.date < b.date ? 1 : -1);
+
+  const teammateMatches = MATCHES.filter(m=>{
+    const together = (m.winners.includes(h2hPlayerA) && m.winners.includes(h2hPlayerB)) ||
+           (m.losers.includes(h2hPlayerA) && m.losers.includes(h2hPlayerB));
+    return together && (!monthActive || m.date.slice(0,7)===selectedMonth);
+  }).sort((a,b)=> a.date < b.date ? 1 : -1);
+
+  const aWins = opponentMatches.filter(m=>m.winners.includes(h2hPlayerA)).length;
+  const bWins = opponentMatches.filter(m=>m.winners.includes(h2hPlayerB)).length;
+
+  html += `<div class="section-heading" style="margin-top:6px;">⚔️ As opponents${monthActive ? ` (${monthLabel(selectedMonth)})` : ''}</div>`;
+  if(opponentMatches.length === 0){
+    html += `<div class="section-sub">${h2hPlayerA} and ${h2hPlayerB} ${monthActive ? `didn't play each other in ${monthLabel(selectedMonth)}` : 'have never played against each other'}.</div>`;
+  } else {
+    html += `<div class="matchup-vs" style="text-align:center; font-size:16px; padding:12px;">
+      <b style="color:${aWins>bWins?'var(--gold-bright)':'var(--text)'};">${h2hPlayerA} ${aWins}</b>
+      <span style="color:var(--text-dim); margin:0 6px;">–</span>
+      <b style="color:${bWins>aWins?'var(--gold-bright)':'var(--text)'};">${bWins} ${h2hPlayerB}</b>
+      <div style="font-size:11px; color:var(--text-dim); margin-top:4px;">${opponentMatches.length} meeting${opponentMatches.length===1?'':'s'} as opponents</div>
+    </div>`;
+    opponentMatches.forEach(m=>{
+      const aWon = m.winners.includes(h2hPlayerA);
+      const aTeam = aWon ? m.winners : m.losers;
+      const bTeam = aWon ? m.losers : m.winners;
+      const aPartner = aTeam.filter(n=>n!==h2hPlayerA)[0];
+      const bPartner = bTeam.filter(n=>n!==h2hPlayerB)[0];
+      const isArmed = armedDeleteId === m.id;
+      const adminButtons = isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
+        <button class="preset-btn h2h-edit-btn" data-match-id="${m.id}" style="flex:1;">Edit</button>
+        <button class="preset-btn h2h-delete-btn" data-match-id="${m.id}" style="flex:1; ${isArmed?'color:#e8a5a1; border-color:var(--red);':''}">${isArmed ? 'Confirm delete?' : 'Delete'}</button>
+      </div>` : '';
+      html += `<div class="callout-card">
+        <div class="cc-title" style="color:${aWon?'var(--green)':'var(--red)'};">${aWon ? h2hPlayerA : h2hPlayerB} won</div>
+        <div class="cc-detail">${m.date} · ${aPartner?`${h2hPlayerA} &amp; ${aPartner}`:h2hPlayerA} vs ${bPartner?`${h2hPlayerB} &amp; ${bPartner}`:h2hPlayerB}<br/>${m.score}</div>
+        ${adminButtons}
+      </div>`;
+    });
+  }
+
+  html += `<div class="section-heading">🤝 As teammates${monthActive ? ` (${monthLabel(selectedMonth)})` : ''}</div>`;
+  if(teammateMatches.length === 0){
+    html += `<div class="section-sub">${h2hPlayerA} and ${h2hPlayerB} ${monthActive ? `didn't play together in ${monthLabel(selectedMonth)}` : 'have never partnered together'}.</div>`;
+  } else {
+    const wins = teammateMatches.filter(m=>m.winners.includes(h2hPlayerA)).length;
+    const losses = teammateMatches.length - wins;
+    const partnership = PARTNERSHIPS.find(p=> p.pair.includes(h2hPlayerA) && p.pair.includes(h2hPlayerB));
+    html += `<div class="matchup-vs" style="padding:10px;">
+      <b>${wins}-${losses}</b> together${partnership ? ` · <span class="${partnership.avg_overperf>3?'perf-pos':(partnership.avg_overperf<-3?'perf-neg':'')}">${partnership.avg_overperf>=0?'+':''}${partnership.avg_overperf}% chemistry</span>` : ''}
+    </div>`;
+    teammateMatches.forEach(m=>{
+      const won = m.winners.includes(h2hPlayerA);
+      const oppTeam = won ? m.losers : m.winners;
+      const isArmed = armedDeleteId === m.id;
+      const adminButtons = isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
+        <button class="preset-btn h2h-edit-btn" data-match-id="${m.id}" style="flex:1;">Edit</button>
+        <button class="preset-btn h2h-delete-btn" data-match-id="${m.id}" style="flex:1; ${isArmed?'color:#e8a5a1; border-color:var(--red);':''}">${isArmed ? 'Confirm delete?' : 'Delete'}</button>
+      </div>` : '';
+      html += `<div class="callout-card">
+        <div class="cc-title" style="color:${won?'var(--green)':'var(--red)'};">${won?'WIN':'LOSS'}</div>
+        <div class="cc-detail">${m.date} · vs ${oppTeam.join(' &amp; ')}<br/>${m.score}</div>
+        ${adminButtons}
+      </div>`;
+    });
+  }
+
+  box.innerHTML = html;
+
+  box.querySelectorAll('.h2h-edit-btn').forEach(btn=>{
+    btn.onclick = ()=> navigateToGamesTabForEdit(btn.dataset.matchId);
+  });
+  box.querySelectorAll('.h2h-delete-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.matchId;
+      if(armedDeleteId === id){ await deleteMatch(id); renderH2H(); }
+      else { armedDeleteId = id; renderH2H(); }
+    };
+  });
+  box.querySelectorAll('.h2h-month-game').forEach(el=>{
+    el.onclick = ()=>{
+      const id = el.dataset.gameid;
+      expandedGameId = (expandedGameId === id) ? null : id;
+      renderH2H();
+    };
+  });
+  wireH2HSelects(names);
+
+  populateMonthSelect(document.getElementById('h2hMonthSelect'));
+  document.getElementById('h2hMonthSelect').addEventListener('change', e=>{
+    selectedMonth = e.target.value;
+    renderH2H();
+  });
+}
+
+function wireH2HSelects(names){
+  const selA = document.getElementById('h2hSelectA');
+  const selB = document.getElementById('h2hSelectB');
+  selA.innerHTML = names.map(n=>`<option value="${n}" ${n===h2hPlayerA?'selected':''}>${n}</option>`).join('');
+  selB.innerHTML = names.map(n=>`<option value="${n}" ${n===h2hPlayerB?'selected':''}>${n}</option>`).join('');
+  selA.addEventListener('change', e=>{ h2hPlayerA = e.target.value; renderH2H(); });
+  selB.addEventListener('change', e=>{ h2hPlayerB = e.target.value; renderH2H(); });
+}
+
+// ===================== WISHLIST / UPCOMING GAME REQUESTS =====================
+function fmtRequestConfirmations(req){
+  const confirmedCount = req.players.filter(n=>req.confirmations[n]).length;
+  const pillClass = confirmedCount === req.players.length ? 'perf-pos' : '';
+  return `<div style="margin-top:6px; font-size:11.5px;">
+    <span class="${pillClass}" style="font-weight:700;">${confirmedCount}/${req.players.length} confirmed</span>
+    <div style="margin-top:4px; color:var(--text-dim);">
+      ${req.players.map(n=> `${req.confirmations[n] ? '✅' : '⬜'} <span class="request-player-link" data-player="${n}" style="text-decoration:underline; cursor:pointer; color:var(--text);">${n}</span>`).join(' &nbsp; ')}
+    </div>
+  </div>`;
+}
+
+function buildRequestCardHtml(req, showRemove, showAddResult){
+  const dateLine = req.preferredDate ? `${req.preferredDate} · ` : '';
+  const playerLinks = req.players.map(n=>`<span class="request-player-link" data-player="${n}" style="text-decoration:underline; cursor:pointer;">${n}</span>`).join(' &amp; ');
+  let buttons = '';
+  if(showAddResult || showRemove){
+    buttons = `<div class="difficulty-row" style="margin-top:8px;">
+      ${showAddResult ? `<button class="preset-btn request-addresult-btn" data-request-id="${req.id}" style="flex:1; color:var(--green); border-color:var(--green);">Add result</button>` : ''}
+      ${showRemove ? `<button class="preset-btn request-remove-btn" data-request-id="${req.id}" style="flex:1;">Remove</button>` : ''}
+    </div>`;
+  }
+  return `<div class="callout-card">
+    <div class="cc-title">${playerLinks}</div>
+    <div class="cc-detail">${dateLine}requested by ${req.requestedBy} (${fmtRelative(req.requestedAt)})</div>
+    ${fmtRequestConfirmations(req)}
+    ${buttons}
+  </div>`;
+}
+
+function wireRequestPlayerLinks(box){
+  box.querySelectorAll('.request-player-link').forEach(el=>{
+    el.onclick = ()=> openSheet(el.dataset.player);
+  });
+}
+
+function renderWishlist(flashMessage, adminFlashMessage){
+  const box = document.getElementById('wishlistView');
+  const pending = gameRequestsState.filter(r=>r.status==='pending');
+
+  let html = `<div class="section-heading">🙋 Request a game</div>`;
+  html += `<div class="section-sub">Name four players. Once all four confirm from their own profile, it moves to Upcoming automatically.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Requested by</label>
+      <input id="reqYourName" class="fg-select" value="${currentUserName}" placeholder="Your name" />
+    </div>
+    <div class="fg-row"><label class="fg-label">Players</label>
+      <input id="reqP1" list="playerNamesList" class="fg-select" placeholder="Player 1" style="margin-bottom:6px;" />
+      <input id="reqP2" list="playerNamesList" class="fg-select" placeholder="Player 2" style="margin-bottom:6px;" />
+      <input id="reqP3" list="playerNamesList" class="fg-select" placeholder="Player 3" style="margin-bottom:6px;" />
+      <input id="reqP4" list="playerNamesList" class="fg-select" placeholder="Player 4" />
+    </div>
+    <datalist id="playerNamesList">${allPlayerNames().map(n=>`<option value="${n}">`).join('')}</datalist>
+    <div class="fg-row"><label class="fg-label">Preferred date (optional)</label><input id="reqDate" type="date" class="fg-select" /></div>
+    <div class="fg-row"><button class="tab-btn active" id="reqSubmit" style="width:100%;">Request this game</button></div>
+    <div id="reqMessage" class="section-sub">${flashMessage || ''}</div>
+  </div>`;
+
+  if(isUnlocked){
+    html += `<div class="section-heading">⚡ Admin: add straight to Upcoming</div>`;
+    html += `<div class="section-sub">For a game already agreed in WhatsApp — skips the confirmation step entirely.</div>`;
+    html += `<div class="fg-controls">
+      <div class="fg-row"><label class="fg-label">Players</label>
+        <input id="adminReqP1" list="playerNamesList" class="fg-select" placeholder="Player 1" style="margin-bottom:6px;" />
+        <input id="adminReqP2" list="playerNamesList" class="fg-select" placeholder="Player 2" style="margin-bottom:6px;" />
+        <input id="adminReqP3" list="playerNamesList" class="fg-select" placeholder="Player 3" style="margin-bottom:6px;" />
+        <input id="adminReqP4" list="playerNamesList" class="fg-select" placeholder="Player 4" />
+      </div>
+      <div class="fg-row"><label class="fg-label">Preferred date (optional)</label><input id="adminReqDate" type="date" class="fg-select" /></div>
+      <div class="fg-row"><button class="preset-btn" id="adminReqSubmit" style="width:100%;">Add directly to Upcoming</button></div>
+      <div id="adminReqMessage" class="section-sub">${adminFlashMessage || ''}</div>
+    </div>`;
+  }
+
+  html += `<div class="section-heading">⏳ Pending (${pending.length})</div>`;
+  if(pending.length === 0){
+    html += `<div class="section-sub">No open requests right now.</div>`;
+  } else {
+    pending.slice().sort((a,b)=> a.requestedAt < b.requestedAt ? 1 : -1).forEach(req=>{
+      html += buildRequestCardHtml(req, true, false);
+    });
+  }
+
+  box.innerHTML = html;
+  wireRequestPlayerLinks(box);
+
+  document.getElementById('reqYourName').addEventListener('change', e=>{
+    currentUserName = e.target.value.trim();
+    saveMyName(currentUserName);
+  });
+
+  document.getElementById('reqSubmit').onclick = async ()=>{
+    const msg = document.getElementById('reqMessage');
+    const requestedBy = document.getElementById('reqYourName').value.trim();
+    if(!requestedBy){ msg.textContent = 'Enter your name first.'; return; }
+    const names = ['reqP1','reqP2','reqP3','reqP4'].map(id=>document.getElementById(id).value.trim());
+    if(names.some(n=>!n)){ msg.textContent = 'Enter all four players.'; return; }
+    if(new Set(names.map(n=>n.toLowerCase())).size !== 4){ msg.textContent = 'The same name appears more than once.'; return; }
+    const unrecognized = names.filter(n => !PLAYERS.find(p=>p.name.toLowerCase()===n.toLowerCase()));
+    if(unrecognized.length){ msg.textContent = `Unrecognized name${unrecognized.length>1?'s':''}: ${unrecognized.join(', ')}. Add them via Manage first if they're new.`; return; }
+
+    currentUserName = requestedBy;
+    await saveMyName(requestedBy);
+
+    const confirmations = {};
+    names.forEach(n=> confirmations[n] = false);
+    // If the requester is one of the four, they're implicitly in.
+    const requesterMatch = names.find(n=>n.toLowerCase()===requestedBy.toLowerCase());
+    if(requesterMatch) confirmations[requesterMatch] = true;
+
+    const req = {
+      id: 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+      requestedBy, requestedAt: new Date().toISOString(),
+      players: names, preferredDate: document.getElementById('reqDate').value || '',
+      confirmations,
+      status: Object.values(confirmations).every(v=>v) ? 'confirmed' : 'pending',
+    };
+    gameRequestsState.push(req);
+    const ok = await saveGameRequests(gameRequestsState);
+    if(!ok){
+      gameRequestsState.pop();
+      msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage.`;
+      return;
+    }
+    renderWishlist('Requested! Each player can confirm from their own profile.');
+  };
+
+  const adminReqSubmit = document.getElementById('adminReqSubmit');
+  if(adminReqSubmit){
+    adminReqSubmit.onclick = async ()=>{
+      const msg = document.getElementById('adminReqMessage');
+      const names = ['adminReqP1','adminReqP2','adminReqP3','adminReqP4'].map(id=>document.getElementById(id).value.trim());
+      if(names.some(n=>!n)){ msg.textContent = 'Enter all four players.'; return; }
+      if(new Set(names.map(n=>n.toLowerCase())).size !== 4){ msg.textContent = 'The same name appears more than once.'; return; }
+      const unrecognized = names.filter(n => !PLAYERS.find(p=>p.name.toLowerCase()===n.toLowerCase()));
+      if(unrecognized.length){ msg.textContent = `Unrecognized name${unrecognized.length>1?'s':''}: ${unrecognized.join(', ')}.`; return; }
+      const adminName = requireName();
+      if(!adminName) return;
+
+      const confirmations = {};
+      names.forEach(n=> confirmations[n] = true);
+      const req = {
+        id: 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+        requestedBy: adminName, requestedAt: new Date().toISOString(),
+        players: names, preferredDate: document.getElementById('adminReqDate').value || '',
+        confirmations, status: 'confirmed',
+      };
+      gameRequestsState.push(req);
+      const ok = await saveGameRequests(gameRequestsState);
+      if(!ok){
+        gameRequestsState.pop();
+        msg.textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage.`;
+        return;
+      }
+      renderWishlist(undefined, 'Added to Upcoming.');
+    };
+  }
+
+  box.querySelectorAll('.request-remove-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.requestId;
+      gameRequestsState = gameRequestsState.filter(r=>r.id!==id);
+      await saveGameRequests(gameRequestsState);
+      renderWishlist();
+    };
+  });
+}
+
+function renderUpcoming(){
+  const box = document.getElementById('upcomingView');
+  const confirmed = gameRequestsState.filter(r=>r.status==='confirmed');
+
+  let html = `<div class="section-heading">📅 Upcoming (${confirmed.length})</div>`;
+  html += `<div class="section-sub">Once a game has actually been played, tap "Add result" to record it — that moves it into the Games tab and clears it from here.</div>`;
+  if(confirmed.length === 0){
+    html += `<div class="section-sub">Nothing fully confirmed yet — once all four players confirm a Wishlist request, it'll show up here.</div>`;
+  } else {
+    confirmed.slice().sort((a,b)=> a.requestedAt < b.requestedAt ? 1 : -1).forEach(req=>{
+      html += buildRequestCardHtml(req, true, true);
+    });
+  }
+  box.innerHTML = html;
+  wireRequestPlayerLinks(box);
+
+  box.querySelectorAll('.request-remove-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const id = btn.dataset.requestId;
+      gameRequestsState = gameRequestsState.filter(r=>r.id!==id);
+      await saveGameRequests(gameRequestsState);
+      renderUpcoming();
+    };
+  });
+
+  box.querySelectorAll('.request-addresult-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      const req = gameRequestsState.find(r=>r.id===btn.dataset.requestId);
+      if(!req) return;
+      navigateToGamesTabForResult(req);
+    };
+  });
+}
+
+let summaryMonth = null;
+
+let summaryMode = 'information'; // 'information' | 'league'
+
+function renderSummary(){
+  const box = document.getElementById('summaryView');
+  const months = getAvailableMonths();
+  if(!summaryMonth) summaryMonth = months.length ? months[months.length-1] : 'all';
+
+  let html = `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Month</label>
+      <select id="summaryMonthSelect" class="fg-select"></select>
+    </div>
+    <div class="fg-row"><label class="fg-label">View</label>
+      <select id="summaryModeSelect" class="fg-select">
+        <option value="information">Information</option>
+        <option value="league">League Table</option>
+      </select>
+    </div>
+  </div>
+  <div id="summaryContent"></div>`;
+
+  box.innerHTML = html;
+  populateSummaryMonthSelect();
+  const modeSel = document.getElementById('summaryModeSelect');
+  modeSel.value = summaryMode;
+  modeSel.onchange = (e)=>{ summaryMode = e.target.value; renderSummary(); };
+
+  if(summaryMode === 'league') renderSummaryLeagueTable();
+  else renderSummaryInformation();
+}
+
+let leagueGrouped = true;
+let leagueSortKey = 'points';
+let leagueSortDesc = true;
+
+const LEAGUE_COLUMNS = [
+  { key: null, label: '#', align: 'left' },
+  { key: 'name', label: 'Player', align: 'left' },
+  { key: 'games', label: 'P', align: 'center' },
+  { key: 'wins', label: 'W', align: 'center' },
+  { key: 'losses', label: 'L', align: 'center' },
+  { key: 'draws', label: 'D', align: 'center' },
+  { key: 'gd', label: 'GD', align: 'center' },
+  { key: 'avg_opp', label: 'Avg Opp', align: 'center' },
+  { key: 'recent_form', label: 'Form (10g)', align: 'center' },
+  { key: 'points', label: 'Pts', align: 'right' },
+];
+
+function sortLeagueRows(rows){
+  const key = leagueSortKey;
+  const dir = leagueSortDesc ? -1 : 1;
+  return rows.slice().sort((a,b)=>{
+    let av = a[key], bv = b[key];
+    if(key === 'name') return dir * a.name.localeCompare(b.name);
+    if(av === undefined || av === null) av = -Infinity;
+    if(bv === undefined || bv === null) bv = -Infinity;
+    if(av !== bv) return dir * (av - bv);
+    // Stable tiebreak so ties don't jump around between renders.
+    return b.points - a.points || b.gd - a.gd || a.name.localeCompare(b.name);
+  });
+}
+
+function buildLeagueTableHtml(rows, showTierColumn){
+  const sorted = sortLeagueRows(rows);
+  let html = `<div class="callout-card" style="padding:0; overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:11px; white-space:nowrap;">
+      <thead><tr style="background:var(--bg2); text-align:left;">`;
+  html += `<th style="padding:7px 4px 7px 8px;">#</th>`;
+  html += `<th class="league-sort-th" data-key="name" style="padding:7px 4px; cursor:pointer;">Player${leagueSortKey==='name'?(leagueSortDesc?' ▾':' ▴'):''}</th>`;
+  if(showTierColumn) html += `<th style="padding:7px 4px; text-align:center;">Tier</th>`;
+  ['games','wins','losses','draws','gd','avg_opp','recent_form','points'].forEach(key=>{
+    const col = LEAGUE_COLUMNS.find(c=>c.key===key);
+    const arrow = leagueSortKey===key ? (leagueSortDesc?' ▾':' ▴') : '';
+    html += `<th class="league-sort-th" data-key="${key}" style="padding:7px 4px; text-align:${col.align}; cursor:pointer;">${col.label}${arrow}</th>`;
+  });
+  html += `</tr></thead><tbody>`;
+  sorted.forEach((r,i)=>{
+    const formHtml = (r.recent_form !== null && r.recent_form !== undefined)
+      ? (r.recent_form_stale
+          ? `<span style="color:var(--text-dim); opacity:0.7;" title="stale">${r.recent_form>=0?'+':''}${r.recent_form}% (${r.recent_form_wins}W-${r.recent_form_losses}L) ⏸</span>`
+          : `<span style="color:${r.recent_form>3?'var(--green)':(r.recent_form<-3?'var(--red)':'var(--text-dim)')};">${r.recent_form>=0?'+':''}${r.recent_form}%</span> <span style="color:var(--text-dim); font-size:10px;">(${r.recent_form_wins}W-${r.recent_form_losses}L)</span>`)
+      : `<span style="color:var(--text-dim);">–</span>`;
+    html += `<tr style="border-top:1px solid var(--line);">
+      <td style="padding:7px 4px 7px 8px; color:var(--text-dim);">${i+1}</td>
+      <td style="padding:7px 4px;"><span class="request-player-link" data-player="${r.name}" style="text-decoration:underline; cursor:pointer; font-weight:700;">${r.name}</span></td>
+      ${showTierColumn ? `<td style="padding:7px 4px; text-align:center;"><span class="badge ${r.tier}" style="display:inline-flex; width:20px; height:20px; font-size:10px;">${r.tier}</span></td>` : ''}
+      <td style="padding:7px 4px; text-align:center;">${r.games}</td>
+      <td style="padding:7px 4px; text-align:center; color:var(--green);">${r.wins}</td>
+      <td style="padding:7px 4px; text-align:center; color:var(--red);">${r.losses}</td>
+      <td style="padding:7px 4px; text-align:center; color:var(--text-dim);">${r.draws}</td>
+      <td style="padding:7px 4px; text-align:center;">${r.gd>=0?'+':''}${r.gd}</td>
+      <td style="padding:7px 4px; text-align:center;">${r.avg_opp}</td>
+      <td style="padding:7px 4px; text-align:center;">${formHtml}</td>
+      <td style="padding:7px 8px 7px 4px; text-align:right; font-weight:700; color:var(--gold-bright);">${r.points}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+  return html;
+}
+
+function renderSummaryLeagueTable(){
+  const content = document.getElementById('summaryContent');
+  const stats = computeMonthlySummaryStats(summaryMonth);
+  const label = summaryMonth === 'all' ? 'All Time' : monthLabel(summaryMonth);
+
+  // Recent Form is always the last-10-games figure (not scoped to the selected month) --
+  // the same established meaning it has everywhere else in the app.
+  const rowsByName = {};
+  Object.values(stats).forEach(s=>{
+    const p = PLAYERS.find(x=>x.name===s.name);
+    const form = computeRecentForm(s.name, 10);
+    rowsByName[s.name] = {
+      ...s, tier: p ? p.tier : '?',
+      recent_form: form ? form.avgPct : null,
+      recent_form_wins: form ? form.wins : 0,
+      recent_form_losses: form ? form.losses : 0,
+      recent_form_stale: form ? form.daysSinceLastGame > RECENT_FORM_STALE_DAYS : false,
+    };
+  });
+
+  let html = `<div class="section-heading" style="margin-top:6px;">🏆 ${label} League Table</div>`;
+  html += `<div class="section-sub">Updates live as the month's games are added — 3 points for a win, 1 for a draw, tiebreak on game difference. Tap a column header to sort by it. "Form" is each player's last 10 games overall, not scoped to this month. Tier S isn't shown — one player can't have a table.</div>`;
+
+  html += `<div class="fg-toggle" style="margin:8px 0 14px;">
+    <button class="fg-toggle-btn ${leagueGrouped?'active':''}" id="leagueGroupedBtn">By tier</button>
+    <button class="fg-toggle-btn ${!leagueGrouped?'active':''}" id="leagueAllBtn">All together</button>
+  </div>`;
+
+  if(leagueGrouped){
+    const tiers = ['A','B','C'];
+    let anyTierShown = false;
+    tiers.forEach(tier=>{
+      const rows = Object.values(rowsByName).filter(s => s.tier === tier && s.games > 0);
+      if(rows.length === 0) return;
+      anyTierShown = true;
+      html += `<div class="section-heading">Tier ${tier}</div>`;
+      html += buildLeagueTableHtml(rows, false);
+    });
+    if(!anyTierShown) html += `<div class="section-sub">No games recorded for ${label}.</div>`;
+  } else {
+    const rows = Object.values(rowsByName).filter(s => s.tier !== 'S' && s.games > 0);
+    if(rows.length === 0) html += `<div class="section-sub">No games recorded for ${label}.</div>`;
+    else html += buildLeagueTableHtml(rows, true);
+  }
+
+  content.innerHTML = html;
+  wireRequestPlayerLinks(content);
+
+  document.getElementById('leagueGroupedBtn').onclick = ()=>{ leagueGrouped = true; renderSummaryLeagueTable(); };
+  document.getElementById('leagueAllBtn').onclick = ()=>{ leagueGrouped = false; renderSummaryLeagueTable(); };
+  content.querySelectorAll('.league-sort-th').forEach(th=>{
+    th.onclick = ()=>{
+      const key = th.dataset.key;
+      if(leagueSortKey === key) leagueSortDesc = !leagueSortDesc;
+      else { leagueSortKey = key; leagueSortDesc = true; }
+      renderSummaryLeagueTable();
+    };
+  });
+}
+
+function renderSummaryInformation(){
+  const box = document.getElementById('summaryContent');
+  let html = '';
+
+  const stats = computeMonthlySummaryStats(summaryMonth);
+  const statsArr = Object.values(stats);
+  const label = summaryMonth === 'all' ? 'All Time' : monthLabel(summaryMonth);
+
+  if(statsArr.length === 0){
+    html += `<div class="section-sub">No games recorded for ${label}.</div>`;
+    box.innerHTML = html;
+    return;
+  }
+
+  html += `<div class="section-heading" style="margin-top:6px;">📊 ${label} Stats Review</div>`;
+
+  const minGamesForRanked = 3;
+  const eligible = statsArr.filter(s=>s.games >= minGamesForRanked);
+
+  const mostGames = topNTied(statsArr, 'games', 3, true);
+  const mostWins = topNTied(statsArr.filter(s=>s.games>0), 'points', 3, true);
+  const mostLosses = topNTied(statsArr, 'losses', 3, true);
+  const lowestWinPct = topNTied(eligible, 'winpct', 3, false);
+  const highestWinPct = topNTied(eligible, 'winpct', 3, true);
+  const doughnutMax = Math.max(0, ...statsArr.map(s=>s.doughnuts));
+  const mostDoughnuts = doughnutMax > 0 ? statsArr.filter(s=>s.doughnuts===doughnutMax).map(s=>s.name) : [];
+  const hardestGames = topNTied(eligible, 'hardness', 3, true);
+  const playerOfMonth = mostWins.length ? mostWins[0] : null;
+
+  function nameLinks(names){
+    return names.map(n=>`<span class="request-player-link" data-player="${n}" style="text-decoration:underline; cursor:pointer;">${n}</span>`).join(' / ');
+  }
+  function renderGroupList(title, groups, formatFn){
+    let h = `<div class="section-heading">${title}</div>`;
+    if(groups.length === 0){ h += `<div class="section-sub">Not enough data.</div>`; return h; }
+    groups.forEach(g=>{
+      h += `<div class="matchup-vs" style="margin-bottom:6px; padding:8px 12px;">${g.rank}. ${nameLinks(g.names)} — ${formatFn(g)}</div>`;
+    });
+    return h;
+  }
+
+  html += renderGroupList('🎾 Most games played', mostGames, g=>`${g.value} game${g.value===1?'':'s'}`);
+  html += renderGroupList('🏆 Most wins &amp; highest points', mostWins, g=>{
+    const s = stats[g.names[0]];
+    return `${s.wins} win${s.wins===1?'':'s'}${s.draws?` · ${s.draws} draw${s.draws===1?'':'s'}`:''} — ${g.value} pts`;
+  });
+  html += renderGroupList('😬 Most losses', mostLosses, g=>`${g.value} loss${g.value===1?'':'es'}`);
+  html += renderGroupList('📉 Lowest win % (highest loss %)', lowestWinPct, g=>`${stats[g.names[0]].losspct}% loser`);
+  html += renderGroupList('📈 Highest win %', highestWinPct, g=>`${g.value}% wins`);
+
+  html += `<div class="section-heading">🍩 Most doughnuts received</div>`;
+  if(mostDoughnuts.length === 0){
+    html += `<div class="section-sub">Nobody got doughnut'd this ${summaryMonth==='all'?'season':'month'}.</div>`;
+  } else {
+    html += `<div class="matchup-vs" style="padding:8px 12px;">${nameLinks(mostDoughnuts)} — x${doughnutMax}</div>`;
+  }
+
+  html += renderGroupList('💪 Hardest games played (avg opponent strength)', hardestGames, g=>`${g.value}`);
+
+  html += `<div class="section-heading">👑 Player of the Month</div>`;
+  if(playerOfMonth){
+    html += `<div class="matchup-vs" style="text-align:center; padding:16px; font-size:16px;">${nameLinks(playerOfMonth.names)} 🏆</div>`;
+  } else {
+    html += `<div class="section-sub">Not enough data.</div>`;
+  }
+
+  html += `<div class="section-sub" style="padding:8px 2px;">Assumptions: points are 3/win, 1/draw. "Hardest games" is avg opponent strength ÷ 300. Win%/loss% include draws in the denominator. Rankings for win%/loss%/hardest require at least ${minGamesForRanked} games played.</div>`;
+
+  html += `<div class="fg-row" style="margin-top:12px;"><button class="tab-btn active" id="copySummaryBtn" style="width:100%;">📋 Copy as WhatsApp text</button></div>
+  <div id="copySummaryMessage" class="section-sub"></div>`;
+
+  box.innerHTML = html;
+  wireRequestPlayerLinks(box);
+
+  document.getElementById('copySummaryBtn').onclick = ()=>{
+    const text = buildWhatsAppSummaryText(summaryMonth, stats, {mostGames, mostWins, mostLosses, lowestWinPct, highestWinPct, mostDoughnuts, doughnutMax, hardestGames, playerOfMonth});
+    const msg = document.getElementById('copySummaryMessage');
+    const showFallback = ()=>{
+      let ta = document.getElementById('summaryFallbackText');
+      if(!ta){
+        ta = document.createElement('textarea');
+        ta.id = 'summaryFallbackText';
+        ta.className = 'fg-select';
+        ta.style.width = '100%';
+        ta.style.marginTop = '8px';
+        ta.rows = 16;
+        msg.after(ta);
+      }
+      ta.value = text;
+      msg.textContent = 'Could not copy automatically — tap the text box below, select all, and copy manually.';
+    };
+    try {
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(()=>{ msg.textContent = 'Copied! Paste it into WhatsApp.'; }).catch(showFallback);
+      } else {
+        showFallback();
+      }
+    } catch(e){
+      showFallback();
+    }
+  };
+}
+
+function populateSummaryMonthSelect(){
+  const sel = document.getElementById('summaryMonthSelect');
+  if(!sel) return;
+  const months = getAvailableMonths();
+  sel.innerHTML = `<option value="all">All time</option>` + months.map(m=>`<option value="${m}" ${m===summaryMonth?'selected':''}>${monthLabel(m)}</option>`).join('');
+  sel.value = summaryMonth;
+  sel.onchange = (e)=>{ summaryMonth = e.target.value; renderSummary(); };
+}
+
+function buildWhatsAppSummaryText(month, stats, groups){
+  const label = month === 'all' ? 'All Time' : monthLabel(month);
+  const lines = [];
+  lines.push(`Please see the ${label} stats review`);
+  lines.push('');
+  lines.push('*Most games played:*');
+  groups.mostGames.forEach(g=> lines.push(`${g.rank}. ${g.names.join(' / ')} ${g.value} games`));
+  lines.push('');
+  lines.push('*Most wins & highest points*');
+  groups.mostWins.forEach(g=>{
+    const s = stats[g.names[0]];
+    const drawPart = s.draws ? ` ${s.draws} draw${s.draws===1?'':'s'}` : '';
+    lines.push(`${g.rank} ${g.names.join(' / ')} ${s.wins} win${s.wins===1?'':'s'}${drawPart} - ${g.value} points`);
+  });
+  lines.push('');
+  lines.push('Most losses');
+  groups.mostLosses.forEach(g=> lines.push(`${g.rank}. ${g.names.join(' / ')} ${g.value} losses`));
+  lines.push('');
+  lines.push('Lowest win %');
+  groups.lowestWinPct.forEach(g=>{
+    const s = stats[g.names[0]];
+    lines.push(`${g.rank}. ${s.losspct}% loser ${g.names.join(' / ')}`);
+  });
+  lines.push('');
+  lines.push('Highest win %');
+  groups.highestWinPct.forEach(g=> lines.push(`${g.rank}. ${g.names.join(' / ')} ${g.value}% wins`));
+  lines.push('');
+  lines.push('Most doughnuts received');
+  if(groups.mostDoughnuts.length){
+    lines.push(`${groups.mostDoughnuts.join(' / ')}  x${groups.doughnutMax}`);
+  } else {
+    lines.push('None this time!');
+  }
+  lines.push('');
+  lines.push('Hardest games played');
+  groups.hardestGames.forEach(g=> lines.push(`${g.rank}. ${g.names.join(' / ')} ${g.value}`));
+  lines.push('');
+  lines.push('Player of the month….');
+  lines.push(groups.playerOfMonth ? `${groups.playerOfMonth.names.join(' / ')} 🏆🏆🏆` : 'Not enough data');
+  return lines.join('\n');
+}
+
+
+function buildGameRequestsForPlayerSection(name){
+  const relevant = gameRequestsState.filter(r=> r.status==='pending' && r.players.includes(name) && !r.confirmations[name]);
+  if(relevant.length === 0) return '';
+  let html = `<div class="section-heading" style="margin-top:14px;">📋 Game requests involving you</div>`;
+  relevant.forEach(req=>{
+    const others = req.players.filter(n=>n!==name);
+    html += `<div class="callout-card">
+      <div class="cc-title">With ${others.join(', ')}</div>
+      <div class="cc-detail">Requested by ${req.requestedBy} (${fmtRelative(req.requestedAt)})${req.preferredDate ? ' · '+req.preferredDate : ''}</div>
+      ${fmtRequestConfirmations(req)}
+      <div class="difficulty-row" style="margin-top:8px;">
+        <button class="preset-btn confirm-request-btn" data-request-id="${req.id}" data-player="${name}" style="flex:1; color:var(--green); border-color:var(--green);">I'm in!</button>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+function renderGamesTab(){
+  const box = document.getElementById('gamesView');
+  const pending = extraMatchesState.filter(m=>m.status==='pending' && !deletedIdsState.includes(m.id));
+  let display = getDisplayMatches().filter(m=>m._status==='approved');
+  if(selectedMonth !== 'all') display = display.filter(m=>m.date.slice(0,7)===selectedMonth);
+  if(selectedGamesPlayer !== 'all') display = display.filter(m=> m.winners.includes(selectedGamesPlayer) || m.losers.includes(selectedGamesPlayer));
+  display.sort((a,b)=> a.date < b.date ? 1 : -1);
+
+  let html = '';
+
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Month</label>
+      <select id="gamesMonthSelect" class="fg-select"></select>
+    </div>
+    <div class="fg-row"><label class="fg-label">Player</label>
+      <select id="gamesPlayerSelect" class="fg-select"></select>
+    </div>
+    <div class="fg-row"><label class="fg-label">Data</label>
+      <select id="gamesDataQualitySelect" class="fg-select">
+        <option value="all">All data</option>
+        <option value="verified">June onwards only (cross-checked)</option>
+        <option value="unverified">Pre-June only (single-sourced)</option>
+      </select>
+    </div>
+  </div>`;
+
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Your name</label>
+      <input id="gamesYourName" class="fg-select" placeholder="So the group knows who added this" value="${currentUserName}" />
+    </div>
+  </div>`;
+
+  html += `<div class="section-heading" id="addGameToggle" style="cursor:pointer; display:flex; align-items:center; gap:6px;"><span id="addGameArrow">${addGameExpanded ? '▾' : '▸'}</span> ➕ Add a game</div>`;
+  html += `<div id="addGameBody" style="display:${addGameExpanded ? 'block' : 'none'};">`;
+  html += `<div class="section-sub">Anyone can submit a result — it lands below as pending until an admin approves it. Paste a result in the usual WhatsApp shorthand and it'll fill in the form for you to check before submitting.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Quick paste</label>
+      <textarea id="agQuickPaste" class="fg-select" rows="5" style="width:100%; font-family:monospace; resize:vertical;" placeholder="Player A &amp; Player B 🏆
+6-4
+6-4
+Player C &amp; Player D"></textarea>
+    </div>
+    <div class="fg-row"><button class="preset-btn" id="agQuickParse" style="width:100%;">Parse &amp; fill form below</button></div>
+    <div id="agQuickMessage" class="section-sub"></div>
+  </div>`;
+  html += `<div class="section-sub">Or fill in the fields directly. New games go into Pending below until an admin approves them — nothing here affects ratings until then.</div>`;
+  html += `<div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Date</label><input id="agDate" type="date" class="fg-select" /></div>
+    <div class="fg-row"><label class="fg-label">Match type</label>
+      <div class="fg-toggle" id="agTypeToggle">
+        <button class="fg-toggle-btn active" data-type="doubles">Doubles</button>
+        <button class="fg-toggle-btn" data-type="singles">Singles</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label">Outcome</label>
+      <div class="fg-toggle" id="agOutcomeToggle">
+        <button class="fg-toggle-btn active" data-outcome="decisive">Finished</button>
+        <button class="fg-toggle-btn" data-outcome="draw">Not finished / draw</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label" id="agTeamALabel">Team A (winners)</label>
+      <input id="agA1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
+      <input id="agA2" list="playerNamesList" class="fg-select" placeholder="Partner (leave blank for singles)" />
+    </div>
+    <div class="fg-row"><label class="fg-label" id="agTeamBLabel">Team B (losers)</label>
+      <input id="agB1" list="playerNamesList" class="fg-select" placeholder="Player name" style="margin-bottom:6px;" />
+      <input id="agB2" list="playerNamesList" class="fg-select" placeholder="Partner (leave blank for singles)" />
+    </div>
+    <datalist id="playerNamesList">${allPlayerNames().map(n=>`<option value="${n}">`).join('')}</datalist>
+    <div class="fg-row"><label class="fg-label" id="agSetsLabel">Set scores (Team A – Team B)</label>
+      <div id="agSets"></div>
+      <button class="preset-btn" id="agAddSet" style="margin-top:6px;">+ Add set</button>
+    </div>
+    <div class="fg-row" id="agNewPlayerRow" style="display:none;">
+      <label class="fg-label" style="color:var(--gold-bright);">New player(s) detected — pick a starting tier</label>
+      <div id="agNewPlayerTiers"></div>
+    </div>
+    <div class="fg-row">
+      <button class="tab-btn active" id="agSubmit" style="width:100%;">Submit for approval</button>
+    </div>
+    <div id="agMessage" class="section-sub"></div>
+  </div>`;
+  html += `</div>`; // close addGameBody
+
+  if(!isUnlocked){
+    html += `<div class="section-heading">🔒 Admin actions</div>`;
+    html += `<div class="section-sub">Approving, editing, or deleting a game needs the admin password.</div>`;
+    html += buildLockScreenHtml();
+  } else {
+    html += `<div class="fg-controls">
+      <div class="fg-row"><button class="preset-btn" id="gamesLockNowBtn">🔒 Lock admin area</button></div>
+      <div id="gamesMessage" class="section-sub"></div>
+    </div>`;
+  }
+
+  const pendingFiltered = selectedGamesPlayer === 'all' ? pending : pending.filter(m=> m.winners.includes(selectedGamesPlayer) || m.losers.includes(selectedGamesPlayer));
+
+  if(pendingFiltered.length > 0){
+    html += `<div class="section-heading">⏳ Pending approval (${pendingFiltered.length})</div>`;
+    html += `<div class="section-sub">Submitted but not yet counted in any rating.</div>`;
+    pendingFiltered.forEach(m=>{
+      const titleText = m.isDraw
+        ? `${m.winners.join(' & ')} vs ${m.losers.join(' & ')} <span class="strength-pill" style="margin-left:6px;">DRAW</span>`
+        : `<span style="color:var(--green);">${m.winners.join(' & ')}</span> <span style="color:var(--text-dim); font-weight:400;">def</span> <span style="color:var(--red);">${m.losers.join(' & ')}</span>`;
+      let pendingCardStyle = '';
+      if(selectedGamesPlayer !== 'all' && !m.isDraw){
+        const playerWon = m.winners.includes(selectedGamesPlayer);
+        pendingCardStyle = playerWon
+          ? 'background:rgba(90,156,90,0.12); border-color:rgba(90,156,90,0.4);'
+          : 'background:rgba(181,69,63,0.12); border-color:rgba(181,69,63,0.4);';
+      }
+      html += `<div class="callout-card" style="${pendingCardStyle}">
+        <div class="cc-title">${titleText}</div>
+        <div class="cc-detail">${m.date} · ${m.sets.map(s=>s.join('-')).join(', ')} · submitted by ${m.submittedBy} (${fmtRelative(m.submittedAt)})</div>
+        ${isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
+          <button class="preset-btn" data-approve="${m.id}" style="flex:1; color:var(--green); border-color:var(--green);">Approve</button>
+          <button class="preset-btn" data-reject="${m.id}" style="flex:1; color:#e8a5a1; border-color:var(--red);">Reject</button>
+          <button class="preset-btn" data-edit="${m.id}" style="flex:1;">Edit</button>
+        </div>` : `<div class="section-sub" style="margin-top:6px;">🔒 Unlock above to approve, reject, or edit</div>`}
+      </div>`;
+    });
+  }
+
+  const gamesHeading = selectedGamesPlayer === 'all' ? `📋 All games (${display.length})` : `📋 ${selectedGamesPlayer}'s games (${display.length})`;
+  html += `<div class="section-heading">${gamesHeading}</div>`;
+  html += `<div class="section-sub">Newest first, grouped by day. Tap a game to see the full breakdown.${isUnlocked ? ' Editing or deleting recalculates every rating immediately.' : ''}</div>`;
+  const idToIdx = {};
+  ALL_MATCHES.forEach((m,i)=>{ idToIdx[m.id] = i; });
+  let lastDate = null;
+  display.forEach(m=>{
+    if(m.date !== lastDate){
+      html += `<div class="section-heading" style="margin-top:16px; font-size:12px; color:var(--gold-dim); text-transform:uppercase; letter-spacing:.04em;">${dayLabel(m.date)}</div>`;
+      lastDate = m.date;
+    }
+    const isBase = m.id.startsWith('base_');
+    const edit = matchEditsState[m.id];
+    let metaLine = isBase ? 'Historical record' : `Submitted by ${m.submittedBy || 'unknown'}`;
+    if(edit) metaLine += ` · edited by ${edit.editedBy} (${fmtRelative(edit.editedAt)})`;
+    const isArmed = armedDeleteId === m.id;
+    const unverifiedTag = m.verified === false ? `<span class="strength-pill" style="color:#e8a5a1; border-color:var(--red); margin-left:6px;">Pre-June · single-sourced</span>` : '';
+    const isExpanded = expandedGameId === m.id;
+    const enriched = m.isDraw ? null : MATCHES[idToIdx[m.id]];
+    const drawTag = m.isDraw ? `<span class="strength-pill" style="margin-left:6px;">DRAW · not finished</span>` : '';
+    const titleText = m.isDraw
+      ? `${m.winners.join(' & ')} vs ${m.losers.join(' & ')}${drawTag}${unverifiedTag}`
+      : `<span style="color:var(--green);">${m.winners.join(' & ')}</span> <span style="color:var(--text-dim); font-weight:400;">def</span> <span style="color:var(--red);">${m.losers.join(' & ')}</span>${unverifiedTag}`;
+    const detailContent = isExpanded
+      ? (m.isDraw
+          ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--line); font-size:11.5px; color:var(--text-dim);">Recorded as unfinished / a draw — doesn't count as a win or loss for anyone, and doesn't affect any rating.</div>`
+          : (enriched ? buildMatchDetailBlock(enriched, idToIdx[m.id], false, true) : ''))
+      : '';
+    let cardStyle = '';
+    if(selectedGamesPlayer !== 'all' && !m.isDraw){
+      const playerWon = m.winners.includes(selectedGamesPlayer);
+      cardStyle = playerWon
+        ? 'background:rgba(90,156,90,0.12); border-color:rgba(90,156,90,0.4);'
+        : 'background:rgba(181,69,63,0.12); border-color:rgba(181,69,63,0.4);';
+    }
+    html += `<div class="callout-card" style="${cardStyle}">
+      <div class="game-card-clickable" data-gameid="${m.id}" style="cursor:pointer;">
+        <div class="cc-title">${titleText}</div>
+        <div class="cc-detail">${m.sets.map(s=>s.join('-')).join(', ')}${m.note?' · '+m.note:''}<br/>${metaLine}</div>
+        ${detailContent}
+      </div>
+      ${isUnlocked ? `<div class="difficulty-row" style="margin-top:8px;">
+        <button class="preset-btn" data-edit="${m.id}" style="flex:1;">Edit</button>
+        <button class="preset-btn" data-delete="${m.id}" style="flex:1; ${isArmed?'color:#e8a5a1; border-color:var(--red);':''}">${isArmed ? 'Confirm delete?' : 'Delete'}</button>
+      </div>` : ''}
+    </div>`;
+  });
+
+  if(isUnlocked && editingMatchId){
+    html += `<div id="editFormAnchor"></div>` + buildEditFormHtml(editingMatchId);
+  }
+
+  box.innerHTML = html;
+
+  box.querySelectorAll('.game-card-clickable').forEach(el=>{
+    el.onclick = ()=>{
+      const id = el.dataset.gameid;
+      expandedGameId = (expandedGameId === id) ? null : id;
+      renderGamesTab();
+    };
+  });
+
+  if(isUnlocked && editingMatchId){
+    const anchor = document.getElementById('editFormAnchor');
+    if(anchor){
+      try { anchor.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e){ /* non-critical */ }
+    }
+  }
+
+  populateMonthSelect(document.getElementById('gamesMonthSelect'));
+  document.getElementById('gamesMonthSelect').addEventListener('change', e=>{
+    selectedMonth = e.target.value;
+    renderGamesTab();
+  });
+
+  const gamesPlayerSelect = document.getElementById('gamesPlayerSelect');
+  const allNames = [...PLAYERS].map(p=>p.name).sort((a,b)=>a.localeCompare(b));
+  gamesPlayerSelect.innerHTML = `<option value="all">All players</option>` + allNames.map(n=>`<option value="${n}" ${n===selectedGamesPlayer?'selected':''}>${n}</option>`).join('');
+  gamesPlayerSelect.value = selectedGamesPlayer;
+  gamesPlayerSelect.addEventListener('change', e=>{
+    selectedGamesPlayer = e.target.value;
+    renderGamesTab();
+  });
+
+  const gamesDataQualitySelect = document.getElementById('gamesDataQualitySelect');
+  gamesDataQualitySelect.value = dataQualityFilter;
+  gamesDataQualitySelect.addEventListener('change', e=>{
+    dataQualityFilter = e.target.value;
+    recomputeAll();
+    renderGamesTab();
+  });
+
+  // ===== Add a game (always available, not gated by admin lock) =====
+  document.getElementById('addGameToggle').onclick = ()=>{
+    addGameExpanded = !addGameExpanded;
+    document.getElementById('addGameBody').style.display = addGameExpanded ? 'block' : 'none';
+    document.getElementById('addGameArrow').textContent = addGameExpanded ? '▾' : '▸';
+    if(!addGameExpanded) linkedRequestId = null; // abandoning the form -- don't carry the link into an unrelated later submission
+  };
+
+  document.getElementById('gamesYourName').addEventListener('change', e=>{
+    currentUserName = e.target.value.trim();
+    saveMyName(currentUserName);
+  });
+
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('agDate').value = today;
+
+  document.querySelectorAll('#agTypeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#agTypeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const isSingles = b.dataset.type==='singles';
+      document.getElementById('agA2').style.display = isSingles ? 'none' : 'block';
+      document.getElementById('agB2').style.display = isSingles ? 'none' : 'block';
+    };
+  });
+
+  function updateOutcomeLabels(isDraw){
+    document.getElementById('agTeamALabel').textContent = isDraw ? 'Team A' : 'Team A (winners)';
+    document.getElementById('agTeamBLabel').textContent = isDraw ? 'Team B' : 'Team B (losers)';
+    document.getElementById('agSetsLabel').textContent = isDraw ? 'Set scores (Team A – Team B) — as played, doesn\'t need a winning side' : 'Set scores (Team A – Team B)';
+  }
+  document.querySelectorAll('#agOutcomeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#agOutcomeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      updateOutcomeLabels(b.dataset.outcome === 'draw');
+    };
+  });
+
+  renderAddGameSets();
+  document.getElementById('agAddSet').onclick = ()=>{
+    if(addGameSets.length>=5) return;
+    addGameSets.push({w:'',l:''});
+    renderAddGameSets();
+  };
+
+  document.getElementById('agQuickParse').onclick = ()=>{
+    const msg = document.getElementById('agQuickMessage');
+    const raw = document.getElementById('agQuickPaste').value;
+    const result = parseQuickEntryText(raw);
+    if(result.error){
+      msg.textContent = result.error;
+      msg.style.color = 'var(--red)';
+      return;
+    }
+    msg.style.color = '';
+    msg.textContent = result.isDraw ? 'Parsed as a draw — check the fields below and hit Submit.' : 'Parsed — check the fields below and hit Submit.';
+
+    const typeBtn = document.querySelector(`#agTypeToggle .fg-toggle-btn[data-type="${result.isSingles ? 'singles' : 'doubles'}"]`);
+    if(typeBtn) typeBtn.click();
+
+    const outcomeBtn = document.querySelector(`#agOutcomeToggle .fg-toggle-btn[data-outcome="${result.isDraw ? 'draw' : 'decisive'}"]`);
+    if(outcomeBtn) outcomeBtn.click();
+
+    document.getElementById('agA1').value = result.winners[0] || '';
+    document.getElementById('agA2').value = result.winners[1] || '';
+    document.getElementById('agB1').value = result.losers[0] || '';
+    document.getElementById('agB2').value = result.losers[1] || '';
+
+    addGameSets = result.sets.map(([w,l])=>({ w: String(w), l: String(l) }));
+    renderAddGameSets();
+    checkForNewPlayers();
+
+    const dateEl = document.getElementById('agDate');
+    try { dateEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){ /* non-critical */ }
+  };
+
+  ['agA1','agA2','agB1','agB2'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', checkForNewPlayers);
+  });
+
+  document.getElementById('agSubmit').onclick = submitNewGame;
+
+  if(!isUnlocked){
+    wireLockScreen(renderGamesTab);
+    return;
+  }
+
+  document.getElementById('gamesLockNowBtn').onclick = async ()=>{
+    isUnlocked = false;
+    await saveMyUnlocked(false);
+    applyTabVisibility();
+    renderGamesTab();
+  };
+
+  box.querySelectorAll('[data-approve]').forEach(btn=>{
+    btn.onclick = ()=> approveMatch(btn.dataset.approve);
+  });
+  box.querySelectorAll('[data-reject]').forEach(btn=>{
+    btn.onclick = ()=> rejectMatch(btn.dataset.reject);
+  });
+  box.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.onclick = ()=>{ editingMatchId = btn.dataset.edit; armedDeleteId = null; renderGamesTab(); };
+  });
+  box.querySelectorAll('[data-delete]').forEach(btn=>{
+    btn.onclick = ()=>{
+      if(armedDeleteId === btn.dataset.delete){ deleteMatch(btn.dataset.delete); }
+      else { armedDeleteId = btn.dataset.delete; renderGamesTab(); }
+    };
+  });
+
+  if(editingMatchId) wireEditForm(editingMatchId);
+}
+
+async function approveMatch(id){
+  const name = requireName();
+  if(!name) return;
+  const m = extraMatchesState.find(x=>x.id===id);
+  if(!m) return;
+  m.status = 'approved';
+  m.approvedBy = name;
+  m.approvedAt = new Date().toISOString();
+  const ok = await saveExtraMatches(extraMatchesState);
+  if(!ok){ document.getElementById('gamesMessage').textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; return; }
+  recomputeAll();
+  renderGamesTab();
+}
+
+async function rejectMatch(id){
+  const name = requireName();
+  if(!name) return;
+  extraMatchesState = extraMatchesState.filter(x=>x.id!==id);
+  const ok = await saveExtraMatches(extraMatchesState);
+  if(!ok){ document.getElementById('gamesMessage').textContent = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;; return; }
+  recomputeAll();
+  renderGamesTab();
+}
+
+async function deleteMatch(id){
+  const name = requireName();
+  if(!name) return;
+  const pendingMatch = extraMatchesState.find(x=>x.id===id && x.status==='pending');
+  if(pendingMatch){
+    extraMatchesState = extraMatchesState.filter(x=>x.id!==id);
+    await saveExtraMatches(extraMatchesState);
+  } else {
+    deletedIdsState.push(id);
+    const ok = await saveDeletedIds(deletedIdsState);
+    if(!ok){
+      const msg = document.getElementById('gamesMessage');
+      const text = storageAvailable() ? `Save failed (${lastStorageError || 'unknown error'}) — try again.` : `Save failed — this page can't reach shared storage. Open the actual published/shared claude.ai link, not a downloaded file.`;
+      if(msg) msg.textContent = text; else alert(text);
+      deletedIdsState.pop(); return;
+    }
+  }
+  armedDeleteId = null;
+  recomputeAll();
+  if(document.getElementById('gamesView')) renderGamesTab();
+}
+
+function findMatchById(id){
+  return getDisplayMatches().find(m=>m.id===id);
+}
+
+function buildEditFormHtml(id){
+  const m = findMatchById(id);
+  if(!m) return '';
+  const isSingles = m.type === 'singles';
+  const isDraw = !!m.isDraw;
+  return `<div class="section-heading">✏️ Edit game</div>
+  <div class="fg-controls">
+    <div class="fg-row"><label class="fg-label">Date</label><input id="edDate" type="date" class="fg-select" value="${m.date}" /></div>
+    <div class="fg-row"><label class="fg-label">Match type</label>
+      <div class="fg-toggle" id="edTypeToggle">
+        <button class="fg-toggle-btn ${!isSingles?'active':''}" data-type="doubles">Doubles</button>
+        <button class="fg-toggle-btn ${isSingles?'active':''}" data-type="singles">Singles</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label">Outcome</label>
+      <div class="fg-toggle" id="edOutcomeToggle">
+        <button class="fg-toggle-btn ${!isDraw?'active':''}" data-outcome="decisive">Finished</button>
+        <button class="fg-toggle-btn ${isDraw?'active':''}" data-outcome="draw">Not finished / draw</button>
+      </div>
+    </div>
+    <div class="fg-row"><label class="fg-label" id="edTeamALabel">Team A${isDraw?'':' (winners)'}</label>
+      <input id="edA1" list="playerNamesList2" class="fg-select" style="margin-bottom:6px;" value="${m.winners[0]||''}" />
+      <input id="edA2" list="playerNamesList2" class="fg-select" value="${m.winners[1]||''}" style="${isSingles?'display:none;':''}" />
+    </div>
+    <div class="fg-row"><label class="fg-label" id="edTeamBLabel">Team B${isDraw?'':' (losers)'}</label>
+      <input id="edB1" list="playerNamesList2" class="fg-select" style="margin-bottom:6px;" value="${m.losers[0]||''}" />
+      <input id="edB2" list="playerNamesList2" class="fg-select" value="${m.losers[1]||''}" style="${isSingles?'display:none;':''}" />
+    </div>
+    <datalist id="playerNamesList2">${allPlayerNames().map(n=>`<option value="${n}">`).join('')}</datalist>
+    <div class="fg-row"><label class="fg-label">Set scores</label><div id="edSets"></div></div>
+    <div class="fg-row" style="display:flex; gap:8px;">
+      <button class="tab-btn active" id="edSubmit" style="flex:1;">Save changes</button>
+      <button class="preset-btn" id="edCancel" style="flex:1;">Cancel</button>
+    </div>
+    <div id="edMessage" class="section-sub"></div>
+  </div>`;
+}
+
+let editSets = [];
+
+function renderEditSets(){
+  const box = document.getElementById('edSets');
+  if(!box) return;
+  box.innerHTML = editSets.map((s,i)=>`
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+      <input type="number" min="0" max="30" value="${s[0]}" data-idx="${i}" data-side="0" class="ed-set-input fg-select" style="width:70px;" />
+      <span style="color:var(--text-dim);">–</span>
+      <input type="number" min="0" max="30" value="${s[1]}" data-idx="${i}" data-side="1" class="ed-set-input fg-select" style="width:70px;" />
+      ${editSets.length>1 ? `<button class="preset-btn" data-ed-remove="${i}" style="margin-left:auto;">Remove</button>` : ''}
+    </div>
+  `).join('') + `<button class="preset-btn" id="edAddSet" style="margin-top:4px;">+ Add set</button>`;
+  box.querySelectorAll('.ed-set-input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const idx = parseInt(e.target.dataset.idx), side = parseInt(e.target.dataset.side);
+      editSets[idx][side] = parseInt(e.target.value) || 0;
+    });
+  });
+  box.querySelectorAll('[data-ed-remove]').forEach(btn=>{
+    btn.onclick = ()=>{ editSets.splice(parseInt(btn.dataset.edRemove),1); renderEditSets(); };
+  });
+  const addBtn = document.getElementById('edAddSet');
+  if(addBtn) addBtn.onclick = ()=>{ if(editSets.length<5){ editSets.push([0,0]); renderEditSets(); } };
+}
+
+function wireEditForm(id){
+  const m = findMatchById(id);
+  if(!m) return;
+  editSets = m.sets.map(s=>[...s]);
+  renderEditSets();
+
+  document.querySelectorAll('#edTypeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#edTypeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const isSingles = b.dataset.type==='singles';
+      document.getElementById('edA2').style.display = isSingles ? 'none' : 'block';
+      document.getElementById('edB2').style.display = isSingles ? 'none' : 'block';
+    };
+  });
+
+  document.querySelectorAll('#edOutcomeToggle .fg-toggle-btn').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#edOutcomeToggle .fg-toggle-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const isDraw = b.dataset.outcome === 'draw';
+      document.getElementById('edTeamALabel').textContent = isDraw ? 'Team A' : 'Team A (winners)';
+      document.getElementById('edTeamBLabel').textContent = isDraw ? 'Team B' : 'Team B (losers)';
+    };
+  });
+
+  document.getElementById('edCancel').onclick = ()=>{ editingMatchId = null; renderGamesTab(); };
+
+  document.getElementById('edSubmit').onclick = async ()=>{
+    const name = requireName();
+    if(!name) return;
+    const msg = document.getElementById('edMessage');
+    const date = document.getElementById('edDate').value;
+    const isSingles = document.querySelector('#edTypeToggle .fg-toggle-btn.active').dataset.type === 'singles';
+    const isDraw = document.querySelector('#edOutcomeToggle .fg-toggle-btn.active').dataset.outcome === 'draw';
+    const a1 = document.getElementById('edA1').value.trim();
+    const a2 = document.getElementById('edA2').value.trim();
+    const b1 = document.getElementById('edB1').value.trim();
+    const b2 = document.getElementById('edB2').value.trim();
+    if(!date || !a1 || !b1 || (!isSingles && (!a2||!b2))){ msg.textContent='Fill in all fields.'; return; }
+    const winners = isSingles ? [a1] : [a1,a2];
+    const losers = isSingles ? [b1] : [b1,b2];
+    const sets = editSets.filter(s=>!isNaN(s[0]) && !isNaN(s[1]));
+    if(sets.length===0){ msg.textContent='Enter at least one set.'; return; }
+    if(!isDraw){
+      const setsWon = sets.filter(s=>s[0]>s[1]).length, setsLost = sets.filter(s=>s[1]>s[0]).length;
+      if(setsWon < setsLost){ msg.textContent="Team A's scores should be the winning side, or mark this as not finished / a draw."; return; }
+    }
+
+    const editedFields = {date, winners, losers, sets, type: isSingles?'singles':'doubles', isDraw,
+                           editedBy: name, editedAt: new Date().toISOString()};
+
+    const pendingMatch = extraMatchesState.find(x=>x.id===id && x.status==='pending');
+    if(pendingMatch){
+      Object.assign(pendingMatch, {date, winners, losers, sets, type: isSingles?'singles':'doubles', isDraw});
+      const ok = await saveExtraMatches(extraMatchesState);
+      if(!ok){ msg.textContent='Save failed.'; return; }
+    } else {
+      matchEditsState[id] = editedFields;
+      const ok = await saveMatchEdits(matchEditsState);
+      if(!ok){ msg.textContent='Save failed.'; return; }
+    }
+    editingMatchId = null;
+    recomputeAll();
+    renderGamesTab();
+  };
+}
+
+
+async function init(){
+  const stored = await loadStoredData();
+  extraMatchesState = stored.extraMatches;
+  tagOverridesState = stored.tagOverrides;
+  matchEditsState = stored.matchEdits;
+  deletedIdsState = stored.deletedIds;
+  currentUserName = await loadMyName();
+  ownerPasswordHash = await loadPasswordHash(STORAGE_KEY_ADMIN_PW_OWNER);
+  boardPasswordHash = await loadPasswordHash(STORAGE_KEY_ADMIN_PW_BOARD);
+  isUnlocked = await loadMyUnlocked();
+  visibilityState = await loadVisibility();
+  gameRequestsState = await loadGameRequests();
+  devAreasState = await loadDevAreas();
+  recomputeAll();
+  applyTabVisibility();
+  render();
+}
+
+init();

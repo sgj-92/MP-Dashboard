@@ -1,0 +1,37 @@
+/* ==========================================================================
+   Money Padel — Prestige V1 design tokens
+   Extends (does not redefine) the existing color system in app.css:
+   --gold, --gold-bright, --gold-dim, --bg0/1/2, --line, --text, --text-dim,
+   --green, --red already exist and are the source of truth for color.
+   This file only adds tokens the new shell/nav/podium components need.
+   ========================================================================== */
+:root{
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* Shell chrome */
+  --shell-header-height: 56px;
+  --shell-nav-height: 64px;
+  --shell-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --shell-safe-top: env(safe-area-inset-top, 0px);
+
+  /* Restrained shadow + illumination -- CSS-only depth, per design direction */
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.02) inset;
+  --shadow-podium: 0 8px 24px rgba(0,0,0,0.5);
+  --glow-prestige: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(212,175,55,0.08) 0%, transparent 70%);
+
+  /* Typography roles -- serif for prestige/identity, sans for interface/stats */
+  --font-prestige: 'Georgia', 'Iowan Old Style', serif;
+  --font-interface: 'Helvetica Neue', Arial, sans-serif;
+}
