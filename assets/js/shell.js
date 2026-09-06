@@ -211,32 +211,126 @@ function buildShellDom(){
   });
 }
 
+// ---- Ranking eligibility (All-Time only) ---------------------------------
+// The group's own existing standard -- play at least 2 games to stay "in
+// the group" -- wasn't actually enforced anywhere before; some genuinely
+// inactive players just never got their manual active flag updated. This
+// makes it automatic: computed fresh from real match dates every time,
+// nobody has to remember to flag anyone, and returning is as simple as
+// playing again. Applies only to the All-Time Power Rankings list -- a
+// monthly leaderboard already has its own natural eligibility test
+// (you have to have played in that month to appear in it at all).
+const RANKING_ELIGIBILITY_DAYS = 30;
+const RANKING_ELIGIBILITY_MIN_MATCHES = 2;
+function isRankingEligible(name){
+  const cutoff = Date.now() - RANKING_ELIGIBILITY_DAYS*86400000;
+  const count = MATCHES.filter(m =>
+    (m.winners.includes(name) || m.losers.includes(name)) && new Date(m.date).getTime() >= cutoff
+  ).length;
+  return count >= RANKING_ELIGIBILITY_MIN_MATCHES;
+}
+
+// Splits the already-rendered, already-sorted list into an eligible (numbered)
+// group and an ineligible (unranked, shown below a divider) group. Order
+// within each group is left exactly as render() produced it -- only ranking
+// numbers and grouping change, never the underlying sort.
+function applyRankingEligibility(){
+  const oldDivider = document.getElementById('eligibilityDivider');
+  if(oldDivider) oldDivider.remove();
+
+  if(activeTab !== 'power' || selectedMonth !== 'all') return; // month views have their own natural test
+
+  const list = document.getElementById('list');
+  if(!list) return;
+  const rows = [...list.children].filter(el => el.classList.contains('row'));
+  if(rows.length === 0) return;
+
+  const eligible = [], ineligible = [];
+  rows.forEach(row=>{
+    const name = row.querySelector('.nm')?.textContent;
+    if(name && !isRankingEligible(name)){ ineligible.push(row); }
+    else { eligible.push(row); }
+  });
+  if(ineligible.length === 0) return; // nobody to set aside -- leave the list exactly as rendered
+
+  rows.forEach(r=>r.remove());
+  eligible.forEach((row, i)=>{
+    const rankEl = row.querySelector('.rank');
+    if(rankEl) rankEl.textContent = i+1;
+    list.appendChild(row);
+  });
+
+  const divider = document.createElement('div');
+  divider.id = 'eligibilityDivider';
+  divider.className = 'eligibility-divider';
+  divider.textContent = `Not currently ranked — no ${RANKING_ELIGIBILITY_MIN_MATCHES}+ matches in the last ${RANKING_ELIGIBILITY_DAYS} days`;
+  list.appendChild(divider);
+
+  ineligible.forEach(row=>{
+    const rankEl = row.querySelector('.rank');
+    if(rankEl) rankEl.textContent = '–';
+    row.classList.add('ineligible-row');
+    // Placed in .meta, not .nm -- .nm truncates long names with an ellipsis,
+    // which could hide an appended tag entirely for anyone with a longer name.
+    const metaEl = row.querySelector('.meta');
+    if(metaEl && !metaEl.querySelector('.inactive-tag')){
+      metaEl.insertAdjacentHTML('afterbegin', '<span class="inactive-tag">Inactive</span> · ');
+    }
+    list.appendChild(row);
+  });
+}
+
 // ---- Rankings podium -----------------------------------------------------
-// Canonical state, per agreed spec: Power Rating + All time + All tiers +
-// Rating sort + empty search + default min-games threshold. Any deviation
-// collapses back to the plain compact ranking list -- no separate state,
-// just reading the same variables the rest of the app already uses.
-function isCanonicalRankingsState(){
-  return activeTab === 'power'
-    && selectedMonth === 'all'
-    && activeTier === 'All'
-    && activeSortP === 'rating'
-    && query === ''
-    && minGames === 10;
+// Podium now applies to any tier and any month (per the product change) --
+// it always represents the top 3 of whatever leaderboard is currently on
+// screen. Hidden only for: a non-Rating ranking mode, an active player
+// search, or a non-default min-games threshold. Replicates render()'s own
+// filter sequence exactly (tier -> month merge -> min-games) and the fixed
+// rating sort, so the podium can never disagree with the list beneath it.
+function computeRankingsPodiumTop3(){
+  if(activeTab !== 'power') return null;
+  if(activeSortP !== 'rating') return null;
+  if(query !== '') return null;
+  // The default qualifying threshold differs by scope on purpose (10 for all-time, 5 for a
+  // single month, since monthly game counts are naturally lower) -- the podium should respect
+  // whichever default applies to the scope currently selected, not a single hardcoded number.
+  const defaultMinGames = selectedMonth === 'all' ? 10 : 5;
+  if(minGames !== defaultMinGames) return null;
+
+  let rows = PLAYERS.filter(p => activeTier==='All' || p.tier===activeTier);
+  const inMonthView = selectedMonth !== 'all';
+  if(inMonthView){
+    const monthly = computeMonthlyStats(selectedMonth);
+    const monthlyRatings = computeMonthlyRating(selectedMonth);
+    rows = rows.map(p => ({...p, ...(monthly[p.name] || ZERO_MONTH_STATS),
+      month_rating: (p.name in monthlyRatings) ? Math.round(monthlyRatings[p.name]*10)/10 : null}));
+  }
+  rows = rows.filter(p => p.total >= minGames);
+  if(inMonthView) rows = rows.filter(p => p.month_rating !== null && p.month_rating !== undefined);
+  // All-time podium can only feature currently-eligible players -- same rule, same test, as the
+  // list beneath it, so the two can never show a different "top 3". Monthly scope is untouched.
+  if(!inMonthView) rows = rows.filter(p => isRankingEligible(p.name));
+
+  const sorted = rows.slice().sort((a,b)=>{
+    const av = inMonthView ? a.month_rating : a.rating;
+    const bv = inMonthView ? b.month_rating : b.rating;
+    return bv - av;
+  });
+  if(sorted.length < 3) return null;
+  return sorted.slice(0,3).map(p=>({ name: p.name, rating: inMonthView ? p.month_rating : p.rating }));
 }
 
 function renderRankingsPodium(){
   const existing = document.getElementById('rankingsPodium');
   if(existing) existing.remove();
 
-  if(activeTab !== 'power') return;
-  if(!isCanonicalRankingsState()) return;
+  const top3 = computeRankingsPodiumTop3();
+  if(!top3) return;
 
   const list = document.getElementById('list');
   if(!list) return;
 
-  const top3 = PLAYERS.filter(p => p.total >= minGames).slice().sort((a,b)=> b.rating - a.rating).slice(0,3);
-  if(top3.length < 3) return; // not enough qualifying players for a podium yet
+  const scopeLabel = `${activeTier === 'All' ? 'All Tiers' : 'Tier ' + activeTier} · ${selectedMonth === 'all' ? 'All Time' : monthLabel(selectedMonth)}`;
 
   const order = [top3[1], top3[0], top3[2]]; // visual order: 2nd, 1st, 3rd
   const slotClass = ['second','first','third'];
@@ -254,7 +348,7 @@ function renderRankingsPodium(){
         </div>
       `).join('')}
     </div>
-    <div class="podium-caption">Money Padel · Official Power Ranking</div>
+    <div class="podium-caption">Money Padel · ${scopeLabel}</div>
   `;
   list.parentNode.insertBefore(podium, list);
   podium.querySelectorAll('.podium-slot').forEach(el=>{
@@ -298,7 +392,9 @@ function buildCompactFiltersBar(){
   [...tierbar.querySelectorAll('.tierbtn')].forEach(btn=>{
     const opt = document.createElement('option');
     opt.value = btn.dataset.tier;
-    opt.textContent = btn.textContent;
+    // Label-only change: the compact select reads "All tiers", independent
+    // of the legacy button's own "All players" text -- app.js untouched.
+    opt.textContent = btn.dataset.tier === 'All' ? 'All tiers' : btn.textContent;
     tierSelect.appendChild(opt);
   });
   tierSelect.value = activeTier;
@@ -407,11 +503,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   buildCompactFiltersBar();
   buildCollapsibleExplainer();
 
-  // Wrap the legacy render() so the podium is (re)computed on every
-  // Power Rating re-render, without touching render() itself.
+  // Wrap the legacy render() so the podium (and ranking eligibility split)
+  // are (re)computed on every Power Rating re-render, without touching
+  // render() itself.
   const _originalRender = window.render;
   window.render = function(){
     _originalRender.apply(this, arguments);
+    applyRankingEligibility();
     renderRankingsPodium();
     hero.style.display = (activeTab === 'power') ? 'block' : 'none';
   };

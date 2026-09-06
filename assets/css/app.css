@@ -634,3 +634,17 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
   overflow: hidden; text-overflow: ellipsis;
 }
 .section-subnav-item.active{ color: var(--gold-bright); border-color: var(--gold-dim); background: var(--bg1); }
+
+/* Ranking eligibility -- ineligible players stay fully visible with their
+   real rating/stats, just without an official numbered position. */
+.eligibility-divider{
+  padding: 14px 16px 10px; margin-top: 4px; border-top: 1px solid var(--line);
+  font-family: var(--font-interface); font-size: 10.5px; color: var(--text-dim);
+  text-align: center; letter-spacing: 0.02em;
+}
+.row.ineligible-row{ opacity: 0.6; }
+.inactive-tag{
+  display: inline-block; font-family: var(--font-interface); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-dim);
+  border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: middle;
+}

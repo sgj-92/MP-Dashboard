@@ -962,7 +962,7 @@ const tierbar = document.getElementById('tierbar');
 TIERS.forEach(t=>{
   const b = document.createElement('button');
   b.className = 'tierbtn' + (t==='All' ? ' active' : '');
-  b.textContent = t === 'All' ? 'All players' : 'Tier ' + t;
+  b.textContent = t === 'All' ? 'All tiers' : 'Tier ' + t;
   b.dataset.tier = t;
   b.onclick = ()=>{ activeTier = t; document.querySelectorAll('.tierbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(); };
   tierbar.appendChild(b);
@@ -1110,7 +1110,14 @@ function sortRows(rows){
     else if(activeSort==='wins') arr.sort((a,b)=> b.wins - a.wins);
     else if(activeSort==='name') arr.sort((a,b)=> a.name.localeCompare(b.name));
   } else {
-    if(activeSortP==='rating') arr.sort((a,b)=> b.rating - a.rating);
+    // "Rating" always represents the ranking basis for whatever scope is currently selected --
+    // season-long normally, or that month's own rating when a month is selected, so it matches
+    // whichever number is actually shown as the big rating figure on each row.
+    if(activeSortP==='rating') arr.sort((a,b)=>{
+      const av = selectedMonth !== 'all' ? (a.month_rating ?? -Infinity) : a.rating;
+      const bv = selectedMonth !== 'all' ? (b.month_rating ?? -Infinity) : b.rating;
+      return bv - av;
+    });
     else if(activeSortP==='month_rating') arr.sort((a,b)=> (b.month_rating ?? -Infinity) - (a.month_rating ?? -Infinity));
     else if(activeSortP==='recent_form') arr.sort((a,b)=> {
       // Stale form (no game in a while) shouldn't outrank someone who's actually active right now.
