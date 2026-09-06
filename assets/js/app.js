@@ -1184,14 +1184,6 @@ function render(){
     } else {
       const perfClass = p.avg_overperf_pct > 0.5 ? 'perf-pos' : (p.avg_overperf_pct < -0.5 ? 'perf-neg' : '');
       const perfSign = p.avg_overperf_pct > 0 ? '+' : '';
-      const formHtml = (p.recent_form !== null && p.recent_form !== undefined)
-        ? (()=>{
-            const fClass = p.recent_form_stale ? '' : (p.recent_form > 3 ? 'perf-pos' : (p.recent_form < -3 ? 'perf-neg' : ''));
-            const fSign = p.recent_form >= 0 ? '+' : '';
-            const staleTag = p.recent_form_stale ? ` <span style="color:var(--text-dim);">· stale, last played ${fmtDaysAgo(p.recent_form_days_ago)}</span>` : '';
-            return `<div class="rating-sub ${fClass}" style="font-size:10px; ${p.recent_form_stale?'opacity:0.6;':''}">form (${p.recent_form_games}g): ${fSign}${p.recent_form}% <span style="color:var(--green);">${p.recent_form_wins}W</span>-<span style="color:var(--red);">${p.recent_form_losses}L</span>${staleTag}</div>`;
-          })()
-        : '';
 
       const inMonthView = selectedMonth !== 'all';
       const hasMonthGames = inMonthView && p.month_rating !== null && p.month_rating !== undefined;
@@ -1206,21 +1198,44 @@ function render(){
       const monthRatingHtml = (inMonthView && !hasMonthGames)
         ? `<div class="rating-sub" style="font-size:10px; color:var(--text-dim);">no games this month</div>`
         : '';
-
       const wlHtml = inMonthView ? ` · <span style="color:var(--green);">${p.wins}W</span>-<span style="color:var(--red);">${p.losses}L</span>` : '';
+
+      // Progressive disclosure: the row's one secondary "meta" line shows whichever stat the
+      // current sort is actually about -- everything else stays reachable by tapping into the
+      // full profile, rather than all appearing on the row at once.
+      let metaHtml;
+      if(activeSortP === 'avg_match_strength'){
+        metaHtml = `avg opp. ${Math.round(p.avg_match_strength)}${wlHtml}`;
+      } else if(activeSortP === 'upset_total'){
+        metaHtml = `<span class="upset-drill" data-player="${p.name}" data-kind="upset_wins">${p.upset_wins} upset win${p.upset_wins===1?'':'s'}</span> · <span class="upset-drill" data-player="${p.name}" data-kind="upset_losses">${p.upset_losses} upset loss${p.upset_losses===1?'':'es'}</span>`;
+      } else {
+        metaHtml = `${p.total} game${p.total===1?'':'s'}${wlHtml}`;
+      }
+
+      // Form: one compact line (record + a trend glyph) instead of a full sentence; a stale
+      // player gets a quiet dot rather than an explanatory paragraph on every row.
+      let formLine = '';
+      if(p.recent_form !== null && p.recent_form !== undefined){
+        if(p.recent_form_stale){
+          formLine = `<div class="rating-sub" style="font-size:10px; color:var(--text-dim); opacity:0.6;">Form ${p.recent_form_wins}W-${p.recent_form_losses}L <span title="stale -- last played ${fmtDaysAgo(p.recent_form_days_ago)}">·</span></div>`;
+        } else {
+          const trend = p.recent_form > 3 ? '↑' : (p.recent_form < -3 ? '↓' : '→');
+          const trendClass = p.recent_form > 3 ? 'perf-pos' : (p.recent_form < -3 ? 'perf-neg' : '');
+          formLine = `<div class="rating-sub" style="font-size:10px;">Form ${p.recent_form_wins}W-${p.recent_form_losses}L <span class="${trendClass}">${trend}</span></div>`;
+        }
+      }
 
       row.innerHTML = `
         <div class="rank">${i+1}</div>
         <span class="tier-badge tier-${p.tier.toLowerCase()}">${p.tier}</span>
         <div class="namecol">
           <div class="nm">${p.name}</div>
-          <div class="meta">avg opp. ${Math.round(p.avg_match_strength)} · ${p.total} games${wlHtml}</div>
-          <div class="upset-mini"><span class="uw upset-drill" data-player="${p.name}" data-kind="upset_wins" style="cursor:pointer; text-decoration:underline;">${p.upset_wins} upset win${p.upset_wins===1?'':'s'}</span> · <span class="ul upset-drill" data-player="${p.name}" data-kind="upset_losses" style="cursor:pointer; text-decoration:underline;">${p.upset_losses} upset loss${p.upset_losses===1?'':'es'}</span> (${p.upset_rate}% of games)</div>
+          <div class="meta">${metaHtml}</div>
         </div>
         <div class="wl">
           ${bigNumberHtml}
-          <div class="rating-sub ${perfClass}">${perfSign}${p.avg_overperf_pct}% clutch</div>
-          ${formHtml}
+          <div class="rating-sub ${perfClass}">${perfSign}${p.avg_overperf_pct}%</div>
+          ${formLine}
           ${seasonSubHtml}
           ${monthRatingHtml}
         </div>

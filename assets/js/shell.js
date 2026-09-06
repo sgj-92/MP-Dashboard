@@ -184,8 +184,109 @@ function renderRankingsPodium(){
   });
 }
 
+// ---- Phase 1B: Rankings hero, compact filter bar, secondary Filters sheet --
+// Reparents existing (already-wired) legacy controls into new compact/secondary
+// containers rather than duplicating them, so every existing event listener
+// keeps working untouched -- only where each control physically lives changes.
+
+function buildRankingsHero(){
+  const hero = document.createElement('div');
+  hero.id = 'rankingsHero';
+  hero.style.cssText = 'display:none; padding: var(--space-4) var(--space-4) 0;';
+  hero.innerHTML = `
+    <div style="font-family:var(--font-interface); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim);">Money Padel · Results Only</div>
+    <div style="font-family:var(--font-prestige); font-size:26px; color:var(--gold-bright); margin-top:2px;">Power Rankings</div>
+    <div style="font-family:var(--font-interface); font-size:12px; color:var(--text-dim); margin-top:2px;">A tier-anchored rating. Scoreline counts, not just who won.</div>
+  `;
+  const controls = document.querySelector('.controls');
+  controls.parentNode.insertBefore(hero, controls);
+  return hero;
+}
+
+function buildCompactFiltersBar(){
+  const dataQualityRow = document.getElementById('dataQualityRow');
+  const monthFilterRow = document.getElementById('monthFilterRow');
+  const tierbar = document.getElementById('tierbar');
+  const searchWrap = document.getElementById('searchWrap');
+  const minGamesRow = document.getElementById('minGamesRow');
+  const sortbarPower = document.getElementById('sortbarPower');
+
+  // Compact primary bar: Month + Tier stay visible and get restyled smaller;
+  // Min games becomes a single pill; Filters opens the secondary sheet.
+  const compactBar = document.createElement('div');
+  compactBar.id = 'compactFiltersBar';
+  compactBar.className = 'compact-filters-bar';
+  compactBar.innerHTML = `<button class="filter-pill" id="minGamesPill">10+ games</button>
+    <button class="filter-pill" id="openFiltersBtn">Filters ⚲</button>`;
+  monthFilterRow.classList.add('compact-month');
+  tierbar.classList.add('compact-tierbar');
+  compactBar.insertBefore(monthFilterRow, compactBar.firstChild);
+  compactBar.insertBefore(tierbar, compactBar.children[1]);
+  document.querySelector('.controls').insertBefore(compactBar, document.getElementById('tabrow').nextSibling);
+
+  // Secondary sheet: Data quality, full min-games control, search, and the
+  // three less-frequently-used sort modes -- nothing removed, just relocated.
+  const secondarySortWrap = document.createElement('div');
+  secondarySortWrap.id = 'secondarySortWrap';
+  secondarySortWrap.className = 'fg-row';
+  ['month_rating', 'avg_match_strength', 'name'].forEach(key=>{
+    const btn = sortbarPower.querySelector(`[data-sortp="${key}"]`);
+    if(btn) secondarySortWrap.appendChild(btn);
+  });
+
+  const sheet = document.createElement('div');
+  sheet.className = 'shell-more-sheet';
+  sheet.id = 'shellFiltersSheet';
+  const panel = document.createElement('div');
+  panel.className = 'shell-more-panel';
+  panel.innerHTML = `<h3>Filters</h3>`;
+  panel.appendChild(dataQualityRow);
+  panel.appendChild(searchWrap);
+  panel.appendChild(minGamesRow);
+  const secondarySortLabel = document.createElement('div');
+  secondarySortLabel.className = 'section-sub';
+  secondarySortLabel.style.cssText = 'margin-top:12px;';
+  secondarySortLabel.textContent = 'More ways to sort';
+  panel.appendChild(secondarySortLabel);
+  panel.appendChild(secondarySortWrap);
+  sheet.appendChild(panel);
+  document.body.appendChild(sheet);
+  sheet.addEventListener('click', (e)=>{ if(e.target === sheet) sheet.classList.remove('show'); });
+
+  document.getElementById('openFiltersBtn').onclick = ()=> sheet.classList.add('show');
+  document.getElementById('minGamesPill').onclick = ()=> sheet.classList.add('show');
+
+  // Keep the pill's label in sync with the actual (still fully functional) min-games control.
+  const minGamesInputEl = document.getElementById('minGamesInput');
+  const syncPillLabel = ()=>{ document.getElementById('minGamesPill').textContent = `${minGamesInputEl.value}+ games`; };
+  minGamesInputEl.addEventListener('input', syncPillLabel);
+  document.querySelectorAll('.minGamesPresets .preset-btn').forEach(b=> b.addEventListener('click', ()=> setTimeout(syncPillLabel, 0)));
+}
+
+function buildCollapsibleExplainer(){
+  const explainer = document.getElementById('explainer');
+  const wrapper = document.createElement('div');
+  wrapper.id = 'explainerWrapper';
+  explainer.parentNode.insertBefore(wrapper, explainer);
+  const toggle = document.createElement('button');
+  toggle.id = 'explainerToggle';
+  toggle.className = 'explainer-toggle';
+  toggle.textContent = 'How this works ›';
+  wrapper.appendChild(toggle);
+  wrapper.appendChild(explainer);
+  explainer.style.display = 'none';
+  toggle.onclick = ()=>{
+    const isOpen = explainer.style.display !== 'none';
+    explainer.style.display = isOpen ? 'none' : 'block';
+    toggle.textContent = isOpen ? 'How this works ›' : 'How this works ⌄';
+  };
+}
+
 document.addEventListener('DOMContentLoaded', ()=>{
   buildShellDom();
+  const hero = buildRankingsHero();
+  buildCompactFiltersBar();
+  buildCollapsibleExplainer();
 
   // Wrap the legacy render() so the podium is (re)computed on every
   // Power Rating re-render, without touching render() itself.
@@ -193,7 +294,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   window.render = function(){
     _originalRender.apply(this, arguments);
     renderRankingsPodium();
+    hero.style.display = (activeTab === 'power') ? 'block' : 'none';
   };
+  // The hero also needs to hide immediately when leaving Rankings via a tab
+  // that doesn't call render() at all (Players, Games, etc.).
+  document.getElementById('tabrow').addEventListener('click', ()=>{
+    hero.style.display = (activeTab === 'power') ? 'block' : 'none';
+  });
 
   updateBottomNavHighlight();
 });
