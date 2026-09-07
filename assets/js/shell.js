@@ -542,6 +542,161 @@ function buildCollapsibleExplainer(){
   };
 }
 
+// ==========================================================================
+// VIEWER FOUNDATION -- lightweight player selection, no accounts/auth.
+// Personalisation only. See privacy note on getCurrentViewer() below.
+// ==========================================================================
+
+// Player name is the identifier used throughout, since the existing data
+// model has no separate player ID -- name is already the de facto stable
+// key for tags, admin overrides, and every profile lookup in the app, so
+// this stays consistent with that rather than inventing a new ID scheme.
+const VIEWER_STORAGE_KEY = 'moneypadel_current_viewer';
+
+// Returns the current viewer's full live player object (same shape as any
+// entry in PLAYERS), or null if none is set / the saved name no longer
+// exists in current player data (auto-clears a stale selection).
+//
+// PRIVACY/SECURITY BOUNDARY: this is presentation personalisation only.
+// Selecting "Shaun" does not prove the user is Shaun -- nothing here is
+// checked against, or should ever be checked against, for admin/password
+// or any other sensitive gate. Existing admin auth stays fully separate.
+function getCurrentViewer(){
+  const savedName = localStorage.getItem(VIEWER_STORAGE_KEY);
+  if(!savedName) return null;
+  const player = PLAYERS.find(p => p.name === savedName);
+  if(!player){ localStorage.removeItem(VIEWER_STORAGE_KEY); return null; }
+  return player;
+}
+
+function setCurrentViewer(playerName){
+  localStorage.setItem(VIEWER_STORAGE_KEY, playerName);
+  document.dispatchEvent(new CustomEvent('viewerchanged', { detail: { name: playerName } }));
+}
+
+function clearCurrentViewer(){
+  localStorage.removeItem(VIEWER_STORAGE_KEY);
+  document.dispatchEvent(new CustomEvent('viewerchanged', { detail: { name: null } }));
+}
+
+// ---- First-launch / switchable player selector ---------------------------
+function buildViewerSelector(){
+  const overlay = document.createElement('div');
+  overlay.className = 'shell-more-sheet';
+  overlay.id = 'viewerSelectorSheet';
+  const panel = document.createElement('div');
+  panel.className = 'shell-more-panel viewer-selector-panel';
+  panel.innerHTML = `
+    <div class="mp-section-label" style="text-align:center;">Welcome to Money Padel</div>
+    <div class="mp-display-title viewer-selector-title">Who are you?</div>
+    <div class="viewer-selector-sub">Choose your player to personalise your experience.</div>
+    <input type="text" id="viewerSearchInput" class="viewer-search" placeholder="Search players…">
+    <div id="viewerPlayerList" class="viewer-player-list"></div>
+  `;
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+
+  function renderList(filter){
+    const listEl = document.getElementById('viewerPlayerList');
+    // Real player data only -- never a second hard-coded list.
+    const names = PLAYERS.map(p=>p.name).sort((a,b)=>a.localeCompare(b));
+    const filtered = filter ? names.filter(n=>n.toLowerCase().includes(filter.toLowerCase())) : names;
+    listEl.innerHTML = filtered.map(n=>`<button class="viewer-player-btn" data-name="${n}">${n}</button>`).join('');
+    listEl.querySelectorAll('.viewer-player-btn').forEach(btn=>{
+      btn.onclick = ()=>{
+        setCurrentViewer(btn.dataset.name);
+        overlay.classList.remove('show');
+        setTimeout(()=> overlay.remove(), 250);
+        updateMyPlayerLabel();
+      };
+    });
+  }
+  renderList('');
+  document.getElementById('viewerSearchInput').addEventListener('input', (e)=> renderList(e.target.value));
+  overlay.classList.add('show');
+}
+
+// ---- "My Player" entry in More -------------------------------------------
+function updateMyPlayerLabel(){
+  const label = document.getElementById('myPlayerLabel');
+  if(!label) return;
+  const viewer = getCurrentViewer();
+  label.textContent = viewer ? viewer.name : 'Choose player';
+}
+
+function buildMyPlayerMoreItem(){
+  const sheet = document.getElementById('shellMoreSheet');
+  if(!sheet) return;
+  const panel = sheet.querySelector('.shell-more-panel');
+  const adminItem = panel.querySelector('.admin-item');
+  const item = document.createElement('button');
+  item.className = 'shell-more-item';
+  item.innerHTML = `My Player<span class="my-player-value"><span id="myPlayerLabel"></span> <span class="chev">›</span></span>`;
+  item.onclick = ()=>{ closeMoreSheet(); buildViewerSelector(); };
+  panel.insertBefore(item, adminItem);
+  updateMyPlayerLabel();
+}
+
+// ---- Data-layer snapshot for the future personalised Home ----------------
+// Pulls together existing, already-computed data for one player -- reuses
+// PLAYERS, computeRecentForm, BEST_PARTNER, H2H, BOUNDARY_TESTS and
+// gameRequestsState exactly as they already exist. No parallel ranking,
+// form, partnership or matchmaking logic is created here.
+function getViewerSnapshot(name){
+  const p = PLAYERS.find(x=>x.name===name);
+  if(!p) return null;
+
+  // Overall / tier rank -- respects the same eligibility rule as the live
+  // Rankings list, so a personalised "you're #4" always matches what the
+  // official list would show, computed fresh rather than duplicated.
+  const eligibleOverall = PLAYERS.filter(x=>x.total>=10 && isRankingEligible(x.name)).sort((a,b)=>b.rating-a.rating);
+  const overallRank = eligibleOverall.findIndex(x=>x.name===name) + 1;
+  const eligibleInTier = eligibleOverall.filter(x=>x.tier===p.tier);
+  const tierRank = eligibleInTier.findIndex(x=>x.name===name) + 1;
+
+  const form = computeRecentForm(name, 10);
+  const bestPartner = BEST_PARTNER[name] || null;
+  // H2H is a flat "sorted-pair -> meeting count" structure (see h2hCount()
+  // in app.js), not a per-player breakdown -- this finds whichever opponent
+  // this player has met most often. A richer win/loss-per-rival breakdown
+  // would need a small new helper over MATCHES (the H2H tab computes that
+  // inline, per-pair, rather than as a reusable function) -- flagged in the
+  // report back rather than built speculatively here.
+  let topRivalry = null, maxMeetings = 0;
+  Object.entries(H2H).forEach(([key, count])=>{
+    const [a,b] = key.split('|');
+    if((a===name || b===name) && count > maxMeetings){
+      maxMeetings = count;
+      topRivalry = { opponent: a===name ? b : a, meetings: count };
+    }
+  });
+  const boundaryMatchups = BOUNDARY_TESTS.filter(c => c.a===name || c.b===name);
+
+  const involvedGames = gameRequestsState.filter(g => g.players && g.players.includes(name));
+  const upcoming = involvedGames.filter(g => g.status === 'confirmed');
+  const pending = involvedGames.filter(g => g.status === 'pending');
+
+  const availableMonths = (typeof getAvailableMonths === 'function') ? getAvailableMonths() : [];
+  const currentMonth = availableMonths.length ? availableMonths[availableMonths.length-1] : null;
+  const monthStats = currentMonth ? (computeMonthlyStats(currentMonth)[name] || null) : null;
+  const monthRating = currentMonth ? (computeMonthlyRating(currentMonth)[name] ?? null) : null;
+
+  return {
+    name: p.name, tier: p.tier, rating: p.rating,
+    overallRank: overallRank > 0 ? overallRank : null,
+    tierRank: tierRank > 0 ? tierRank : null,
+    eligible: isRankingEligible(name),
+    total: p.total, wins: p.wins, losses: p.losses, winpct: p.winpct,
+    recentForm: form,
+    bestPartner,
+    topRivalry,
+    boundaryMatchups,
+    upcomingGames: upcoming,
+    pendingRequests: pending,
+    currentMonth, monthStats, monthRating,
+  };
+}
+
 document.addEventListener('DOMContentLoaded', ()=>{
   buildShellDom();
   const hero = buildRankingsHero();
@@ -552,6 +707,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // Wrap the legacy render() so the podium (and ranking eligibility split)
   // are (re)computed on every Power Rating re-render, without touching
   // render() itself.
+  let viewerInitDone = false;
   const _originalRender = window.render;
   window.render = function(){
     _originalRender.apply(this, arguments);
@@ -559,6 +715,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
     renderRankingsPodium();
     hero.style.display = (activeTab === 'power') ? 'block' : 'none';
     syncHeaderSectionTitle();
+    // Viewer foundation init happens here, on the first real render, rather
+    // than directly in DOMContentLoaded: app.js's init() is async and loads
+    // Firestore data before calling recomputeAll(), so PLAYERS is not
+    // reliably populated yet at DOMContentLoaded time. The first render()
+    // call only ever happens after that data is loaded and PLAYERS is set,
+    // which is what buildViewerSelector's real player list depends on.
+    if(!viewerInitDone){
+      viewerInitDone = true;
+      buildMyPlayerMoreItem();
+      if(!getCurrentViewer()) buildViewerSelector();
+    }
   };
   // The hero also needs to hide immediately when leaving Rankings via a tab
   // that doesn't call render() at all (Players, Games, etc.).
