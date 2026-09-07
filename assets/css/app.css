@@ -509,9 +509,10 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
 }
 .podium-slot .rank-num.gold{ color: var(--gold-bright); font-style: normal; font-size: 14px; }
 /* Production crown/laurel asset -- replaces the earlier CSS-drawn crown+laurel
-   for #1 only. Sits above the gold pedestal; the gold asset itself already
-   carries the "champion" lighting treatment, so this stays understated. */
-.podium-slot .crown-laurel-wrap{ position: relative; height: 24px; margin-bottom: 1px; }
+   for #1 only. A prestige accent, not the focal point -- gets its own modest
+   breathing room from the name below, distinct from the tight rating-to-
+   pedestal gap, so the crown doesn't feel crammed against Kaz's name. */
+.podium-slot .crown-laurel-wrap{ position: relative; height: 24px; margin-bottom: 4px; }
 .podium-slot .crown-laurel-img{
   position: absolute; top: 0; left: 50%; transform: translateX(-50%);
   height: 100%; width: auto; max-width: none; object-fit: contain; pointer-events: none;
@@ -528,16 +529,20 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
 }
 /* Production pedestal artwork -- transparent PNGs, sized by height per
    position to preserve the 2-1-3 hierarchy; object-fit:contain guarantees
-   the artwork is never stretched, whatever its native aspect ratio is. */
-/* Production pedestal artwork -- transparent PNGs, sized by height per
-   position to preserve the 2-1-3 hierarchy; object-fit:contain guarantees
    the artwork is never stretched, whatever its native aspect ratio is.
    object-position:top anchors the visible surface to the top of its box --
    without it, contain's own letterboxing (since the artwork is wider than
    its column) splits empty space above and below, adding an invisible gap
-   under the rating text that has nothing to do with the margin below. */
+   under the rating text that has nothing to do with the margin below.
+   Each podium-slot is one component: rank/crown -> name -> rating -> pedestal,
+   flush together with only this small margin -- never positioned separately,
+   so the player reads as physically standing on their own pedestal. Column
+   height differs naturally by position (taller pedestal = taller column);
+   .podium-row's flex-end alignment is what puts Erf/Osh visibly lower than
+   Kaz, producing the actual 2-1-3 silhouette, while this margin stays
+   identical across all three so the text-to-surface relationship never varies. */
 .podium-slot .p-pedestal{
-  display: block; margin: 5px auto 0; width: 100%; object-fit: contain; object-position: center top;
+  display: block; margin: 3px auto 0; width: 100%; object-fit: contain; object-position: center top;
 }
 .podium-slot.second .p-pedestal{ height: 46px; }
 .podium-slot.third .p-pedestal{ height: 34px; }
