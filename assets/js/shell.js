@@ -810,6 +810,18 @@ function computeMatchToMake(viewerName){
   return { partner, opponents: best, pctFor: pct, pctAgainst: 100-pct, description: desc };
 }
 
+function computeRecentFormSequence(name, windowSize){
+  // computeRecentForm only returns aggregate counts (wins/losses), not which
+  // specific games were won or lost -- this derives the real per-game
+  // sequence from the same MATCHES data, oldest-to-newest (left-to-right),
+  // so the dot colours actually reflect what happened, not just the totals.
+  windowSize = windowSize || 10;
+  const own = MATCHES.filter(m => m.winners.includes(name) || m.losers.includes(name))
+    .sort((a,b)=> a.date < b.date ? 1 : -1) // newest first
+    .slice(0, windowSize);
+  return own.reverse().map(m => m.winners.includes(name)); // oldest-to-newest, true W/L per game
+}
+
 function initials(name){
   return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
 }
@@ -873,27 +885,27 @@ function renderHomeDashboard(){
 
     <div class="mp-card-standard home-card">
       <div class="home-card-header"><span>Your Game</span><button class="home-card-link" id="homeViewProfileBtn">View Profile ›</button></div>
-      <div class="home-yourgame-row">
-        <div class="home-tier-block">
-          <span class="tier-badge tier-${viewer.tier.toLowerCase()}" style="width:34px;height:34px;font-size:15px;">${viewer.tier}</span>
-          <div class="home-tier-sub">#${snap.tierRank||'–'} in Tier ${viewer.tier}<br>#${snap.overallRank||'–'} Overall</div>
-        </div>
-        <div class="home-rating-block">
-          <div class="section-sub" style="font-size:10px;">Rating</div>
-          <div class="home-rating-num">${Math.round(viewer.rating)}</div>
-        </div>
-        <div class="home-form-block">
-          <div class="section-sub" style="font-size:10px;">Recent Form</div>
-          <div class="home-form-dots">${snap.recentForm ? Array.from({length:snap.recentForm.games}).map((_,i)=>{
-            const isWin = i < snap.recentForm.wins; return `<span class="form-dot ${isWin?'w':'l'}">${isWin?'W':'L'}</span>`;
-          }).join('') : '—'}</div>
-          <div class="section-sub" style="font-size:10.5px; margin-top:2px;">${snap.wins}W – ${snap.losses}L · ${snap.winpct}% win rate</div>
-        </div>
+      <div class="home-yourgame-group">
+        <span class="tier-badge tier-${viewer.tier.toLowerCase()}" style="width:32px;height:32px;font-size:14px;">${viewer.tier}</span>
+        <div class="home-tier-sub">#${snap.tierRank||'–'} in Tier ${viewer.tier} · #${snap.overallRank||'–'} Overall</div>
+      </div>
+      <div class="home-yourgame-divider"></div>
+      <div class="home-yourgame-group home-yourgame-rating">
+        <div class="section-sub" style="font-size:10px;">Rating</div>
+        <div class="home-rating-num">${Math.round(viewer.rating)}</div>
+      </div>
+      <div class="home-yourgame-divider"></div>
+      <div class="home-yourgame-group">
+        <div class="section-sub" style="font-size:10px;">Recent Form <span style="opacity:0.7;">(last ${snap.recentForm ? snap.recentForm.games : 0})</span></div>
+        <div class="home-form-dots">${snap.recentForm ? computeRecentFormSequence(viewer.name, 10).map(isWin=>
+          `<span class="form-dot ${isWin?'w':'l'}"></span>`
+        ).join('') : '—'}</div>
+        <div class="section-sub" style="font-size:10.5px; margin-top:4px;">${snap.recentForm ? `${snap.recentForm.wins}W – ${snap.recentForm.losses}L this window` : 'Not enough recent games'}</div>
       </div>
       <div class="home-insight">${insight}</div>
     </div>
 
-    <div class="home-card-header" style="padding:0 4px;"><span>Club Pulse</span><button class="home-card-link" id="homeAllInsightsBtn">All Insights ›</button></div>
+    <div class="home-card-header home-section-header"><span>Club Pulse</span><button class="home-card-link" id="homeAllInsightsBtn">All Insights ›</button></div>
     <div class="home-pulse-row">
       <div class="mp-card-standard home-pulse-card">
         <div class="home-pulse-title">#1 Ranked</div>
@@ -909,33 +921,34 @@ function renderHomeDashboard(){
       </div>
     </div>
 
-    <div class="home-card-header" style="padding:0 4px;"><span>Match to Make</span><button class="home-card-link" id="homeFindMoreBtn">Find More Matches ›</button></div>
+    <div class="home-card-header home-section-header"><span>Match to Make</span><button class="home-card-link" id="homeFindMoreBtn">Find More Matches ›</button></div>
     ${matchup ? `
-      <div class="mp-card-standard home-card">
+      <div class="mp-card-standard home-card home-matchup-card">
         <div class="section-sub">A well-balanced matchup</div>
-        <div class="home-matchup-pct">${matchup.pctFor}% – ${matchup.pctAgainst}% <span class="section-sub" style="font-size:11px;">· ${matchup.description}</span></div>
-        <div class="home-matchup-row">
-          <div class="home-avatar-pair"><div class="home-avatar">${initials(viewer.name)}</div><div class="home-avatar">${initials(matchup.partner.name)}</div>
-            <div class="home-avatar-names">${viewer.name} + ${matchup.partner.name}</div></div>
-          <div class="section-sub">vs</div>
-          <div class="home-avatar-pair"><div class="home-avatar">${initials(matchup.opponents[0].name)}</div><div class="home-avatar">${initials(matchup.opponents[1].name)}</div>
-            <div class="home-avatar-names">${matchup.opponents[0].name} + ${matchup.opponents[1].name}</div></div>
+        <div class="home-matchup-pct">${matchup.pctFor}% – ${matchup.pctAgainst}%</div>
+        <div class="section-sub" style="font-size:11px; margin-top:-4px; margin-bottom:10px;">${matchup.description}</div>
+        <div class="home-matchup-players">
+          <div class="home-player-block"><div class="home-avatar">${initials(viewer.name)}</div><div class="home-player-name">${viewer.name}</div></div>
+          <div class="home-player-block"><div class="home-avatar">${initials(matchup.partner.name)}</div><div class="home-player-name">${matchup.partner.name}</div></div>
+          <div class="home-matchup-vs">VS</div>
+          <div class="home-player-block"><div class="home-avatar">${initials(matchup.opponents[0].name)}</div><div class="home-player-name">${matchup.opponents[0].name}</div></div>
+          <div class="home-player-block"><div class="home-avatar">${initials(matchup.opponents[1].name)}</div><div class="home-player-name">${matchup.opponents[1].name}</div></div>
         </div>
-        <button class="filter-btn home-view-matchup-btn" id="homeViewMatchupBtn" style="width:auto; padding:0 16px; height:38px; margin-top:10px;">View Matchup ›</button>
+        <button class="mp-btn-primary" id="homeViewMatchupBtn" style="width:100%; margin-top:12px;">View Matchup ›</button>
       </div>
     ` : `<div class="mp-card-standard home-card"><div class="section-sub">Not enough eligible players to suggest a matchup right now.</div></div>`}
 
-    <div class="home-card-header" style="padding:0 4px;"><span>Next on Court</span></div>
+    <div class="home-card-header home-section-header"><span>Next on Court</span></div>
     <div class="mp-card-standard home-card home-nextcourt">
       ${upcoming ? `
         <div class="home-nextcourt-info"><b>${upcoming.players.join(' & ')}</b><div class="section-sub">Confirmed game</div></div>
       ` : `
         <div class="home-nextcourt-info"><b>Nothing booked yet.</b><div class="section-sub">Find your next game and get on court.</div></div>
-        <button class="filter-btn" id="homeFindGameBtn" style="width:auto; padding:0 16px; height:38px;">Find a Game ›</button>
+        <button class="mp-btn-primary" id="homeFindGameBtn">Find a Game ›</button>
       `}
     </div>
 
-    <div class="home-card-header" style="padding:0 4px;"><span>${currentMonth ? monthLabel(currentMonth).toUpperCase() : 'THIS MONTH'} AT MONEY PADEL</span><button class="home-card-link" id="homeFullReviewBtn">View Full Review ›</button></div>
+    <div class="home-card-header home-section-header"><span>${currentMonth ? monthLabel(currentMonth).toUpperCase() : 'THIS MONTH'} AT MONEY PADEL</span><button class="home-card-link" id="homeFullReviewBtn">View Full Review ›</button></div>
     <div class="mp-card-standard home-card home-monthly-grid">
       <div class="home-monthly-stat"><div class="home-monthly-num">${gamesThisMonth}</div><div class="section-sub">Games played</div></div>
       <div class="home-monthly-stat"><div class="home-monthly-num" style="font-size:16px;">${mostActive ? mostActive.names[0] : '–'}</div><div class="section-sub">Most active${mostActive ? ` · ${mostActive.value} games` : ''}</div></div>
