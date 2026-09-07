@@ -63,6 +63,33 @@ function goToSection(section){
   activeSection = section;
   updateBottomNavHighlight();
   renderSectionSubnav();
+  // Tapping Home always resets to the dashboard view, even if "View Full
+  // Review" was open -- an implicit "back to Home" path.
+  if(section === 'home'){
+    const backBtn = document.getElementById('homeBackFromReview');
+    if(backBtn) backBtn.style.display = 'none';
+    const summaryEl = document.getElementById('summaryView');
+    if(summaryEl) summaryEl.style.display = 'none';
+    renderHomeDashboard();
+    document.getElementById('homeDashboard').style.display = 'block';
+  }
+  updateHeaderForSection();
+}
+
+// The header's right-side slot becomes the player switcher on Home
+// ("Shaun ▾"), reusing the same selector the first-launch flow and My
+// Player entry already use -- reverts to the plain section label elsewhere.
+function updateHeaderForSection(){
+  const titleEl = document.getElementById('shellSectionTitle');
+  if(!titleEl) return;
+  if(activeSection === 'home'){
+    const viewer = getCurrentViewer();
+    titleEl.innerHTML = `<button id="homeViewerSwitch" class="home-viewer-switch">${viewer ? viewer.name : 'Choose player'} ▾</button>`;
+    document.getElementById('homeViewerSwitch').onclick = ()=> buildViewerSelector();
+  } else {
+    const sectionLabels = { rankings:'Rankings', play:'Play', players:'Players', more:'More' };
+    titleEl.innerHTML = sectionLabels[activeSection] || '';
+  }
 }
 
 function updateBottomNavHighlight(){
@@ -562,20 +589,22 @@ const VIEWER_STORAGE_KEY = 'moneypadel_current_viewer';
 // checked against, or should ever be checked against, for admin/password
 // or any other sensitive gate. Existing admin auth stays fully separate.
 function getCurrentViewer(){
-  const savedName = localStorage.getItem(VIEWER_STORAGE_KEY);
+  let savedName;
+  try { savedName = localStorage.getItem(VIEWER_STORAGE_KEY); }
+  catch(e){ return null; } // localStorage can be unavailable/restricted (e.g. private browsing) -- degrade gracefully
   if(!savedName) return null;
   const player = PLAYERS.find(p => p.name === savedName);
-  if(!player){ localStorage.removeItem(VIEWER_STORAGE_KEY); return null; }
+  if(!player){ try{ localStorage.removeItem(VIEWER_STORAGE_KEY); }catch(e){} return null; }
   return player;
 }
 
 function setCurrentViewer(playerName){
-  localStorage.setItem(VIEWER_STORAGE_KEY, playerName);
+  try { localStorage.setItem(VIEWER_STORAGE_KEY, playerName); } catch(e){ /* selection just won't persist this session */ }
   document.dispatchEvent(new CustomEvent('viewerchanged', { detail: { name: playerName } }));
 }
 
 function clearCurrentViewer(){
-  localStorage.removeItem(VIEWER_STORAGE_KEY);
+  try { localStorage.removeItem(VIEWER_STORAGE_KEY); } catch(e){}
   document.dispatchEvent(new CustomEvent('viewerchanged', { detail: { name: null } }));
 }
 
@@ -697,6 +726,256 @@ function getViewerSnapshot(name){
   };
 }
 
+// ==========================================================================
+// PERSONALISED HOME -- replaces the plain monthly Summary as the Home
+// landing. The legacy Summary/Stats Review is fully preserved and reachable
+// via "View Full Review" -- nothing deleted, just no longer the default.
+// Reuses existing calculations only (ranking, eligibility, recent form,
+// partnerships, H2H, monthly stats, matchmaking) -- no parallel logic.
+// ==========================================================================
+
+// "Points off promotion": no formal admin-decided promotion threshold exists
+// in the app (tier seeds are starting points for new players, not boundaries
+// -- ratings drift organically by design). This uses the lowest current
+// rating among players already in the tier above as a live, defensible proxy
+// for "roughly what it'd take" -- flagged here and in the report back, since
+// it's an interpretation, not an existing formal rule.
+function computePromotionGap(name){
+  const p = PLAYERS.find(x=>x.name===name);
+  if(!p) return null;
+  const order = ['C','B','A','S'];
+  const idx = order.indexOf(p.tier);
+  if(idx === -1 || idx === order.length-1) return null; // top tier or unknown
+  const tierAbove = order[idx+1];
+  const aboveRatings = PLAYERS.filter(x=>x.tier===tierAbove).map(x=>x.rating);
+  if(!aboveRatings.length) return null;
+  const boundary = Math.min(...aboveRatings);
+  const gap = Math.round(boundary - p.rating);
+  return { tierAbove, gap };
+}
+
+function computeClubPulse(){
+  const eligible = PLAYERS.filter(p=>p.total>=10 && isRankingEligible(p.name));
+  const topRanked = eligible.slice().sort((a,b)=>b.rating-a.rating)[0] || null;
+
+  let inForm = null;
+  PLAYERS.forEach(p=>{
+    if(p.recent_form!==null && p.recent_form!==undefined && !p.recent_form_stale && p.recent_form_games>=3){
+      if(!inForm || p.recent_form > inForm.recent_form) inForm = p;
+    }
+  });
+
+  let promotionWatch = null, smallestGap = Infinity;
+  PLAYERS.forEach(p=>{
+    const g = computePromotionGap(p.name);
+    if(g && g.gap > 0 && g.gap < smallestGap){ smallestGap = g.gap; promotionWatch = { ...p, gap: g.gap, tierAbove: g.tierAbove }; }
+  });
+
+  return { topRanked, inForm, promotionWatch };
+}
+
+// Reuses the same nearest-average pairing approach as the existing Find a
+// Game engine (generateCandidatePairs/generateCandidatePartners) and the
+// same Elo expected-score formula already used elsewhere in the app for
+// predicted outcomes -- just orchestrated for "best partner + best opposing
+// pair for that team", which the existing functions don't directly return.
+function computeMatchToMake(viewerName){
+  const viewer = PLAYERS.find(p=>p.name===viewerName);
+  if(!viewer) return null;
+  const partnerCandidates = generateCandidatePartners(viewer, 'any', 1);
+  // Same priority the real Find a Game feature uses: proven chemistry first
+  // (already sorted best-first), then the closest-rated fresh option.
+  const bestPartnerCandidate = (partnerCandidates.history && partnerCandidates.history[0])
+    || (partnerCandidates.fresh && partnerCandidates.fresh[0]);
+  if(!bestPartnerCandidate) return null;
+  const partner = PLAYERS.find(p=>p.name===bestPartnerCandidate.name);
+  if(!partner) return null;
+  const teamAvg = (viewer.rating + partner.rating) / 2;
+
+  const pool = PLAYERS.filter(p => p.name!==viewer.name && p.name!==partner.name && !INACTIVE_PLAYERS.has(p.name));
+  let best = null, bestGap = Infinity;
+  for(let i=0;i<pool.length;i++) for(let j=i+1;j<pool.length;j++){
+    const a = pool[i], b = pool[j];
+    const avg = (a.rating + b.rating) / 2;
+    const gap = Math.abs(avg - teamAvg);
+    if(gap < bestGap){ bestGap = gap; best = [a,b]; }
+  }
+  if(!best) return null;
+
+  const oppAvg = (best[0].rating + best[1].rating) / 2;
+  const expected = 1 / (1 + Math.pow(10, (oppAvg - teamAvg) / 400)); // same Elo formula used elsewhere in the app
+  const pct = Math.round(expected * 100);
+  const desc = Math.abs(pct-50) <= 3 ? 'Almost perfectly balanced.' : (pct>50 ? 'Slight edge to your side.' : 'Slight edge to the opponents.');
+
+  return { partner, opponents: best, pctFor: pct, pctAgainst: 100-pct, description: desc };
+}
+
+function initials(name){
+  return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+}
+
+function buildHomeDashboard(){
+  const dash = document.createElement('div');
+  dash.id = 'homeDashboard';
+  dash.style.display = 'none';
+  const legacySummary = document.getElementById('summaryView');
+  legacySummary.parentNode.insertBefore(dash, legacySummary);
+  return dash;
+}
+
+function renderHomeDashboard(){
+  const dash = document.getElementById('homeDashboard');
+  if(!dash) return;
+  const viewer = getCurrentViewer();
+  if(!viewer){
+    dash.innerHTML = `<div class="section-sub" style="padding:24px 16px; text-align:center;">Select a player to personalise Home.</div>`;
+    return;
+  }
+
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
+  const dateLabel = now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' }).toUpperCase();
+
+  const snap = getViewerSnapshot(viewer.name);
+  const pulse = computeClubPulse();
+  const matchup = computeMatchToMake(viewer.name);
+  const currentMonth = snap.currentMonth;
+  const monthStatsAll = currentMonth ? computeMonthlySummaryStats(currentMonth) : {};
+  const monthStatsArr = Object.values(monthStatsAll);
+  const gamesThisMonth = currentMonth ? MATCHES.filter(m=>m.date.slice(0,7)===currentMonth).length : 0;
+  const mostActive = monthStatsArr.length ? topNTied(monthStatsArr, 'games', 1, true)[0] : null;
+  const eligibleMonth = monthStatsArr.filter(s=>s.games>=3);
+  const highestWinPct = eligibleMonth.length ? topNTied(eligibleMonth, 'winpct', 1, true)[0] : null;
+  const mostWins = monthStatsArr.filter(s=>s.games>0).length ? topNTied(monthStatsArr.filter(s=>s.games>0), 'points', 1, true)[0] : null;
+
+  const promoGap = computePromotionGap(viewer.name);
+  let insight;
+  if(promoGap && promoGap.gap > 0){
+    insight = `You're just ${promoGap.gap} points off Tier ${promoGap.tierAbove}. Keep pushing.`;
+  } else if(snap.recentForm && !viewer.recent_form_stale && snap.recentForm.avgPct > 3){
+    insight = `You're trending up — ${snap.recentForm.wins}W-${snap.recentForm.losses}L in your last ${snap.recentForm.games}.`;
+  } else if(snap.bestPartner){
+    insight = `You and ${snap.bestPartner.partner} have won ${snap.bestPartner.winpct}% together — a partnership worth repeating.`;
+  } else {
+    insight = `${snap.total} games played this season. Keep building your record.`;
+  }
+
+  const upcoming = snap.upcomingGames[0] || null;
+
+  dash.innerHTML = `
+    <div class="home-hero">
+      <div class="mp-section-label">${dateLabel}</div>
+      <div class="mp-display-title home-greeting">${greeting},<br><span class="home-greeting-name">${viewer.name}.</span></div>
+      <div class="home-hero-sub">READY FOR THE NEXT GAME?</div>
+      <div class="home-hero-tagline">SAME GAME. HIGHER STANDARDS.</div>
+    </div>
+
+    <div class="mp-card-standard home-card">
+      <div class="home-card-header"><span>Your Game</span><button class="home-card-link" id="homeViewProfileBtn">View Profile ›</button></div>
+      <div class="home-yourgame-row">
+        <div class="home-tier-block">
+          <span class="tier-badge tier-${viewer.tier.toLowerCase()}" style="width:34px;height:34px;font-size:15px;">${viewer.tier}</span>
+          <div class="home-tier-sub">#${snap.tierRank||'–'} in Tier ${viewer.tier}<br>#${snap.overallRank||'–'} Overall</div>
+        </div>
+        <div class="home-rating-block">
+          <div class="section-sub" style="font-size:10px;">Rating</div>
+          <div class="home-rating-num">${Math.round(viewer.rating)}</div>
+        </div>
+        <div class="home-form-block">
+          <div class="section-sub" style="font-size:10px;">Recent Form</div>
+          <div class="home-form-dots">${snap.recentForm ? Array.from({length:snap.recentForm.games}).map((_,i)=>{
+            const isWin = i < snap.recentForm.wins; return `<span class="form-dot ${isWin?'w':'l'}">${isWin?'W':'L'}</span>`;
+          }).join('') : '—'}</div>
+          <div class="section-sub" style="font-size:10.5px; margin-top:2px;">${snap.wins}W – ${snap.losses}L · ${snap.winpct}% win rate</div>
+        </div>
+      </div>
+      <div class="home-insight">${insight}</div>
+    </div>
+
+    <div class="home-card-header" style="padding:0 4px;"><span>Club Pulse</span><button class="home-card-link" id="homeAllInsightsBtn">All Insights ›</button></div>
+    <div class="home-pulse-row">
+      <div class="mp-card-standard home-pulse-card">
+        <div class="home-pulse-title">#1 Ranked</div>
+        ${pulse.topRanked ? `<div class="home-pulse-name">${pulse.topRanked.name}</div><div class="home-pulse-sub">${Math.round(pulse.topRanked.rating)}</div>` : `<div class="section-sub">Not enough data.</div>`}
+      </div>
+      <div class="mp-card-standard home-pulse-card">
+        <div class="home-pulse-title">In Form</div>
+        ${pulse.inForm ? `<div class="home-pulse-name">${pulse.inForm.name}</div><div class="home-pulse-sub perf-pos">+${pulse.inForm.recent_form}%</div>` : `<div class="section-sub">Not enough data.</div>`}
+      </div>
+      <div class="mp-card-standard home-pulse-card">
+        <div class="home-pulse-title">Promotion Watch</div>
+        ${pulse.promotionWatch ? `<div class="home-pulse-name">${pulse.promotionWatch.name}</div><div class="home-pulse-sub">Tier ${pulse.promotionWatch.tier} · ${pulse.promotionWatch.gap} pts</div>` : `<div class="section-sub">Not enough data.</div>`}
+      </div>
+    </div>
+
+    <div class="home-card-header" style="padding:0 4px;"><span>Match to Make</span><button class="home-card-link" id="homeFindMoreBtn">Find More Matches ›</button></div>
+    ${matchup ? `
+      <div class="mp-card-standard home-card">
+        <div class="section-sub">A well-balanced matchup</div>
+        <div class="home-matchup-pct">${matchup.pctFor}% – ${matchup.pctAgainst}% <span class="section-sub" style="font-size:11px;">· ${matchup.description}</span></div>
+        <div class="home-matchup-row">
+          <div class="home-avatar-pair"><div class="home-avatar">${initials(viewer.name)}</div><div class="home-avatar">${initials(matchup.partner.name)}</div>
+            <div class="home-avatar-names">${viewer.name} + ${matchup.partner.name}</div></div>
+          <div class="section-sub">vs</div>
+          <div class="home-avatar-pair"><div class="home-avatar">${initials(matchup.opponents[0].name)}</div><div class="home-avatar">${initials(matchup.opponents[1].name)}</div>
+            <div class="home-avatar-names">${matchup.opponents[0].name} + ${matchup.opponents[1].name}</div></div>
+        </div>
+        <button class="filter-btn home-view-matchup-btn" id="homeViewMatchupBtn" style="width:auto; padding:0 16px; height:38px; margin-top:10px;">View Matchup ›</button>
+      </div>
+    ` : `<div class="mp-card-standard home-card"><div class="section-sub">Not enough eligible players to suggest a matchup right now.</div></div>`}
+
+    <div class="home-card-header" style="padding:0 4px;"><span>Next on Court</span></div>
+    <div class="mp-card-standard home-card home-nextcourt">
+      ${upcoming ? `
+        <div class="home-nextcourt-info"><b>${upcoming.players.join(' & ')}</b><div class="section-sub">Confirmed game</div></div>
+      ` : `
+        <div class="home-nextcourt-info"><b>Nothing booked yet.</b><div class="section-sub">Find your next game and get on court.</div></div>
+        <button class="filter-btn" id="homeFindGameBtn" style="width:auto; padding:0 16px; height:38px;">Find a Game ›</button>
+      `}
+    </div>
+
+    <div class="home-card-header" style="padding:0 4px;"><span>${currentMonth ? monthLabel(currentMonth).toUpperCase() : 'THIS MONTH'} AT MONEY PADEL</span><button class="home-card-link" id="homeFullReviewBtn">View Full Review ›</button></div>
+    <div class="mp-card-standard home-card home-monthly-grid">
+      <div class="home-monthly-stat"><div class="home-monthly-num">${gamesThisMonth}</div><div class="section-sub">Games played</div></div>
+      <div class="home-monthly-stat"><div class="home-monthly-num" style="font-size:16px;">${mostActive ? mostActive.names[0] : '–'}</div><div class="section-sub">Most active${mostActive ? ` · ${mostActive.value} games` : ''}</div></div>
+      <div class="home-monthly-stat"><div class="home-monthly-num" style="font-size:16px;">${highestWinPct ? highestWinPct.names[0] : '–'}</div><div class="section-sub">Highest win rate${highestWinPct ? ` · ${highestWinPct.value}%` : ''}</div></div>
+      <div class="home-monthly-stat"><div class="home-monthly-num" style="font-size:16px;">${mostWins ? mostWins.names[0] : '–'}</div><div class="section-sub">Player of the Month</div></div>
+    </div>
+  `;
+
+  document.getElementById('homeViewProfileBtn').onclick = ()=> openSheet(viewer.name);
+  document.getElementById('homeAllInsightsBtn').onclick = ()=>{ legacyTabBtn('callouts').click(); };
+  document.getElementById('homeFindMoreBtn').onclick = ()=>{ goToSection('play'); };
+  document.getElementById('homeFullReviewBtn').onclick = ()=> showFullMonthlyReview();
+  const findGameBtn = document.getElementById('homeFindGameBtn');
+  if(findGameBtn) findGameBtn.onclick = ()=> goToSection('play');
+  const viewMatchupBtn = document.getElementById('homeViewMatchupBtn');
+  if(viewMatchupBtn) viewMatchupBtn.onclick = ()=> goToSection('play');
+}
+
+// "View Full Review" -- shows the fully preserved legacy Summary view in
+// place of the dashboard, without leaving Home / changing activeTab.
+function showFullMonthlyReview(){
+  document.getElementById('homeDashboard').style.display = 'none';
+  document.getElementById('summaryView').style.display = 'block';
+  let backBtn = document.getElementById('homeBackFromReview');
+  if(!backBtn){
+    backBtn = document.createElement('button');
+    backBtn.id = 'homeBackFromReview';
+    backBtn.className = 'explainer-toggle';
+    backBtn.textContent = '‹ Back to Home';
+    backBtn.style.cssText = 'padding:12px 16px; font-weight:600;';
+    backBtn.onclick = ()=>{
+      document.getElementById('summaryView').style.display = 'none';
+      backBtn.style.display = 'none';
+      document.getElementById('homeDashboard').style.display = 'block';
+    };
+    document.getElementById('summaryView').parentNode.insertBefore(backBtn, document.getElementById('summaryView'));
+  }
+  backBtn.style.display = 'block';
+}
+
 document.addEventListener('DOMContentLoaded', ()=>{
   buildShellDom();
   const hero = buildRankingsHero();
@@ -724,7 +1003,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(!viewerInitDone){
       viewerInitDone = true;
       buildMyPlayerMoreItem();
+      buildHomeDashboard();
       if(!getCurrentViewer()) buildViewerSelector();
+      // If Home is already the active section by the time data is ready (or
+      // becomes active later), keep the dashboard in sync with the viewer.
+      document.addEventListener('viewerchanged', ()=>{
+        updateMyPlayerLabel();
+        if(activeSection === 'home') renderHomeDashboard();
+      });
+      if(activeSection === 'home') renderHomeDashboard();
     }
   };
   // The hero also needs to hide immediately when leaving Rankings via a tab
