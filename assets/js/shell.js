@@ -343,6 +343,7 @@ function renderRankingsPodium(){
 
   const order = [top3[1], top3[0], top3[2]]; // visual order: 2nd, 1st, 3rd
   const slotClass = ['second','first','third'];
+  const pedestalAsset = { second: 'silver', first: 'gold', third: 'bronze' };
   const podium = document.createElement('div');
   podium.className = 'rankings-podium';
   podium.id = 'rankingsPodium';
@@ -351,18 +352,14 @@ function renderRankingsPodium(){
       ${order.map((p,i)=> `
         <div class="podium-slot ${slotClass[i]}" data-player="${p.name}">
           ${slotClass[i]==='first' ? `
-            <div class="laurel-wrap">
-              <svg class="laurel" viewBox="0 0 160 56" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
-                <path d="M78 50C60 44 46 30 44 12"/><path d="M46 16c-4 1-8 0-10-3"/><path d="M50 24c-4 1-8 0-10-3"/><path d="M55 32c-4 1-8 0-10-3"/><path d="M61 39c-4 1-8 1-10-2"/>
-                <path d="M82 50C100 44 114 30 116 12"/><path d="M114 16c4 1 8 0 10-3"/><path d="M110 24c4 1 8 0 10-3"/><path d="M105 32c4 1 8 0 10-3"/><path d="M99 39c4 1 8 1 10-2"/>
-              </svg>
-              <div class="crown"><img src="assets/rankings/crown.svg" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'nav-icon-fallback',textContent:'1'}))"></div>
+            <div class="crown-laurel-wrap">
+              <img class="crown-laurel-img" src="assets/rankings/podium-crown-laurel.png" alt="" onerror="this.style.display='none'">
               <div class="rank-num gold">1</div>
             </div>
           ` : `<div class="rank-num">${slotClass[i]==='second'?'2':'3'}</div>`}
           <div class="p-name">${p.name}</div>
           <div class="p-rating">${Math.round(p.rating)}</div>
-          <div class="p-pedestal"></div>
+          <img class="p-pedestal" src="assets/rankings/podium-${pedestalAsset[slotClass[i]]}.png" alt="" onerror="this.style.background='var(--surface-2)'; this.style.border='1px solid var(--surface-border)';">
         </div>
       `).join('')}
     </div>

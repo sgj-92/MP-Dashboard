@@ -504,51 +504,38 @@ body { padding-bottom: calc(var(--shell-nav-height) + var(--shell-safe-bottom));
   position: relative; z-index: 1;
 }
 .podium-slot{ flex: 1; text-align: center; cursor: pointer; position: relative; }
-.podium-slot .crown{ width: 18px; height: 18px; margin: 0 auto 3px; opacity: 0.85; }
-.podium-slot .crown .nav-icon-fallback{
-  width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--gold-hairline);
-  display: flex; align-items: center; justify-content: center; font-size: 8.5px; color: var(--gold-bright);
-}
 .podium-slot .rank-num{
   font-family: var(--font-prestige); color: var(--text-dim); font-size: 13px; font-style: italic;
 }
 .podium-slot .rank-num.gold{ color: var(--gold-bright); font-style: normal; font-size: 14px; }
-.podium-slot .laurel-wrap{ position: relative; height: 34px; margin-bottom: 2px; }
-.podium-slot .laurel{
-  position: absolute; top: -2px; left: 50%; transform: translateX(-50%);
-  width: 130px; height: 46px; color: var(--gold-dim); opacity: 0.35; pointer-events: none;
+/* Production crown/laurel asset -- replaces the earlier CSS-drawn crown+laurel
+   for #1 only. Sits above the gold pedestal; the gold asset itself already
+   carries the "champion" lighting treatment, so this stays understated. */
+.podium-slot .crown-laurel-wrap{ position: relative; height: 30px; margin-bottom: 2px; }
+.podium-slot .crown-laurel-img{
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  height: 100%; width: auto; max-width: none; object-fit: contain; pointer-events: none;
 }
-.podium-slot .laurel-wrap .crown{ position: relative; margin: 0 auto; }
-.podium-slot .laurel-wrap .rank-num{ position: relative; }
+.podium-slot .crown-laurel-wrap .rank-num{ position: relative; }
 .podium-slot .p-name{
   font-family: var(--font-prestige); color: var(--text); font-size: 13.5px; margin: 3px 0 1px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; padding: 0 2px;
+  position: relative; z-index: 1;
 }
 .podium-slot .p-rating{
   font-family: var(--font-interface); color: var(--text); font-weight: 700; font-size: 16px; letter-spacing: -0.01em;
+  position: relative; z-index: 1;
 }
+/* Production pedestal artwork -- transparent PNGs, sized by height per
+   position to preserve the 2-1-3 hierarchy; object-fit:contain guarantees
+   the artwork is never stretched, whatever its native aspect ratio is. */
 .podium-slot .p-pedestal{
-  margin-top: var(--space-2); border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  background: var(--surface-2); border: 1px solid var(--surface-border); border-bottom: none;
+  display: block; margin: var(--space-2) auto 0; width: 100%; object-fit: contain;
 }
-/* Second/third stay visually subordinate: quieter surface, no illumination. */
-.podium-slot.second .p-pedestal{ height: 20px; }
-.podium-slot.third .p-pedestal{ height: 13px; opacity: 0.85; }
-/* First place gets real authority: soft elevation glow, warmer surface,
-   larger serif name, and the only gold-toned rating figure on the podium. */
-.podium-slot.first{
-  padding-top: 4px;
-}
-.podium-slot.first::before{
-  content:''; position:absolute; top:-14px; left:50%; transform:translateX(-50%);
-  width: 84px; height: 84px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(212,175,55,0.16) 0%, transparent 68%);
-  pointer-events: none;
-}
-.podium-slot.first .p-pedestal{
-  height: 32px; background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
-  border-color: var(--gold-hairline); box-shadow: var(--shadow-podium-first);
-}
+.podium-slot.second .p-pedestal{ height: 46px; }
+.podium-slot.third .p-pedestal{ height: 34px; }
+.podium-slot.first{ padding-top: 2px; }
+.podium-slot.first .p-pedestal{ height: 64px; }
 .podium-slot.first .p-name{ font-size: 16.5px; font-style: normal; }
 .podium-slot.first .p-rating{ font-size: 22px; color: var(--gold-bright); }
 .podium-caption{
