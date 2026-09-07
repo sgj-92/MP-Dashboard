@@ -1022,6 +1022,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
       // becomes active later), keep the dashboard in sync with the viewer.
       document.addEventListener('viewerchanged', ()=>{
         updateMyPlayerLabel();
+        updateHeaderForSection(); // the header's "Osh ▾" label lives outside
+                                   // #homeDashboard, so re-rendering the
+                                   // dashboard alone never touches it -- this
+                                   // is what was actually going stale.
         if(activeSection === 'home') renderHomeDashboard();
       });
       if(activeSection === 'home') renderHomeDashboard();
